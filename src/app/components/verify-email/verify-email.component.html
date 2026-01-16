@@ -1,0 +1,59 @@
+<app-header></app-header>
+
+<div class="verify-page">
+    <div class="verify-container">
+
+        <!-- Language Switcher -->
+        <div class="lang-switcher">
+            <button type="button" [class.active]="currentLang === 'vi'" (click)="switchLanguage('vi')">VI</button>
+            <span class="divider">|</span>
+            <button type="button" [class.active]="currentLang === 'en'" (click)="switchLanguage('en')">EN</button>
+        </div>
+
+        <!-- Logo -->
+        <div class="logo">
+            <h1>TRENDORA</h1>
+            <span>FASHION</span>
+        </div>
+
+        <!-- Card -->
+        <div class="verify-card">
+
+            <!-- Loading -->
+            <div *ngIf="status === 'loading'" class="state">
+                <div class="spinner"></div>
+                <h2>{{ 'VERIFY_EMAIL.VERIFYING' | translate }}</h2>
+            </div>
+
+            <!-- Success -->
+            <div *ngIf="status === 'success'" class="state">
+                <div class="icon">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#000" fill="none" stroke-width="1.5">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2>{{ 'VERIFY_EMAIL.SUCCESS' | translate }}</h2>
+                <p>{{ message }}</p>
+                <button class="btn-primary" type="button" (click)="goToLogin()">
+                    {{ 'VERIFY_EMAIL.LOGIN_BUTTON' | translate }}
+                </button>
+            </div>
+
+            <!-- Error -->
+            <div *ngIf="status === 'error'" class="state">
+                <div class="icon">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#000" fill="none" stroke-width="1.5">
+                        <path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2>{{ 'VERIFY_EMAIL.ERROR' | translate }}</h2>
+                <p>{{ message }}</p>
+                <button class="btn-secondary" type="button" (click)="goToLogin()">
+                    {{ 'VERIFY_EMAIL.LOGIN_BUTTON' | translate }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<app-footer></app-footer>

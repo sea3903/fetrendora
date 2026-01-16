@@ -1,81 +1,85 @@
 <app-header></app-header>
-<div class="container">
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <div class="login-form mx-auto">
-                <h2 class="login-header">Đăng nhập</h2>
-                <div class="form-group">
-                    <label for="phoneNumber">Phone</label>
-                    <input type="text" class="form-control" 
-                        [(ngModel)]="phoneNumber"
-                            (input)="onPhoneNumberChange()"
-                            name="phone"
-                            (focus)="loginForm.form.markAsTouched()"
-                    id="phoneNumber">
-                    <div class="divider-nospace"></div>
-                </div>
-                <div class="mt-5"></div>
-                <div class="form-group password-field">
-                    <label for="password">Mật khẩu</label>
-                    <input type="{{ showPassword ? 'text' : 'password' }}"
-                        [(ngModel)]="password"                            
-                        name="password"
-                        placeholder="Ít nhất 3 ký tự" 
-                        class="form-control" id="password">
-                    <i class="password-toggle fas" [ngClass]="showPassword ? 
-                        'fa-eye' : 'fa-eye-slash'" (click)="togglePassword()"></i>
-                    <div class="divider-nospace"></div>
-                </div>                
-                <div class="form-group">
-                    <div class="form-check checkbox-text">
-                      <span style="display: flex;">
-                        <input type="checkbox" 
-                            class="form-check-input" 
-                            id="remember" 
-                            [(ngModel)]="rememberMe">
-                        <label class="form-check-label text-start" for="remember">
-                          Ghi nhớ đăng nhập</label>
-                      </span>
-                      <a href="#" class="register-link">Quên mật khẩu</a>
-                    </div>
-                  </div>
-                  
-                <div class="form-group">
-                    <select class="form-control access-right"
-                        [(ngModel)]="selectedRole">
-                        <option selected disabled>Quyền đăng nhập</option>
-                        @for(role of roles; track role.name) {
-                            <option [ngValue]="role">
-                                {{ role.name }}
-                            </option>
-                        }                        
-                    </select>
-                  </div>
-                  
-                  <button 
-                    type="button" 
-                    (click)="login()"
-                    class="login-button">Đăng nhập</button>
-                  <div class="divider"></div>
-                  <div class="social-login-buttons">
-                    <button 
-                        type="button" 
-                        (click)="loginWithGoogle()"
-                        class="social-button google-button">
-                        Đăng nhập với Google
-                    </button>
-                    <button 
-                        type="button" 
-                        (click)="loginWithFacebook()"
-                        class="social-button facebook-button">
-                        Đăng nhập với Facebook
-                    </button>
-                  </div>
-                  <p class="text-center">Bạn chưa đăng ký? <span>
-                    <a class="register-link" 
-                        (click)="createAccount()">Tạo tài khoản</a>
-                </span></p>                                                     
-        
-    </div>   
+
+<div class="login-page">
+  <div class="login-container">
+
+    <!-- Language Switcher -->
+    <div class="lang-switcher">
+      <button type="button" [class.active]="currentLang === 'vi'" (click)="switchLanguage('vi')">VI</button>
+      <span class="divider">|</span>
+      <button type="button" [class.active]="currentLang === 'en'" (click)="switchLanguage('en')">EN</button>
+    </div>
+
+    <!-- Logo -->
+    <div class="logo">
+      <h1>TRENDORA</h1>
+      <span>FASHION</span>
+    </div>
+
+    <!-- Login Card -->
+    <div class="login-card">
+      <h2 class="title">{{ 'LOGIN.TITLE' | translate }}</h2>
+
+      <form #loginForm="ngForm">
+        <!-- Email -->
+        <div class="form-group">
+          <label>{{ 'LOGIN.EMAIL' | translate }} <span class="required">*</span></label>
+          <input type="email" name="email" [(ngModel)]="email" (blur)="validateEmail()"
+            [placeholder]="'LOGIN.EMAIL_PLACEHOLDER' | translate" [class.error]="emailError">
+          <span class="error-text" *ngIf="emailError">{{ emailError }}</span>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label>{{ 'LOGIN.PASSWORD' | translate }} <span class="required">*</span></label>
+          <div class="password-wrapper">
+            <input [type]="showPassword ? 'text' : 'password'" name="password" [(ngModel)]="password"
+              (blur)="validatePassword()" [placeholder]="'LOGIN.PASSWORD_PLACEHOLDER' | translate"
+              [class.error]="passwordError">
+            <button class="toggle-password" type="button" (click)="togglePassword()">
+              <i class="fas" [class.fa-eye]="showPassword" [class.fa-eye-slash]="!showPassword"></i>
+            </button>
+          </div>
+          <span class="error-text" *ngIf="passwordError">{{ passwordError }}</span>
+        </div>
+
+        <!-- Remember & Forgot -->
+        <div class="options">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="rememberMe" name="rememberMe">
+            <span>{{ 'LOGIN.REMEMBER_ME' | translate }}</span>
+          </label>
+          <a class="forgot-link" (click)="forgotPassword()">{{ 'LOGIN.FORGOT_PASSWORD' | translate }}</a>
+        </div>
+
+        <!-- Login Button -->
+        <button class="btn-primary" type="button" (click)="login()">
+          {{ 'LOGIN.BUTTON' | translate }}
+        </button>
+      </form>
+
+      <!-- Divider -->
+      <div class="divider-line">
+        <span>{{ 'LOGIN.OR' | translate }}</span>
+      </div>
+
+      <!-- Social Login -->
+      <div class="social-buttons">
+        <button class="btn-social btn-google" type="button" (click)="loginWithGoogle()">
+          Google
+        </button>
+        <button class="btn-social btn-facebook" type="button" (click)="loginWithFacebook()">
+          Facebook
+        </button>
+      </div>
+
+      <!-- Register Link -->
+      <p class="register-text">
+        {{ 'LOGIN.NO_ACCOUNT' | translate }}
+        <a (click)="createAccount()">{{ 'LOGIN.REGISTER' | translate }}</a>
+      </p>
+    </div>
+  </div>
 </div>
+
 <app-footer></app-footer>

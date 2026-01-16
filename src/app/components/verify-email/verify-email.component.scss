@@ -1,8 +1,8 @@
 /**
  * ═══════════════════════════════════════════════════════════════
- * REGISTER PAGE - Trendora Fashion
+ * VERIFY EMAIL PAGE - Trendora Fashion
  * ═══════════════════════════════════════════════════════════════
- * Đen trắng thuần túy, font Inter, form lớn, validation
+ * Đen trắng thuần túy, font Inter, form lớn
  */
 
 // Variables
@@ -12,13 +12,12 @@ $color-gray-100: #f5f5f5;
 $color-gray-200: #e5e5e5;
 $color-gray-400: #a3a3a3;
 $color-gray-600: #525252;
-$color-error: #dc2626;
 $font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
-// ═══════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════════
 // PAGE LAYOUT
 // ═══════════════════════════════════════════════════════════════
-.register-page {
+.verify-page {
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -28,7 +27,7 @@ $font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-family: $font-family;
 }
 
-.register-container {
+.verify-container {
     width: 100%;
     max-width: 480px;
 }
@@ -94,31 +93,15 @@ $font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// REGISTER CARD
+// VERIFY CARD
 // ═══════════════════════════════════════════════════════════════
-.register-card {
-    background: $color-white;
-    border: 1px solid $color-gray-200;
-    padding: 50px;
-}
-
-.title {
-    font-size: 16px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    text-align: center;
-    color: $color-black;
-    margin: 0 0 40px 0;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// SUCCESS CARD
-// ═══════════════════════════════════════════════════════════════
-.success-card {
+.verify-card {
     background: $color-white;
     border: 1px solid $color-gray-200;
     padding: 60px 50px;
+}
+
+.state {
     text-align: center;
 
     .icon {
@@ -138,107 +121,31 @@ $font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         font-size: 15px;
         color: $color-gray-600;
         line-height: 1.6;
-        margin: 0 0 10px 0;
-    }
-
-    .email {
-        font-weight: 500;
-        color: $color-black;
-        font-size: 16px;
-    }
-
-    .note {
-        margin-top: 20px;
-        margin-bottom: 40px;
-        font-size: 14px;
+        margin: 0 0 40px 0;
     }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// FORM ELEMENTS
+// SPINNER
 // ═══════════════════════════════════════════════════════════════
-.form-group {
-    margin-bottom: 24px;
-
-    label {
-        display: block;
-        font-size: 12px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: $color-gray-600;
-        margin-bottom: 10px;
-
-        .required {
-            color: $color-error;
-        }
-
-        .optional {
-            color: $color-gray-400;
-            font-weight: 400;
-            text-transform: none;
-        }
-    }
-
-    input {
-        width: 100%;
-        padding: 16px 18px;
-        font-size: 15px;
-        font-family: $font-family;
-        border: 1px solid $color-gray-200;
-        background: $color-white;
-        color: $color-black;
-        outline: none;
-        transition: border-color 0.2s;
-
-        &::placeholder {
-            color: $color-gray-400;
-        }
-
-        &:focus {
-            border-color: $color-black;
-        }
-
-        &.error {
-            border-color: $color-error;
-        }
-    }
-
-    .error-text {
-        display: block;
-        font-size: 12px;
-        color: $color-error;
-        margin-top: 6px;
-    }
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 2px solid $color-gray-200;
+    border-top-color: $color-black;
+    border-radius: 50%;
+    margin: 0 auto 30px;
+    animation: spin 1s linear infinite;
 }
 
-.password-wrapper {
-    position: relative;
-
-    input {
-        padding-right: 50px;
-    }
-
-    .toggle-password {
-        position: absolute;
-        right: 16px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        color: $color-gray-400;
-        cursor: pointer;
-        padding: 6px;
-        font-size: 16px;
-
-        &:hover {
-            color: $color-black;
-        }
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
     }
 }
 
 // ═══════════════════════════════════════════════════════════════
-// BUTTON
+// BUTTONS
 // ═══════════════════════════════════════════════════════════════
 .btn-primary {
     width: 100%;
@@ -253,36 +160,27 @@ $font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     border: none;
     cursor: pointer;
     transition: background-color 0.2s;
-    margin-top: 16px;
 
     &:hover {
         background: $color-gray-600;
     }
-
-    &:disabled {
-        background: $color-gray-400;
-        cursor: not-allowed;
-    }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// LOGIN LINK
-// ═══════════════════════════════════════════════════════════════
-.login-text {
-    text-align: center;
-    margin-top: 30px;
+.btn-secondary {
+    width: 100%;
+    padding: 18px;
     font-size: 14px;
-    color: $color-gray-600;
+    font-weight: 500;
+    font-family: $font-family;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    background: $color-white;
+    color: $color-black;
+    border: 1px solid $color-gray-200;
+    cursor: pointer;
+    transition: border-color 0.2s;
 
-    a {
-        color: $color-black;
-        font-weight: 500;
-        text-decoration: none;
-        cursor: pointer;
-        margin-left: 6px;
-
-        &:hover {
-            text-decoration: underline;
-        }
+    &:hover {
+        border-color: $color-black;
     }
 }

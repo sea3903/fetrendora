@@ -1,132 +1,129 @@
-import { Component, ViewChild, OnInit, inject } from '@angular/core';
+/**
+ * Login Component - Trendora Fashion
+ * Đen trắng, tối giản, i18n, form validation
+ */
+import { Component, ViewChild, OnInit, inject, PLATFORM_ID } from '@angular/core';
 import { LoginDTO } from '../../dtos/user/login.dto';
-import { NgForm } from '@angular/forms';
-import { Role } from '../../models/role'; // Đường dẫn đến model Role
+import { NgForm, FormsModule } from '@angular/forms';
+import { Role } from '../../models/role';
 import { UserResponse } from '../../responses/user/user.response';
-
 import { HeaderComponent } from '../header/header.component';
 import { FooterComponent } from '../footer/footer.component';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ApiResponse } from '../../responses/api.response';
 import { HttpErrorResponse } from '@angular/common/http';
 import { BaseComponent } from '../base/base.component';
-
 import { tap, switchMap, catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
-
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
-    selector: 'app-login',
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.scss'],
-    imports: [
-        FooterComponent,
-        HeaderComponent,
-        CommonModule,
-        FormsModule
-    ]
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'],
+  standalone: true,
+  imports: [
+    FooterComponent,
+    HeaderComponent,
+    CommonModule,
+    FormsModule,
+    TranslateModule
+  ]
 })
-export class LoginComponent extends BaseComponent implements OnInit{
-  @ViewChild('loginForm') loginForm!: NgForm;  
-    
+export class LoginComponent extends BaseComponent implements OnInit {
+  @ViewChild('loginForm') loginForm!: NgForm;
 
-  /*
-  //Login user1
-  phoneNumber: string = '33445566';
-  password: string = '123456789';
+  private translate = inject(TranslateService);
+  private platformId = inject(PLATFORM_ID);
 
-  //Login user2
-  phoneNumber: string = '0964896239';
-  password: string = '123456789';
-
-
-  //Login admin
-  phoneNumber: string = '11223344';
-  password: string = '11223344';
-
-  */
-  phoneNumber: string = '33445566';
-  password: string = '123456789';
+  // Form fields
+  email: string = '';
+  password: string = '';
   showPassword: boolean = false;
-
-  roles: Role[] = []; // Mảng roles
   rememberMe: boolean = true;
-  selectedRole: Role | undefined; // Biến để lưu giá trị được chọn từ dropdown
-  userResponse?: UserResponse
 
-  onPhoneNumberChange() {
-    console.log(`Phone typed: ${this.phoneNumber}`);
-    //how to validate ? phone must be at least 6 characters
-  }
-  
+  // Validation errors
+  emailError: string = '';
+  passwordError: string = '';
+
+  roles: Role[] = [];
+  selectedRole: Role | undefined;
+  userResponse?: UserResponse;
+
+  // Language
+  currentLang: string = 'vi';
 
   ngOnInit() {
-    // Gọi API lấy danh sách roles và lưu vào biến roles
-    debugger
+    if (isPlatformBrowser(this.platformId)) {
+      // Get saved language
+      const savedLang = localStorage.getItem('lang') || 'vi';
+      this.currentLang = savedLang;
+      this.translate.use(savedLang);
+    }
+
+    this.translate.setDefaultLang('vi');
+
+    // Get roles
     this.roleService.getRoles().subscribe({
       next: ({ data: roles }: ApiResponse) => {
         this.roles = roles;
-        this.selectedRole = roles.length > 0 ? roles[0] : undefined;
+        this.selectedRole = roles.find((r: Role) => r.name.toLowerCase() === 'user') || roles[0];
       },
       error: (error: HttpErrorResponse) => {
-        this.toastService.showToast({
-          error: error,
-          defaultMsg: 'Lỗi tải danh sách vai trò',
-          title: 'Lỗi Tải Vai Trò'
-        });
-      }
-    });    
-  }
-  createAccount() {
-    debugger
-    // Chuyển hướng người dùng đến trang đăng ký (hoặc trang tạo tài khoản)
-    this.router.navigate(['/register']); 
-  }
-  loginWithGoogle() {    
-    debugger
-    this.authService.authenticate('google').subscribe({
-      next: (url: string) => {
-        debugger
-        // Chuyển hướng người dùng đến URL đăng nhập Google
-        window.location.href = url;
-      },
-      error: (error: HttpErrorResponse) => {
-        this.toastService.showToast({
-          error: error,
-          defaultMsg: 'Lỗi kết nối với Google',
-          title: 'Lỗi Đăng Nhập'
-        });
-      }
-    });
-  }  
-  
-  loginWithFacebook() {         
-    // Logic đăng nhập với Facebook
-    debugger
-    this.authService.authenticate('facebook').subscribe({
-      next: (url: string) => {
-        debugger
-        // Chuyển hướng người dùng đến URL đăng nhập Facebook
-        window.location.href = url;
-      },
-      error: (error: HttpErrorResponse) => {
-        this.toastService.showToast({
-          error: error,
-          defaultMsg: 'Lỗi kết nối với Facebook',
-          title: 'Lỗi Đăng Nhập'
-        });
+        console.error('Error loading roles:', error);
       }
     });
   }
-  
+
+  switchLanguage(lang: string) {
+    this.currentLang = lang;
+    this.translate.use(lang);
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('lang', lang);
+    }
+  }
+
+  validateEmail(): boolean {
+    if (!this.email || this.email.trim() === '') {
+      this.emailError = this.translate.instant('LOGIN.VALIDATION.EMAIL_REQUIRED');
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.email)) {
+      this.emailError = this.translate.instant('LOGIN.VALIDATION.EMAIL_INVALID');
+      return false;
+    }
+    this.emailError = '';
+    return true;
+  }
+
+  validatePassword(): boolean {
+    if (!this.password || this.password.trim() === '') {
+      this.passwordError = this.translate.instant('LOGIN.VALIDATION.PASSWORD_REQUIRED');
+      return false;
+    }
+    if (this.password.length < 6) {
+      this.passwordError = this.translate.instant('LOGIN.VALIDATION.PASSWORD_MIN');
+      return false;
+    }
+    this.passwordError = '';
+    return true;
+  }
+
   login() {
+    const isEmailValid = this.validateEmail();
+    const isPasswordValid = this.validatePassword();
+
+    if (!isEmailValid || !isPasswordValid) {
+      return;
+    }
+
     const loginDTO: LoginDTO = {
-      phone_number: this.phoneNumber,
+      email: this.email,
       password: this.password,
       role_id: this.selectedRole?.id ?? 1
     };
-  
+
     this.userService.login(loginDTO).pipe(
       tap((apiResponse: ApiResponse) => {
         const { token } = apiResponse.data;
@@ -140,20 +137,20 @@ export class LoginComponent extends BaseComponent implements OnInit{
               ...apiResponse2.data,
               date_of_birth: new Date(apiResponse2.data.date_of_birth),
             };
-  
+
             if (this.rememberMe) {
               this.userService.saveUserResponseToLocalStorage(this.userResponse);
             }
-  
+
             if (this.userResponse?.role.name === 'admin') {
               this.router.navigate(['/admin']);
-            } else if (this.userResponse?.role.name === 'user') {
+            } else {
               this.router.navigate(['/']);
             }
           }),
           catchError((error: HttpErrorResponse) => {
-            console.error('Lỗi khi lấy thông tin người dùng:', error?.error?.message ?? '');
-            return of(null); // Tiếp tục chuỗi Observable
+            console.error('Error getting user details:', error?.error?.message ?? '');
+            return of(null);
           })
         );
       }),
@@ -164,13 +161,51 @@ export class LoginComponent extends BaseComponent implements OnInit{
       error: (error: HttpErrorResponse) => {
         this.toastService.showToast({
           error: error,
-          defaultMsg: 'Sai thông tin đăng nhập',
-          title: 'Lỗi Đăng Nhập'
+          defaultMsg: this.translate.instant('LOGIN.ERROR.INVALID_CREDENTIALS'),
+          title: this.translate.instant('COMMON.ERROR')
         });
       }
     });
   }
-  
+
+  loginWithGoogle() {
+    this.authService.authenticate('google').subscribe({
+      next: (url: string) => {
+        window.location.href = url;
+      },
+      error: (error: HttpErrorResponse) => {
+        this.toastService.showToast({
+          error: error,
+          defaultMsg: 'Google login error',
+          title: this.translate.instant('COMMON.ERROR')
+        });
+      }
+    });
+  }
+
+  loginWithFacebook() {
+    this.authService.authenticate('facebook').subscribe({
+      next: (url: string) => {
+        window.location.href = url;
+      },
+      error: (error: HttpErrorResponse) => {
+        this.toastService.showToast({
+          error: error,
+          defaultMsg: 'Facebook login error',
+          title: this.translate.instant('COMMON.ERROR')
+        });
+      }
+    });
+  }
+
+  createAccount() {
+    this.router.navigate(['/register']);
+  }
+
+  forgotPassword() {
+    this.router.navigate(['/forgot-password']);
+  }
+
   togglePassword() {
     this.showPassword = !this.showPassword;
   }

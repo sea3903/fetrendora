@@ -1,4 +1,48 @@
-$shopapp-color: rgb(127, 68, 255);    
-$shopapp-tint-color: rgb(233, 66, 178);
-$shopapp-title-color: rgb(105, 244, 181);
-$shopapp-background-color: rgb(19, 23, 42);
+/**
+ * Shared Styles - Trendora Fashion
+ * Variables chung cho backward compatibility
+ */
+
+// Font
+$font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+$font-size-base: 14px;
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+
+// Colors - Legacy (cho các component cũ)
+$shopapp-color: #000000;
+$shopapp-tint-color: #333333;
+$shopapp-background-color: #ffffff;
+$shopapp-text-color: #000000;
+$shopapp-title-color: #000000;
+$shopapp-border-color: #e5e5e5;
+$shopapp-hover-color: #f5f5f5;
+$shopapp-error-color: #dc2626;
+$shopapp-success-color: #16a34a;
+
+// Colors - New (Trendora)
+$color-text-primary: #000000;
+$color-bg-primary: #ffffff;
+$color-border: #e5e5e5;
+$color-gray-100: #f5f5f5;
+$color-gray-200: #e5e5e5;
+$color-gray-400: #a3a3a3;
+$color-gray-600: #525252;
+
+// Spacing
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+
+// Font sizes
+$font-size-4xl: 32px;
+$font-size-3xl: 28px;
+$font-size-2xl: 24px;
+$font-size-xl: 20px;
+$font-size-lg: 18px;
+
+// Border radius - Trendora is square
+$border-radius: 0;
+$border-radius-md: 0;
+$border-radius-lg: 0;

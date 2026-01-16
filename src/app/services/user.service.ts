@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { RegisterDTO } from '../dtos/user/register.dto';
 import { LoginDTO } from '../dtos/user/login.dto';
 import { environment } from '../../environments/environment';
@@ -10,6 +10,7 @@ import { UpdateUserDTO } from '../dtos/user/update.user.dto';
 import { DOCUMENT } from '@angular/common';
 import { inject } from '@angular/core';
 import { ApiResponse } from '../responses/api.response';
+import { JwtHelperService } from '@auth0/angular-jwt';
 
 @Injectable({
   providedIn: 'root'
@@ -20,38 +21,45 @@ export class UserService {
   private apiUserDetail = `${environment.apiBaseUrl}/users/details`;
 
   private http = inject(HttpClient);
-  private httpUtilService = inject(HttpUtilService);  
+  private httpUtilService = inject(HttpUtilService);
+  private jwtHelper = new JwtHelperService();
 
-  localStorage?:Storage;
-  
+  localStorage?: Storage;
+
   private apiConfig = {
     headers: this.httpUtilService.createHeaders(),
   }
 
-  constructor(        
+  // ════════════════════════════════════════════════════════════════
+  // BEHAVIOR SUBJECT - REAL-TIME USER UPDATES
+  // ════════════════════════════════════════════════════════════════
+  private userSubject = new BehaviorSubject<UserResponse | null>(null);
+  public user$ = this.userSubject.asObservable();
+
+  constructor(
     @Inject(DOCUMENT) private document: Document
-  ) { 
+  ) {
     this.localStorage = document.defaultView?.localStorage;
+    // Khởi tạo user từ localStorage khi service được tạo
+    const savedUser = this.getUserResponseFromLocalStorage();
+    if (savedUser) {
+      this.userSubject.next(savedUser);
+    }
   }
 
-  register(registerDTO: RegisterDTO):Observable<ApiResponse> {
+  // Emit user change event
+  emitUserChange(user: UserResponse | null) {
+    this.userSubject.next(user);
+  }
+
+  register(registerDTO: RegisterDTO): Observable<ApiResponse> {
     return this.http.post<ApiResponse>(this.apiRegister, registerDTO, this.apiConfig);
   }
 
-  login(loginDTO: LoginDTO): Observable<ApiResponse> {    
+  login(loginDTO: LoginDTO): Observable<ApiResponse> {
     return this.http.post<ApiResponse>(this.apiLogin, loginDTO, this.apiConfig);
   }
-  /*
-  getUserDetail(token: string): Observable<ApiResponse> {
-    debugger
-    return this.http.post<ApiResponse>(this.apiUserDetail, {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      })
-    })
-  }
-  */
+
   getUserDetail(token: string): Observable<ApiResponse> {
     return this.http.post<ApiResponse>(this.apiUserDetail, null, {
       headers: new HttpHeaders({
@@ -60,57 +68,111 @@ export class UserService {
       })
     });
   }
-  
-  updateUserDetail(token: string, updateUserDTO: UpdateUserDTO): Observable<ApiResponse>  {
-    let userResponse = this.getUserResponseFromLocalStorage();        
-    return this.http.put<ApiResponse>(`${this.apiUserDetail}/${userResponse?.id}`,updateUserDTO,{
+
+  // ════════════════════════════════════════════════════════════════
+  // LẤY USER ID TỪ JWT TOKEN - NGUỒN TIN CẬY NHẤT
+  // ════════════════════════════════════════════════════════════════
+  private getUserIdFromToken(token: string): number | null {
+    try {
+      if (!token) return null;
+      const decoded = this.jwtHelper.decodeToken(token);
+      if (decoded && 'userId' in decoded) {
+        return parseInt(decoded['userId']);
+      }
+      return null;
+    } catch (error) {
+      console.error('Không thể decode token:', error);
+      return null;
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // UPDATE USER - SỬ DỤNG USER ID TỪ TOKEN
+  // ════════════════════════════════════════════════════════════════
+  updateUserDetail(token: string, updateUserDTO: UpdateUserDTO): Observable<ApiResponse> {
+    // Lấy userId từ JWT token - đáng tin cậy hơn localStorage
+    const userId = this.getUserIdFromToken(token);
+
+    if (!userId) {
+      // Fallback: thử lấy từ localStorage
+      const userFromStorage = this.getUserResponseFromLocalStorage();
+      if (userFromStorage?.id) {
+        console.log('Dùng userId từ localStorage:', userFromStorage.id);
+        return this.http.put<ApiResponse>(`${this.apiUserDetail}/${userFromStorage.id}`, updateUserDTO, {
+          headers: new HttpHeaders({
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          })
+        });
+      }
+
+      console.error('Không tìm thấy userId từ cả token và localStorage');
+      return new Observable(observer => {
+        observer.error({ status: 400, error: { message: 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.' } });
+      });
+    }
+
+    console.log('Dùng userId từ JWT token:', userId);
+    return this.http.put<ApiResponse>(`${this.apiUserDetail}/${userId}`, updateUserDTO, {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`
       })
-    })
+    });
   }
+
+  // ════════════════════════════════════════════════════════════════
+  // LOCAL STORAGE OPERATIONS - WITH REAL-TIME EMIT
+  // ════════════════════════════════════════════════════════════════
   saveUserResponseToLocalStorage(userResponse?: UserResponse) {
     try {
-      debugger
-      if(userResponse == null || !userResponse) {
+      if (!userResponse) {
+        console.warn('Không có user data để lưu');
         return;
       }
-      // Convert the userResponse object to a JSON string
-      const userResponseJSON = JSON.stringify(userResponse);  
-      // Save the JSON string to local storage with a key (e.g., "userResponse")
-      this.localStorage?.setItem('user', userResponseJSON);  
-      console.log('User response saved to local storage.');
+      if (!userResponse.id) {
+        console.error('User không có ID, không lưu vào localStorage');
+        return;
+      }
+      const userResponseJSON = JSON.stringify(userResponse);
+      this.localStorage?.setItem('user', userResponseJSON);
+      console.log('User saved to localStorage, ID:', userResponse.id);
+
+      // EMIT USER CHANGE cho real-time update
+      this.emitUserChange(userResponse);
     } catch (error) {
-      console.error('Error saving user response to local storage:', error);
+      console.error('Error saving user to localStorage:', error);
     }
   }
-  getUserResponseFromLocalStorage():UserResponse | null {
+
+  getUserResponseFromLocalStorage(): UserResponse | null {
     try {
-      // Retrieve the JSON string from local storage using the key
-      const userResponseJSON = this.localStorage?.getItem('user'); 
-      if(userResponseJSON == null || userResponseJSON == undefined) {
+      const userResponseJSON = this.localStorage?.getItem('user');
+      if (!userResponseJSON) {
         return null;
       }
-      // Parse the JSON string back to an object
-      const userResponse = JSON.parse(userResponseJSON!);  
-      console.log('User response retrieved from local storage.');
+      const userResponse = JSON.parse(userResponseJSON);
       return userResponse;
     } catch (error) {
-      console.error('Error retrieving user response from local storage:', error);
-      return null; // Return null or handle the error as needed
+      console.error('Error parsing user from localStorage:', error);
+      return null;
     }
   }
-  removeUserFromLocalStorage():void {
+
+  removeUserFromLocalStorage(): void {
     try {
-      // Remove the user data from local storage using the key
       this.localStorage?.removeItem('user');
-      console.log('User data removed from local storage.');
+      console.log('User data removed from localStorage.');
+      // EMIT NULL khi logout
+      this.emitUserChange(null);
     } catch (error) {
-      console.error('Error removing user data from local storage:', error);
-      // Handle the error as needed
+      console.error('Error removing user from localStorage:', error);
     }
   }
+
+  // ════════════════════════════════════════════════════════════════
+  // OTHER METHODS
+  // ════════════════════════════════════════════════════════════════
   getUsers(params: { page: number, limit: number, keyword: string }): Observable<ApiResponse> {
     const url = `${environment.apiBaseUrl}/users`;
     return this.http.get<ApiResponse>(url, { params: params });
@@ -125,5 +187,24 @@ export class UserService {
     const url = `${environment.apiBaseUrl}/users/block/${params.userId}/${params.enable ? '1' : '0'}`;
     return this.http.put<ApiResponse>(url, null, this.apiConfig);
   }
-  
+
+  forgotPassword(email: string): Observable<ApiResponse> {
+    const url = `${environment.apiBaseUrl}/users/forgot-password`;
+    return this.http.post<ApiResponse>(`${url}?email=${email}`, null);
+  }
+
+  resetPasswordWithToken(token: string, newPassword: string): Observable<ApiResponse> {
+    const url = `${environment.apiBaseUrl}/users/reset-password-token`;
+    return this.http.post<ApiResponse>(`${url}?token=${token}&newPassword=${newPassword}`, null);
+  }
+
+  uploadProfileImage(token: string, file: File): Observable<ApiResponse> {
+    const url = `${environment.apiBaseUrl}/users/upload-profile-image`;
+    const formData = new FormData();
+    formData.append('file', file);
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.post<ApiResponse>(url, formData, { headers });
+  }
 }

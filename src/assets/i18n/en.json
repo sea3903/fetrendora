@@ -1,0 +1,131 @@
+{
+    "COMMON": {
+        "LOADING": "Loading...",
+        "ERROR": "Error",
+        "SUCCESS": "Success",
+        "CANCEL": "Cancel",
+        "SAVE": "Save",
+        "DELETE": "Delete",
+        "EDIT": "Edit",
+        "SEARCH": "Search",
+        "FILTER": "Filter",
+        "CLOSE": "Close",
+        "PROFILE": "Profile",
+        "CHANGE_PASSWORD": "Change Password",
+        "LOGOUT": "Logout"
+    },
+    "SIDEBAR": {
+        "MANAGEMENT": "Management",
+        "ACCOUNT": "Account",
+        "ORDERS": "Orders",
+        "USERS": "Users"
+    },
+    "NAV": {
+        "HOME": "Home",
+        "PRODUCTS": "Products",
+        "CATEGORIES": "Categories",
+        "CART": "Cart",
+        "LOGIN": "Login",
+        "REGISTER": "Register",
+        "LOGOUT": "Logout",
+        "PROFILE": "Profile",
+        "CHANGE_PASSWORD": "Change Password",
+        "ADMIN": "Admin"
+    },
+    "FORGOT_PASSWORD": {
+        "TITLE": "Forgot Password",
+        "DESC": "Enter your email to receive a password reset link.",
+        "SEND_BTN": "Send Link",
+        "CHECK_MAIL": "Check your Email",
+        "SENT_DESC": "We sent a password reset link to"
+    },
+    "LOGIN": {
+        "TITLE": "Login",
+        "EMAIL": "Email",
+        "EMAIL_PLACEHOLDER": "Enter your email",
+        "PASSWORD": "Password",
+        "PASSWORD_PLACEHOLDER": "Enter your password",
+        "REMEMBER_ME": "Remember me",
+        "FORGOT_PASSWORD": "Forgot password?",
+        "ROLE": "Role",
+        "SELECT_ROLE": "Select role",
+        "BUTTON": "Login",
+        "NO_ACCOUNT": "Don't have an account?",
+        "REGISTER": "Register now",
+        "OR": "OR",
+        "WITH_GOOGLE": "Login with Google",
+        "WITH_FACEBOOK": "Login with Facebook",
+        "ERROR": {
+            "INVALID_CREDENTIALS": "Invalid email or password",
+            "ACCOUNT_LOCKED": "Account is locked",
+            "NOT_VERIFIED": "Please verify your email first"
+        },
+        "VALIDATION": {
+            "EMAIL_REQUIRED": "Email is required",
+            "EMAIL_INVALID": "Please enter a valid email",
+            "PASSWORD_REQUIRED": "Password is required",
+            "PASSWORD_MIN": "Password must be at least 6 characters"
+        }
+    },
+    "REGISTER": {
+        "TITLE": "Register",
+        "FULLNAME": "Full name",
+        "FULLNAME_PLACEHOLDER": "Enter your full name",
+        "EMAIL": "Email",
+        "EMAIL_PLACEHOLDER": "Enter your email",
+        "PASSWORD": "Password",
+        "PASSWORD_PLACEHOLDER": "At least 6 characters",
+        "CONFIRM_PASSWORD": "Confirm password",
+        "CONFIRM_PASSWORD_PLACEHOLDER": "Re-enter your password",
+        "PHONE": "Phone number (optional)",
+        "PHONE_PLACEHOLDER": "Enter phone number",
+        "ADDRESS": "Address",
+        "ADDRESS_PLACEHOLDER": "Enter address",
+        "BUTTON": "Register",
+        "HAS_ACCOUNT": "Already have an account?",
+        "LOGIN": "Login",
+        "SUCCESS": "Registration successful! Please check your email to verify your account.",
+        "ERROR": {
+            "EMAIL_EXISTS": "Email already exists",
+            "PASSWORD_MISMATCH": "Passwords do not match"
+        },
+        "VALIDATION": {
+            "FULLNAME_REQUIRED": "Full name is required",
+            "EMAIL_REQUIRED": "Email is required",
+            "EMAIL_INVALID": "Please enter a valid email",
+            "PASSWORD_REQUIRED": "Password is required",
+            "PASSWORD_MIN": "Password must be at least 6 characters",
+            "CONFIRM_REQUIRED": "Please confirm your password"
+        }
+    },
+    "VERIFY_EMAIL": {
+        "TITLE": "Email Verification",
+        "VERIFYING": "Verifying your email...",
+        "SUCCESS": "Email verified successfully! You can now login.",
+        "ERROR": "Verification failed. The link may have expired or is invalid.",
+        "LOGIN_BUTTON": "Go to Login"
+    },
+    "PRODUCT": {
+        "ADD_TO_CART": "Add to cart",
+        "BUY_NOW": "Buy now",
+        "PRICE": "Price",
+        "QUANTITY": "Quantity",
+        "DESCRIPTION": "Description",
+        "REVIEWS": "Reviews",
+        "OUT_OF_STOCK": "Out of stock"
+    },
+    "CART": {
+        "TITLE": "Cart",
+        "EMPTY": "Your cart is empty",
+        "TOTAL": "Total",
+        "CHECKOUT": "Checkout",
+        "CONTINUE_SHOPPING": "Continue shopping"
+    },
+    "FOOTER": {
+        "ABOUT": "About us",
+        "CONTACT": "Contact",
+        "PRIVACY": "Privacy policy",
+        "TERMS": "Terms of service",
+        "COPYRIGHT": "© 2024 Trendora Fashion. All rights reserved."
+    }
+}

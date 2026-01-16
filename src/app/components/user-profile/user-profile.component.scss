@@ -1,11 +1,11 @@
 /**
  * ═══════════════════════════════════════════════════════════════
- * REGISTER PAGE - Trendora Fashion
+ * USER PROFILE PAGE - Trendora Fashion
  * ═══════════════════════════════════════════════════════════════
- * Đen trắng thuần túy, font Inter, form lớn, validation
+ * Đồng nhất với Login: Đen trắng thuần túy, font Inter, form lớn
  */
 
-// Variables
+// Variables (same as Login)
 $color-black: #000000;
 $color-white: #ffffff;
 $color-gray-100: #f5f5f5;
@@ -18,182 +18,190 @@ $font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 // ═══════════════════════════════════════════════════════════════
 // PAGE LAYOUT
 // ═══════════════════════════════════════════════════════════════
-.register-page {
+.profile-page {
     min-height: 100vh;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     background-color: $color-white;
     padding: 60px 20px;
     font-family: $font-family;
 }
 
-.register-container {
+.profile-container {
     width: 100%;
-    max-width: 480px;
+    max-width: 600px;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// LANGUAGE SWITCHER
+// LOADING STATE
 // ═══════════════════════════════════════════════════════════════
-.lang-switcher {
+.loading-container {
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     align-items: center;
-    margin-bottom: 30px;
-    gap: 8px;
+    min-height: 300px;
+}
 
-    button {
-        background: none;
-        border: none;
-        font-size: 12px;
-        font-weight: 500;
-        color: $color-gray-400;
-        cursor: pointer;
-        padding: 6px 10px;
-        letter-spacing: 1px;
-        transition: all 0.2s;
-
-        &:hover {
-            color: $color-black;
-        }
-
-        &.active {
-            color: $color-black;
-            background: $color-gray-100;
-        }
-    }
-
-    .divider {
-        color: $color-gray-200;
-    }
+.spinner-large {
+    width: 40px;
+    height: 40px;
+    border: 3px solid $color-gray-200;
+    border-top-color: $color-black;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// LOGO
+// PAGE HEADER
 // ═══════════════════════════════════════════════════════════════
-.logo {
+.page-header {
     text-align: center;
-    margin-bottom: 50px;
+    margin-bottom: 40px;
 
     h1 {
-        font-size: 36px;
-        font-weight: 500;
-        letter-spacing: 8px;
-        color: $color-black;
-        margin: 0;
-    }
-
-    span {
-        display: block;
-        font-size: 13px;
-        letter-spacing: 6px;
-        color: $color-gray-600;
-        margin-top: 6px;
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// REGISTER CARD
-// ═══════════════════════════════════════════════════════════════
-.register-card {
-    background: $color-white;
-    border: 1px solid $color-gray-200;
-    padding: 50px;
-}
-
-.title {
-    font-size: 16px;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    text-align: center;
-    color: $color-black;
-    margin: 0 0 40px 0;
-}
-
-// ═══════════════════════════════════════════════════════════════
-// SUCCESS CARD
-// ═══════════════════════════════════════════════════════════════
-.success-card {
-    background: $color-white;
-    border: 1px solid $color-gray-200;
-    padding: 60px 50px;
-    text-align: center;
-
-    .icon {
-        margin-bottom: 30px;
-    }
-
-    h2 {
-        font-size: 16px;
-        font-weight: 500;
-        text-transform: uppercase;
+        font-size: 28px;
+        font-weight: 700;
         letter-spacing: 3px;
         color: $color-black;
-        margin: 0 0 20px 0;
+        text-transform: uppercase;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PROFILE CARD
+// ═══════════════════════════════════════════════════════════════
+.profile-card {
+    background-color: $color-white;
+    border: 1px solid $color-gray-200;
+    padding: 40px;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AVATAR SECTION
+// ═══════════════════════════════════════════════════════════════
+.avatar-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.avatar-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 15px;
+
+    img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid $color-black;
+    }
+}
+
+.avatar-edit {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 36px;
+    height: 36px;
+    background: $color-black;
+    color: $color-white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+        background: $color-gray-600;
     }
 
-    p {
-        font-size: 15px;
-        color: $color-gray-600;
-        line-height: 1.6;
-        margin: 0 0 10px 0;
-    }
-
-    .email {
-        font-weight: 500;
-        color: $color-black;
-        font-size: 16px;
-    }
-
-    .note {
-        margin-top: 20px;
-        margin-bottom: 40px;
+    i {
         font-size: 14px;
     }
 }
 
+.user-name {
+    font-size: 22px;
+    font-weight: 600;
+    color: $color-black;
+    margin: 0 0 5px 0;
+}
+
+.user-email {
+    font-size: 14px;
+    color: $color-gray-400;
+    margin: 0;
+}
+
 // ═══════════════════════════════════════════════════════════════
-// FORM ELEMENTS
+// DIVIDER
 // ═══════════════════════════════════════════════════════════════
+.divider {
+    height: 1px;
+    background: $color-gray-200;
+    margin: 30px 0;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION TITLES
+// ═══════════════════════════════════════════════════════════════
+.section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: $color-black;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0 0 20px 0;
+}
+
+.section-subtitle {
+    font-size: 13px;
+    color: $color-gray-400;
+    margin: -15px 0 20px 0;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FORM LAYOUT
+// ═══════════════════════════════════════════════════════════════
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+
+    @media (max-width: 576px) {
+        grid-template-columns: 1fr;
+    }
+}
+
 .form-group {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 
     label {
         display: block;
         font-size: 12px;
-        font-weight: 500;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 1px;
         color: $color-gray-600;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
+    }
 
-        .required {
-            color: $color-error;
-        }
-
-        .optional {
-            color: $color-gray-400;
-            font-weight: 400;
-            text-transform: none;
-        }
+    .required {
+        color: $color-error;
     }
 
     input {
         width: 100%;
-        padding: 16px 18px;
+        padding: 14px 16px;
         font-size: 15px;
         font-family: $font-family;
         border: 1px solid $color-gray-200;
         background: $color-white;
-        color: $color-black;
+        transition: all 0.2s;
         outline: none;
-        transition: border-color 0.2s;
-
-        &::placeholder {
-            color: $color-gray-400;
-        }
 
         &:focus {
             border-color: $color-black;
@@ -202,60 +210,41 @@ $font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         &.error {
             border-color: $color-error;
         }
-    }
 
-    .error-text {
-        display: block;
-        font-size: 12px;
-        color: $color-error;
-        margin-top: 6px;
-    }
-}
-
-.password-wrapper {
-    position: relative;
-
-    input {
-        padding-right: 50px;
-    }
-
-    .toggle-password {
-        position: absolute;
-        right: 16px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        color: $color-gray-400;
-        cursor: pointer;
-        padding: 6px;
-        font-size: 16px;
-
-        &:hover {
-            color: $color-black;
+        &::placeholder {
+            color: $color-gray-400;
         }
     }
 }
 
+.error-text {
+    display: block;
+    font-size: 12px;
+    color: $color-error;
+    margin-top: 6px;
+}
+
 // ═══════════════════════════════════════════════════════════════
-// BUTTON
+// BUTTONS
 // ═══════════════════════════════════════════════════════════════
 .btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
-    padding: 18px;
+    padding: 16px;
     font-size: 14px;
-    font-weight: 500;
-    font-family: $font-family;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 3px;
+    letter-spacing: 2px;
     background: $color-black;
     color: $color-white;
     border: none;
     cursor: pointer;
-    transition: background-color 0.2s;
-    margin-top: 16px;
+    transition: all 0.2s;
+    font-family: $font-family;
 
-    &:hover {
+    &:hover:not(:disabled) {
         background: $color-gray-600;
     }
 
@@ -265,24 +254,81 @@ $font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// LOGIN LINK
-// ═══════════════════════════════════════════════════════════════
-.login-text {
-    text-align: center;
-    margin-top: 30px;
+.btn-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 16px;
     font-size: 14px;
-    color: $color-gray-600;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    background: $color-white;
+    color: $color-black;
+    border: 2px solid $color-black;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: $font-family;
+
+    &:hover:not(:disabled) {
+        background: $color-gray-100;
+    }
+
+    &:disabled {
+        border-color: $color-gray-400;
+        color: $color-gray-400;
+        cursor: not-allowed;
+    }
+}
+
+.spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// QUICK LINK
+// ═══════════════════════════════════════════════════════════════
+.quick-link {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid $color-gray-200;
 
     a {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
+        background: $color-gray-100;
         color: $color-black;
-        font-weight: 500;
         text-decoration: none;
-        cursor: pointer;
-        margin-left: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
 
         &:hover {
-            text-decoration: underline;
+            background: $color-gray-200;
+        }
+
+        i:first-child {
+            margin-right: 12px;
+        }
+
+        i:last-child {
+            margin-left: auto;
+            color: $color-gray-400;
         }
     }
 }

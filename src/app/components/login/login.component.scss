@@ -1,138 +1,358 @@
-@use '../../styles/shared-styles.scss' as *;
+/**
+ * ═══════════════════════════════════════════════════════════════
+ * LOGIN PAGE - Trendora Fashion
+ * ═══════════════════════════════════════════════════════════════
+ * Đen trắng thuần túy, font Inter, form lớn, validation
+ */
 
-.container {
-    color: white;
-    height: 100vh;
-}
-.login-form {
-    background-color: $shopapp-background-color;
-    border-radius: 10px;
-    padding: 20px;
-    max-width: 500px;
-    border: 1px solid rgb(32, 34, 60);
+// Variables
+$color-black: #000000;
+$color-white: #ffffff;
+$color-gray-100: #f5f5f5;
+$color-gray-200: #e5e5e5;
+$color-gray-400: #a3a3a3;
+$color-gray-600: #525252;
+$color-error: #dc2626;
+$font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+// ═══════════════════════════════════════════════════════════════
+// PAGE LAYOUT
+// ═══════════════════════════════════════════════════════════════
+.login-page {
+    min-height: 100vh;
+    display: flex;
     align-items: center;
     justify-content: center;
-}
-.login-header {
-    text-align: center;
-    color: $shopapp-title-color;
-    margin-bottom: 20px;
-}
-.form-control {
-    background-color: transparent;
-    border: none;
-    color: white;
-}
-.form-control:focus {
-    color: white;
-    background-color: transparent;
-    outline: none;
-    border-color: transparent;    
-}
-  
-.divider-nospace {
-    border-top: 1px solid white;
+    background-color: $color-white;
+    padding: 60px 20px;
+    font-family: $font-family;
 }
 
-.password-field {
+.login-container {
+    width: 100%;
+    max-width: 480px;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LANGUAGE SWITCHER
+// ═══════════════════════════════════════════════════════════════
+.lang-switcher {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 30px;
+    gap: 8px;
+
+    button {
+        background: none;
+        border: none;
+        font-size: 12px;
+        font-weight: 500;
+        color: $color-gray-400;
+        cursor: pointer;
+        padding: 6px 10px;
+        letter-spacing: 1px;
+        transition: all 0.2s;
+
+        &:hover {
+            color: $color-black;
+        }
+
+        &.active {
+            color: $color-black;
+            background: $color-gray-100;
+        }
+    }
+
+    .divider {
+        color: $color-gray-200;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LOGO
+// ═══════════════════════════════════════════════════════════════
+.logo {
+    text-align: center;
+    margin-bottom: 50px;
+
+    h1 {
+        font-size: 36px;
+        font-weight: 500;
+        letter-spacing: 8px;
+        color: $color-black;
+        margin: 0;
+    }
+
+    span {
+        display: block;
+        font-size: 13px;
+        letter-spacing: 6px;
+        color: $color-gray-600;
+        margin-top: 6px;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LOGIN CARD
+// ═══════════════════════════════════════════════════════════════
+.login-card {
+    background: $color-white;
+    border: 1px solid $color-gray-200;
+    padding: 50px;
+}
+
+.title {
+    font-size: 16px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-align: center;
+    color: $color-black;
+    margin: 0 0 40px 0;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FORM ELEMENTS
+// ═══════════════════════════════════════════════════════════════
+.form-group {
+    margin-bottom: 24px;
+
+    label {
+        display: block;
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: $color-gray-600;
+        margin-bottom: 10px;
+
+        .required {
+            color: $color-error;
+        }
+    }
+
+    input {
+        width: 100%;
+        padding: 16px 18px;
+        font-size: 15px;
+        font-family: $font-family;
+        border: 1px solid $color-gray-200;
+        background: $color-white;
+        color: $color-black;
+        outline: none;
+        transition: border-color 0.2s;
+
+        &::placeholder {
+            color: $color-gray-400;
+        }
+
+        &:focus {
+            border-color: $color-black;
+        }
+
+        &.error {
+            border-color: $color-error;
+        }
+    }
+
+    .error-text {
+        display: block;
+        font-size: 12px;
+        color: $color-error;
+        margin-top: 6px;
+    }
+}
+
+.password-wrapper {
     position: relative;
+
+    input {
+        padding-right: 50px;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: $color-gray-400;
+        cursor: pointer;
+        padding: 6px;
+        font-size: 16px;
+
+        &:hover {
+            color: $color-black;
+        }
+    }
 }
-.password-toggle {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    color: $shopapp-title-color;
-    cursor: pointer;
-}
-.checkbox-text {
-    color: rgb(243, 165, 42);
+
+// ═══════════════════════════════════════════════════════════════
+// OPTIONS (Remember & Forgot)
+// ═══════════════════════════════════════════════════════════════
+.options {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 10px;
-}
-/* Màu checkbox khi được chọn */
-.checkbox-text input[type="checkbox"]:checked {
-    border-color: white;
-    background-color: $shopapp-tint-color;
+    margin-bottom: 30px;
+    font-size: 14px;
+
+    a,
+    .forgot-link {
+        color: $color-black;
+        text-decoration: none;
+        cursor: pointer;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
 }
 
-.form-check-input {
-    margin-right: 5px;
-}
-
-.register-link {
-    color: $shopapp-title-color;
-    text-decoration: none;
-}
-.access-right {
-    margin-top: 20px;
-    width: 200px;
-    color: white;
-    background-color: $shopapp-background-color !important;
-    border: 1px solid $shopapp-tint-color;
-}
-
-.access-right:focus {
-    border: 1px solid $shopapp-tint-color;
-}
-
-.form-control::placeholder {
-    /* Chrome, Firefox, Opera, Safari 10.1+ */
-    color: rgba(243, 165, 42, 0.4);
-    opacity: 1;
-    /* Firefox */
-}
-
-.form-control:-ms-input-placeholder {
-    /* Internet Explorer 10-11 */
-    color: rgba(243, 165, 42, 0.4);
-}
-
-.form-control::-ms-input-placeholder {
-    /* Microsoft Edge */
-    color: rgba(243, 165, 42, 0.4);
-}
-
-.login-button {
-    background: linear-gradient(to right, $shopapp-tint-color, $shopapp-color);
-    color: white;
-    border-radius: 30px;
-    width: 100%;
-    padding: 10px 0;
-    margin-top: 20px;
-    border: none;
-}
-.divider {
-    height: 1px;
-    background-color: rgb(243, 165, 42);
-    /* background-color: rgb(105, 244, 181) */
-    margin: 20px;
-}
-
-.social-login-buttons {
+.checkbox-label {
     display: flex;
-  }
-  
-  .social-button {
-    flex: 1;
-    margin: 5px;
-    padding: 10px;
-    font-size: 16px;
+    align-items: center;
+    gap: 10px;
     cursor: pointer;
-    border-radius: 8px; /* Thêm thuộc tính này để bo viền */
-  }
-  
-  .google-button {
-    background-color: #db4437; /* Màu đỏ của Google */
-    color: white;
+    color: $color-gray-600;
+
+    input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        border: 1px solid $color-gray-200;
+        appearance: none;
+        cursor: pointer;
+
+        &:checked {
+            background: $color-black;
+            border-color: $color-black;
+            position: relative;
+
+            &::after {
+                content: '';
+                position: absolute;
+                left: 5px;
+                top: 2px;
+                width: 5px;
+                height: 10px;
+                border: solid $color-white;
+                border-width: 0 2px 2px 0;
+                transform: rotate(45deg);
+            }
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BUTTONS
+// ═══════════════════════════════════════════════════════════════
+.btn-primary {
+    width: 100%;
+    padding: 18px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: $font-family;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    background: $color-black;
+    color: $color-white;
     border: none;
-  }
-  
-  .facebook-button {
-    background-color: #4267B2; /* Màu xanh của Facebook */
-    color: white;
-    border: none;
-  }
-  
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+        background: $color-gray-600;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DIVIDER
+// ═══════════════════════════════════════════════════════════════
+.divider-line {
+    display: flex;
+    align-items: center;
+    margin: 30px 0;
+
+    &::before,
+    &::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: $color-gray-200;
+    }
+
+    span {
+        padding: 0 20px;
+        font-size: 12px;
+        color: $color-gray-400;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SOCIAL BUTTONS
+// ═══════════════════════════════════════════════════════════════
+.social-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.btn-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: $font-family;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-google {
+    background: $color-white;
+    color: $color-black;
+    border: 1px solid $color-gray-200;
+
+    &:hover {
+        border-color: $color-black;
+    }
+}
+
+.btn-facebook {
+    background: $color-black;
+    color: $color-white;
+    border: 1px solid $color-black;
+
+    &:hover {
+        background: $color-gray-600;
+        border-color: $color-gray-600;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// REGISTER LINK
+// ═══════════════════════════════════════════════════════════════
+.register-text {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 14px;
+    color: $color-gray-600;
+
+    a {
+        color: $color-black;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        margin-left: 6px;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}

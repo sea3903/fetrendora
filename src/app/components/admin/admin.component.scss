@@ -1,39 +1,429 @@
-.container-fluid {
-    background-color: white;
-    padding-left: 0 !important; /* Remove left padding */
-    padding-right: 0 !important; /* Remove right padding */
+// ═══════════════════════════════════════════════════════════════
+// ADMIN DASHBOARD STYLES - Trendora Design System
+// ═══════════════════════════════════════════════════════════════
+
+// Variables
+$primary-color: #1a1a1a;
+$secondary-color: #333;
+$accent-color: #4CAF50;
+$text-color: #333;
+$text-muted: #666;
+$bg-light: #f5f5f5;
+$bg-white: #fff;
+$border-color: #e0e0e0;
+$shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+$sidebar-width: 260px;
+$header-height: 64px;
+
+.admin-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: $bg-light;
 }
-.header {
-    background-color: #333;
-    /* Header background color */
+
+// ═══════════════════════════════════════════════════════════════
+// HEADER
+// ═══════════════════════════════════════════════════════════════
+.admin-header {
+    height: $header-height;
+    background: $primary-color;
     color: white;
-    /* Text color */
-    padding: 10px;
-    /* Add padding to the header */
-    text-align: center;
-    /* Center-align text in the header */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    box-shadow: $shadow;
+
+    .header-left {
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            i {
+                color: $accent-color;
+            }
+        }
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
 }
-#sidebar {
-    background-color: #007bff !important; /* Primary color */
-    color: white; /* Text color */
-    height: 100vh;
-    overflow-y: auto; /* Add scrollbars if content overflows */
+
+// ═══════════════════════════════════════════════════════════════
+// LANGUAGE SWITCHER
+// ═══════════════════════════════════════════════════════════════
+.lang-switcher {
+    position: relative;
+
+    .lang-btn {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        padding: 8px 12px;
+        border-radius: 8px;
+        transition: all 0.2s;
+        font-size: 0.875rem;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .fa-globe {
+            font-size: 1rem;
+        }
+
+        .fa-chevron-down {
+            font-size: 0.65rem;
+        }
+    }
+
+    .lang-menu {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        background: $bg-white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        min-width: 150px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.2s ease;
+        z-index: 1001;
+
+        &.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .lang-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            color: $text-color;
+            cursor: pointer;
+            transition: background 0.2s;
+
+            &:first-child {
+                border-radius: 8px 8px 0 0;
+            }
+
+            &:last-child {
+                border-radius: 0 0 8px 8px;
+            }
+
+            &:hover {
+                background: $bg-light;
+            }
+
+            &.active {
+                background: rgba($accent-color, 0.1);
+                color: $accent-color;
+                font-weight: 500;
+            }
+
+            .flag {
+                font-size: 1.1rem;
+            }
+        }
+    }
 }
-/* Custom CSS for sidebar links */
-#sidebar a {
-    color: white; /* Text color for links */
-    border-top: 1px solid rgba(255, 255, 255, 0.2); /* Add a border line at the top of each link */
-    padding: 10px 15px; /* Add padding to links for spacing */
+
+// User Dropdown
+.user-dropdown {
+    position: relative;
+
+    .user-btn {
+        background: transparent;
+        border: none;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        padding: 8px 12px;
+        border-radius: 8px;
+        transition: background 0.2s;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .user-name {
+            font-weight: 500;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        i.fa-chevron-down {
+            font-size: 0.75rem;
+            transition: transform 0.2s;
+        }
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        background: $bg-white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        min-width: 200px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.2s ease;
+
+        &.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: $text-color;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.2s;
+
+            &:first-child {
+                border-radius: 8px 8px 0 0;
+            }
+
+            &:hover {
+                background: $bg-light;
+            }
+
+            i {
+                width: 18px;
+                color: $text-muted;
+            }
+
+            &.logout {
+                color: #dc3545;
+
+                i {
+                    color: #dc3545;
+                }
+
+                &:hover {
+                    background: #fff5f5;
+                }
+            }
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: $border-color;
+            margin: 4px 0;
+        }
+    }
 }
-/* Custom CSS for active link */
-#sidebar a.active {
-    font-weight: bold; /* Highlight active link */
-    background-color: #0056b3;
+
+// ═══════════════════════════════════════════════════════════════
+// BODY LAYOUT
+// ═══════════════════════════════════════════════════════════════
+.admin-body {
+    display: flex;
+    margin-top: $header-height;
+    min-height: calc(100vh - #{$header-height});
 }
-/* Change background color on hover */
-#sidebar a:hover {
-    background-color: #0056b3; /* Change the background color on hover */
+
+// ═══════════════════════════════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════════════════════════════
+.sidebar {
+    width: $sidebar-width;
+    background: $bg-white;
+    border-right: 1px solid $border-color;
+    position: fixed;
+    top: $header-height;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+    padding: 16px 0;
+
+    .nav-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .nav-section {
+        padding: 16px 20px 8px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: $text-muted;
+        letter-spacing: 0.5px;
+    }
+
+    .nav-item {
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: $text-color;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+
+            i {
+                width: 20px;
+                font-size: 1rem;
+                color: $text-muted;
+            }
+
+            span {
+                font-weight: 500;
+            }
+
+            &:hover {
+                background: $bg-light;
+                color: $accent-color;
+
+                i {
+                    color: $accent-color;
+                }
+            }
+
+            &.active {
+                background: rgba($accent-color, 0.1);
+                color: $accent-color;
+                border-left-color: $accent-color;
+
+                i {
+                    color: $accent-color;
+                }
+            }
+        }
+    }
 }
-.icon {
-    padding: 5px;
+
+// ═══════════════════════════════════════════════════════════════
+// MAIN CONTENT
+// ═══════════════════════════════════════════════════════════════
+.main-content {
+    flex: 1;
+    margin-left: $sidebar-width;
+    padding: 24px;
+    background: $bg-light;
+    min-height: calc(100vh - #{$header-height});
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RESPONSIVE
+// ═══════════════════════════════════════════════════════════════
+@media (max-width: 768px) {
+    .sidebar {
+        width: 60px;
+
+        .nav-section {
+            display: none;
+        }
+
+        .nav-item .nav-link {
+            justify-content: center;
+            padding: 14px;
+
+            span {
+                display: none;
+            }
+
+            i {
+                font-size: 1.25rem;
+            }
+        }
+
+        .sidebar-footer {
+            display: none;
+        }
+    }
+
+    .main-content {
+        margin-left: 60px;
+        padding: 16px;
+    }
+
+    .user-dropdown .user-btn .user-name {
+        display: none;
+    }
+
+    .lang-switcher .lang-btn span {
+        display: none;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIDEBAR FOOTER - Language Selector
+// ═══════════════════════════════════════════════════════════════
+.sidebar-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px;
+    border-top: 1px solid $border-color;
+    background: $bg-white;
+
+    .lang-selector {
+        display: flex;
+        gap: 8px;
+
+        .lang-option {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid $border-color;
+            border-radius: 6px;
+            background: transparent;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+
+            &:hover {
+                border-color: $primary-color;
+            }
+
+            &.active {
+                background: $primary-color;
+                color: white;
+                border-color: $primary-color;
+            }
+        }
+    }
 }

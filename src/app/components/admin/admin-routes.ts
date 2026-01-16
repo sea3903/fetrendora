@@ -1,7 +1,7 @@
 import { AdminComponent } from "./admin.component";
 import { OrderAdminComponent } from "./order/order.admin.component";
 import { DetailOrderAdminComponent } from "./detail-order/detail.order.admin.component";
-import { Route, Router,Routes } from "@angular/router";
+import { Route, Router, Routes } from "@angular/router";
 import { NgModule } from "@angular/core";
 import { RouterModule } from "@angular/router";
 import { ProductAdminComponent } from "./product/product.admin.component";
@@ -11,6 +11,9 @@ import { InsertProductAdminComponent } from "./product/insert/insert.product.adm
 import { InsertCategoryAdminComponent } from "./category/insert/insert.category.admin.component";
 import { UpdateCategoryAdminComponent } from "./category/update/update.category.admin.component";
 import { UserAdminComponent } from "./user/user.admin.component";
+// Admin Profile & Change Password Components
+import { AdminProfileComponent } from "./profile/admin-profile.component";
+import { AdminChangePasswordComponent } from "./change-password/admin-change-password.component";
 
 export const adminRoutes: Routes = [
     {
@@ -20,7 +23,7 @@ export const adminRoutes: Routes = [
             {
                 path: 'orders',
                 component: OrderAdminComponent
-            },            
+            },
             {
                 path: 'products',
                 component: ProductAdminComponent
@@ -54,16 +57,18 @@ export const adminRoutes: Routes = [
             {
                 path: 'users',
                 component: UserAdminComponent
-            },  
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // ADMIN PROFILE & CHANGE PASSWORD
+            // ═══════════════════════════════════════════════════════════════
+            {
+                path: 'profile',
+                component: AdminProfileComponent
+            },
+            {
+                path: 'change-password',
+                component: AdminChangePasswordComponent
+            },
         ]
     }
 ];
-/*
-@NgModule({
-    imports: [
-        RouterModule.forChild(routes)
-    ],
-    exports: [RouterModule]
-})
-export class AdminRoutingModule { }
-*/

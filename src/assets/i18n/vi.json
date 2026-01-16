@@ -1,0 +1,134 @@
+{
+    "COMMON": {
+        "LOADING": "Đang tải...",
+        "ERROR": "Lỗi",
+        "SUCCESS": "Thành công",
+        "CANCEL": "Hủy",
+        "SAVE": "Lưu",
+        "DELETE": "Xóa",
+        "EDIT": "Sửa",
+        "SEARCH": "Tìm kiếm",
+        "FILTER": "Bộ lọc",
+        "CLOSE": "Đóng",
+        "PROFILE": "Thông tin cá nhân",
+        "CHANGE_PASSWORD": "Đổi mật khẩu",
+        "LOGOUT": "Đăng xuất"
+    },
+    "SIDEBAR": {
+        "MANAGEMENT": "Quản lý",
+        "ACCOUNT": "Tài khoản",
+        "ORDERS": "Đơn hàng",
+        "USERS": "Người dùng"
+    },
+    "NAV": {
+        "HOME": "Trang chủ",
+        "PRODUCTS": "Sản phẩm",
+        "CATEGORIES": "Danh mục",
+        "CART": "Giỏ hàng",
+        "LOGIN": "Đăng nhập",
+        "REGISTER": "Đăng ký",
+        "LOGOUT": "Đăng xuất",
+        "PROFILE": "Tài khoản",
+        "CHANGE_PASSWORD": "Đổi mật khẩu",
+        "ADMIN": "Quản trị"
+    },
+    "FORGOT_PASSWORD": {
+        "TITLE": "Quên Mật Khẩu",
+        "DESC": "Nhập email của bạn để nhận link đặt lại mật khẩu.",
+        "SEND_BTN": "Gửi Link",
+        "CHECK_MAIL": "Kiểm tra Email",
+        "SENT_DESC": "Chúng tôi đã gửi link đặt lại mật khẩu đến"
+    },
+    "LOGIN": {
+        "TITLE": "Đăng Nhập",
+        "EMAIL": "Email",
+        "EMAIL_PLACEHOLDER": "Nhập email của bạn",
+        "PASSWORD": "Mật khẩu",
+        "PASSWORD_PLACEHOLDER": "Nhập mật khẩu",
+        "REMEMBER_ME": "Ghi nhớ đăng nhập",
+        "FORGOT_PASSWORD": "Quên mật khẩu?",
+        "ROLE": "Quyền đăng nhập",
+        "SELECT_ROLE": "Chọn quyền",
+        "BUTTON": "Đăng Nhập",
+        "NO_ACCOUNT": "Chưa có tài khoản?",
+        "REGISTER": "Đăng ký ngay",
+        "OR": "HOẶC",
+        "WITH_GOOGLE": "Đăng nhập với Google",
+        "WITH_FACEBOOK": "Đăng nhập với Facebook",
+        "ERROR": {
+            "INVALID_CREDENTIALS": "Sai email hoặc mật khẩu",
+            "ACCOUNT_LOCKED": "Tài khoản đã bị khóa",
+            "NOT_VERIFIED": "Vui lòng xác thực email trước"
+        },
+        "VALIDATION": {
+            "EMAIL_REQUIRED": "Vui lòng nhập email",
+            "EMAIL_INVALID": "Email không hợp lệ",
+            "PASSWORD_REQUIRED": "Vui lòng nhập mật khẩu",
+            "PASSWORD_MIN": "Mật khẩu phải có ít nhất 6 ký tự"
+        }
+    },
+    "REGISTER": {
+        "TITLE": "Đăng Ký",
+        "FULLNAME": "Họ và tên",
+        "FULLNAME_PLACEHOLDER": "Nhập họ và tên",
+        "EMAIL": "Email",
+        "EMAIL_PLACEHOLDER": "Nhập email của bạn",
+        "PASSWORD": "Mật khẩu",
+        "PASSWORD_PLACEHOLDER": "Ít nhất 6 ký tự",
+        "CONFIRM_PASSWORD": "Xác nhận mật khẩu",
+        "CONFIRM_PASSWORD_PLACEHOLDER": "Nhập lại mật khẩu",
+        "PHONE": "Số điện thoại",
+        "PHONE_PLACEHOLDER": "Nhập số điện thoại",
+        "OPTIONAL": "(Tùy chọn)",
+        "ADDRESS": "Địa chỉ",
+        "ADDRESS_PLACEHOLDER": "Nhập địa chỉ",
+        "BUTTON": "Đăng Ký",
+        "HAS_ACCOUNT": "Đã có tài khoản?",
+        "LOGIN": "Đăng nhập",
+        "SUCCESS": "Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.",
+        "ERROR": {
+            "EMAIL_EXISTS": "Email đã được sử dụng",
+            "PASSWORD_MISMATCH": "Mật khẩu không khớp"
+        },
+        "VALIDATION": {
+            "FULLNAME_REQUIRED": "Vui lòng nhập họ và tên",
+            "EMAIL_REQUIRED": "Vui lòng nhập email",
+            "EMAIL_INVALID": "Email không hợp lệ",
+            "PASSWORD_REQUIRED": "Vui lòng nhập mật khẩu",
+            "PASSWORD_MIN": "Mật khẩu phải có ít nhất 6 ký tự",
+            "CONFIRM_REQUIRED": "Vui lòng xác nhận mật khẩu"
+        }
+    },
+    "VERIFY_EMAIL": {
+        "TITLE": "Xác Thực Email",
+        "VERIFYING": "Đang xác thực email của bạn...",
+        "SUCCESS": "Xác thực email thành công! Bạn có thể đăng nhập ngay.",
+        "ERROR": "Xác thực thất bại. Link có thể đã hết hạn hoặc không hợp lệ.",
+        "LOGIN_BUTTON": "Đến trang Đăng nhập",
+        "CHECK_EMAIL": "Kiểm tra email",
+        "CHECK_EMAIL_DESC": "Chúng tôi đã gửi link xác thực đến"
+    },
+    "PRODUCT": {
+        "ADD_TO_CART": "Thêm vào giỏ",
+        "BUY_NOW": "Mua ngay",
+        "PRICE": "Giá",
+        "QUANTITY": "Số lượng",
+        "DESCRIPTION": "Mô tả",
+        "REVIEWS": "Đánh giá",
+        "OUT_OF_STOCK": "Hết hàng"
+    },
+    "CART": {
+        "TITLE": "Giỏ Hàng",
+        "EMPTY": "Giỏ hàng trống",
+        "TOTAL": "Tổng cộng",
+        "CHECKOUT": "Thanh toán",
+        "CONTINUE_SHOPPING": "Tiếp tục mua sắm"
+    },
+    "FOOTER": {
+        "ABOUT": "Về chúng tôi",
+        "CONTACT": "Liên hệ",
+        "PRIVACY": "Chính sách bảo mật",
+        "TERMS": "Điều khoản dịch vụ",
+        "COPYRIGHT": "© 2024 Trendora Fashion. Tất cả quyền được bảo lưu."
+    }
+}

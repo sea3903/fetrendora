@@ -1,50 +1,102 @@
-<div class="container-fluid">
-    <header class="header bg-success text-white d-flex justify-content-between">
-      <h1 class="header-title">Dashboard Header</h1>
-      <!-- Logout Button -->
-      <button class="btn btn-danger btn-sm" (click)="logout()">Logout</button>
-    </header>
-    <div class="row">
-      <nav id="sidebar" class="col-md-2 col-lg-2 d-md-block bg-light sidebar">
-        <div class="position-sticky">
-          <ul class="nav flex-column">
-            <li class="nav-item">
-              <a class="nav-link" 
-                (click)="showAdminComponent('orders')"
-                routerLink="/admin/orders"
-                routerLinkActive="active">
-                <i class="fab fa-first-order icon"></i>Orders
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" 
-                (click)="showAdminComponent('categories')"
-                  routerLink="/admin/categories"
-                  routerLinkActive="active">
-                <i class="fab fa-canadian-maple-leaf icon"></i>Categories
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" 
-                (click)="showAdminComponent('products')"
-                routerLink="/admin/products"
-                routerLinkActive="active">
-                <i class="fab fa-codepen icon"></i>Products
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" 
-                (click)="showAdminComponent('users')"
-                routerLink="/admin/users"
-                routerLinkActive="active">
-                <i class="fab fa-codepen icon"></i>Users
-              </a>
-            </li>
-          </ul>
+<div class="admin-container">
+  <!-- Header -->
+  <header class="admin-header">
+    <div class="header-left">
+      <h1 class="header-title">
+        <i class="fas fa-tachometer-alt"></i>
+        Admin Dashboard
+      </h1>
+    </div>
+    <div class="header-right">
+      <!-- Language Switcher -->
+      <div class="lang-switcher">
+        <button class="lang-btn" (click)="toggleLangDropdown(); $event.stopPropagation()">
+          <i class="fas fa-globe"></i>
+          <span>{{ currentLang === 'vi' ? 'VI' : 'EN' }}</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="lang-menu" [class.show]="langDropdownOpen" (click)="$event.stopPropagation()">
+          <a class="lang-item" [class.active]="currentLang === 'vi'" (click)="switchLanguage('vi')">
+            <span class="flag">🇻🇳</span> Tiếng Việt
+          </a>
+          <a class="lang-item" [class.active]="currentLang === 'en'" (click)="switchLanguage('en')">
+            <span class="flag">🇺🇸</span> English
+          </a>
         </div>
-      </nav>
-      <div class="col-md-10 col-lg-10 overflow-auto">
-        <router-outlet></router-outlet>
+      </div>
+
+      <!-- User Dropdown -->
+      <div class="user-dropdown" *ngIf="userResponse">
+        <button class="user-btn" (click)="toggleDropdown(); $event.stopPropagation()">
+          <img [src]="getAvatarUrl()" class="user-avatar" (error)="onImageError($event)" alt="Avatar">
+          <span class="user-name">{{ userResponse.fullname || 'Admin' }}</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="dropdown-menu" [class.show]="dropdownOpen" (click)="$event.stopPropagation()">
+          <a class="dropdown-item" routerLink="/admin/profile" (click)="closeDropdown()">
+            <i class="fas fa-user"></i> {{ 'NAV.PROFILE' | translate }}
+          </a>
+          <a class="dropdown-item" routerLink="/admin/change-password" (click)="closeDropdown()">
+            <i class="fas fa-key"></i> {{ 'NAV.CHANGE_PASSWORD' | translate }}
+          </a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item logout" (click)="logout()">
+            <i class="fas fa-sign-out-alt"></i> {{ 'NAV.LOGOUT' | translate }}
+          </a>
+        </div>
       </div>
     </div>
+  </header>
+
+  <div class="admin-body">
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar">
+      <ul class="nav-list">
+        <li class="nav-section">{{ 'SIDEBAR.MANAGEMENT' | translate }}</li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/orders" routerLinkActive="active">
+            <i class="fas fa-shopping-cart"></i>
+            <span>{{ 'SIDEBAR.ORDERS' | translate }}</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/categories" routerLinkActive="active">
+            <i class="fas fa-tags"></i>
+            <span>{{ 'NAV.CATEGORIES' | translate }}</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/products" routerLinkActive="active">
+            <i class="fas fa-box"></i>
+            <span>{{ 'NAV.PRODUCTS' | translate }}</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/users" routerLinkActive="active">
+            <i class="fas fa-users"></i>
+            <span>{{ 'SIDEBAR.USERS' | translate }}</span>
+          </a>
+        </li>
+
+        <li class="nav-section">{{ 'SIDEBAR.ACCOUNT' | translate }}</li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/profile" routerLinkActive="active">
+            <i class="fas fa-user-circle"></i>
+            <span>{{ 'NAV.PROFILE' | translate }}</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/admin/change-password" routerLinkActive="active">
+            <i class="fas fa-lock"></i>
+            <span>{{ 'NAV.CHANGE_PASSWORD' | translate }}</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
   </div>
+</div>

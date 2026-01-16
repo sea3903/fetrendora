@@ -1,0 +1,92 @@
+<app-header></app-header>
+
+<div class="profile-page">
+    <div class="profile-container">
+
+        <!-- Tiêu đề trang -->
+        <div class="page-header">
+            <h1>{{ 'PROFILE.TITLE' | translate }}</h1>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading-container" *ngIf="loading">
+            <div class="spinner-large"></div>
+        </div>
+
+        <!-- Card thông tin -->
+        <div class="profile-card" *ngIf="!loading && userResponse">
+
+            <!-- Phần Avatar -->
+            <div class="avatar-section">
+                <div class="avatar-wrapper">
+                    <img [src]="avatarUrl" alt="Avatar" (error)="onImageError($event)">
+                    <label class="avatar-edit">
+                        <i class="fas fa-camera"></i>
+                        <input type="file" (change)="onFileSelected($event)" accept="image/*" hidden>
+                    </label>
+                </div>
+                <h3 class="user-name">{{ userResponse?.fullname }}</h3>
+                <p class="user-email">{{ userResponse?.email }}</p>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Form thông tin cá nhân -->
+            <form (ngSubmit)="saveProfile()" #profileForm="ngForm">
+                <h2 class="section-title">{{ 'PROFILE.PERSONAL_INFO' | translate }}</h2>
+
+                <div class="form-row">
+                    <!-- Họ và tên -->
+                    <div class="form-group">
+                        <label>{{ 'REGISTER.FULLNAME' | translate }} <span class="required">*</span></label>
+                        <input type="text" name="fullName" [(ngModel)]="fullName" (blur)="validateFullName()"
+                            (input)="validateFullName()" [placeholder]="'REGISTER.FULLNAME_PLACEHOLDER' | translate"
+                            [class.error]="fullNameError">
+                        <span class="error-text" *ngIf="fullNameError">{{ fullNameError }}</span>
+                    </div>
+
+                    <!-- Số điện thoại -->
+                    <div class="form-group">
+                        <label>{{ 'REGISTER.PHONE' | translate }}</label>
+                        <input type="tel" name="phoneNumber" [(ngModel)]="phoneNumber" (blur)="validatePhone()"
+                            (input)="validatePhone()" [placeholder]="'REGISTER.PHONE_PLACEHOLDER' | translate"
+                            [class.error]="phoneError">
+                        <span class="error-text" *ngIf="phoneError">{{ phoneError }}</span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <!-- Ngày sinh -->
+                    <div class="form-group">
+                        <label>{{ 'PROFILE.DOB' | translate }}</label>
+                        <input type="date" name="dateOfBirth" [(ngModel)]="dateOfBirth">
+                    </div>
+
+                    <!-- Địa chỉ -->
+                    <div class="form-group">
+                        <label>{{ 'REGISTER.ADDRESS' | translate }}</label>
+                        <input type="text" name="address" [(ngModel)]="address"
+                            [placeholder]="'REGISTER.ADDRESS_PLACEHOLDER' | translate">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary" [disabled]="!isFormValid() || saving">
+                    <span *ngIf="saving" class="spinner"></span>
+                    {{ 'COMMON.SAVE' | translate }}
+                </button>
+            </form>
+
+            <!-- Link đến trang đổi mật khẩu -->
+            <div class="quick-link">
+                <a routerLink="/change-password">
+                    <i class="fas fa-lock"></i>
+                    {{ 'NAV.CHANGE_PASSWORD' | translate }}
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<app-footer></app-footer>
