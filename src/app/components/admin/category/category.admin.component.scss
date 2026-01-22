@@ -1,0 +1,493 @@
+// ═══════════════════════════════════════════════════════════════
+// CATEGORY ADMIN COMPONENT STYLES
+// ═══════════════════════════════════════════════════════════════
+
+$primary: #1a1a1a;
+$accent: #4CAF50;
+$accent-dark: #43A047; // darken($accent, 8%)
+$danger: #dc3545;
+$text: #333;
+$text-muted: #666;
+$border: #e0e0e0;
+$bg-light: #f8f9fa;
+$white: #fff;
+$shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+.category-admin-page {
+    padding: 0;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PAGE HEADER
+// ═══════════════════════════════════════════════════════════════
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid $border;
+
+    h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: $primary;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BUTTONS
+// ═══════════════════════════════════════════════════════════════
+.btn-primary {
+    background: $accent;
+    color: $white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+
+    &:hover {
+        background: $accent-dark;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
+.btn-secondary {
+    background: transparent;
+    color: $text;
+    border: 1px solid $border;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+        background: $bg-light;
+    }
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+
+    &.edit {
+        background: rgba($accent, 0.1);
+        color: $accent;
+
+        &:hover {
+            background: $accent;
+            color: $white;
+        }
+    }
+
+    &.delete {
+        background: rgba($danger, 0.1);
+        color: $danger;
+
+        &:hover {
+            background: $danger;
+            color: $white;
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SEARCH BAR
+// ═══════════════════════════════════════════════════════════════
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+
+    .search-input-wrapper {
+        flex: 1;
+        max-width: 400px;
+        position: relative;
+
+        i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: $text-muted;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 12px 12px 42px;
+            border: 1px solid $border;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+
+            &:focus {
+                outline: none;
+                border-color: $accent;
+            }
+        }
+    }
+
+    .btn-search {
+        background: $accent;
+        color: $white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+
+        &:hover {
+            background: $accent-dark;
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TABLE
+// ═══════════════════════════════════════════════════════════════
+.table-container {
+    background: $white;
+    border-radius: 12px;
+    box-shadow: $shadow;
+    overflow: hidden;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+
+    thead {
+        background: $bg-light;
+
+        th {
+            padding: 12px 14px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: $text-muted;
+            border-bottom: 1px solid $border;
+            white-space: nowrap;
+        }
+    }
+
+    tbody {
+        tr {
+            &:hover {
+                background: rgba($accent, 0.03);
+            }
+
+            &:not(:last-child) td {
+                border-bottom: 1px solid $border;
+            }
+        }
+
+        td {
+            padding: 12px 14px;
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
+    }
+
+    // Category: STT(8%) + Tên(25%) + Danh mục cha(20%) + Slug(32%) + Thao tác(15%) = 100%
+    .col-stt {
+        width: 8%;
+        text-align: center;
+    }
+
+    th.col-stt,
+    th.col-actions {
+        text-align: center !important;
+    }
+
+    td.col-stt {
+        font-weight: 600;
+        color: $text-muted;
+    }
+
+    .col-name {
+        width: 25%;
+        text-align: left;
+    }
+
+    td.col-name {
+        font-weight: 500;
+
+        .indent {
+            color: $text-muted;
+            margin-right: 4px;
+        }
+    }
+
+    .col-parent {
+        width: 20%;
+        text-align: left;
+    }
+
+    td.col-parent {
+        color: $text-muted;
+    }
+
+    .col-slug {
+        width: 32%;
+        text-align: left;
+    }
+
+    td.col-slug {
+        font-family: monospace;
+        font-size: 0.85rem;
+        color: $text-muted;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .col-actions {
+        width: 15%;
+        text-align: center;
+    }
+}
+
+.action-btns {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 48px !important;
+    color: $text-muted;
+
+    i {
+        font-size: 3rem;
+        margin-bottom: 12px;
+        opacity: 0.3;
+    }
+
+    p {
+        margin: 0;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PAGINATION
+// ═══════════════════════════════════════════════════════════════
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+}
+
+.page-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid $border;
+    background: $white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover:not(:disabled) {
+        border-color: $accent;
+        color: $accent;
+    }
+
+    &.active {
+        background: $accent;
+        border-color: $accent;
+        color: $white;
+    }
+
+    &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LOADING
+// ═══════════════════════════════════════════════════════════════
+.loading-container {
+    display: flex;
+    justify-content: center;
+    padding: 48px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid $border;
+    border-top-color: $accent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.spinner-small {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: $white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════════════
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    background: $white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid $border;
+
+    h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .btn-close {
+        background: transparent;
+        border: none;
+        font-size: 1.25rem;
+        cursor: pointer;
+        color: $text-muted;
+        padding: 8px;
+        border-radius: 8px;
+
+        &:hover {
+            background: $bg-light;
+            color: $text;
+        }
+    }
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: $text;
+
+        .required {
+            color: $danger;
+        }
+    }
+
+    input[type="text"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid $border;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-family: inherit;
+
+        &:focus {
+            outline: none;
+            border-color: $accent;
+        }
+
+        &.error {
+            border-color: $danger;
+        }
+    }
+
+    select {
+        cursor: pointer;
+        background: $white;
+    }
+
+    .hint {
+        display: block;
+        margin-top: 6px;
+        font-size: 0.8rem;
+        color: $text-muted;
+    }
+
+    .error-text {
+        color: $danger;
+        font-size: 0.8rem;
+        margin-top: 4px;
+        display: block;
+    }
+}
+
+.form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid $border;
+}

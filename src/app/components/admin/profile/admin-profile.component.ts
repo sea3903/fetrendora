@@ -7,7 +7,7 @@ import { TokenService } from '../../../services/token.service';
 import { UserResponse } from '../../../responses/user/user.response';
 import { UpdateUserDTO } from '../../../dtos/user/update.user.dto';
 import { ToastService } from '../../../services/toast.service';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
@@ -20,8 +20,7 @@ import { environment } from '../../../../environments/environment';
     imports: [
         CommonModule,
         FormsModule,
-        RouterLink,
-        TranslateModule
+        RouterLink
     ],
     providers: [DatePipe]
 })
@@ -50,7 +49,7 @@ export class AdminProfileComponent implements OnInit {
     private userService = inject(UserService);
     private tokenService = inject(TokenService);
     private toastService = inject(ToastService);
-    private translate = inject(TranslateService);
+
     private datePipe = inject(DatePipe);
     private router = inject(Router);
 
@@ -123,12 +122,12 @@ export class AdminProfileComponent implements OnInit {
     // Validation
     validateFullName(): boolean {
         if (!this.fullName || this.fullName.trim() === '') {
-            this.fullNameError = this.translate.instant('PROFILE.VALIDATION.FULLNAME_REQUIRED');
+            this.fullNameError = 'Vui lòng nhập họ và tên';
             return false;
         }
         const nameRegex = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẵếưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\s]+$/;
         if (!nameRegex.test(this.fullName.trim())) {
-            this.fullNameError = this.translate.instant('PROFILE.VALIDATION.FULLNAME_INVALID');
+            this.fullNameError = 'Họ tên chỉ được chứa chữ cái và khoảng trắng';
             return false;
         }
         this.fullNameError = '';
@@ -142,7 +141,7 @@ export class AdminProfileComponent implements OnInit {
         }
         const phoneRegex = /^(03|05|07|08|09)[0-9]{8}$/;
         if (!phoneRegex.test(this.phoneNumber.trim())) {
-            this.phoneError = this.translate.instant('PROFILE.VALIDATION.PHONE_INVALID');
+            this.phoneError = 'Số điện thoại không hợp lệ';
             return false;
         }
         this.phoneError = '';
@@ -194,7 +193,7 @@ export class AdminProfileComponent implements OnInit {
                 error: (err: HttpErrorResponse) => {
                     this.saving = false;
                     this.toastService.showToast({
-                        title: this.translate.instant('COMMON.ERROR'),
+                        title: 'Lỗi',
                         defaultMsg: err.error?.message || 'Upload avatar thất bại',
                         error: err
                     });
@@ -236,15 +235,15 @@ export class AdminProfileComponent implements OnInit {
                 }
 
                 this.toastService.showToast({
-                    title: this.translate.instant('COMMON.SUCCESS'),
-                    defaultMsg: this.translate.instant('PROFILE.SAVE_SUCCESS')
+                    title: 'Thành công',
+                    defaultMsg: 'Cập nhật thông tin thành công!'
                 });
                 this.selectedFile = null;
             },
             error: (err: HttpErrorResponse) => {
                 this.saving = false;
                 this.toastService.showToast({
-                    title: this.translate.instant('COMMON.ERROR'),
+                    title: 'Lỗi',
                     defaultMsg: err.error?.message || 'Cập nhật thất bại',
                     error: err
                 });

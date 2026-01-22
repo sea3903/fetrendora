@@ -18,12 +18,25 @@ import { Observable, of } from 'rxjs';
 class CustomTranslateLoader implements TranslateLoader {
   private translations: { [key: string]: any } = {
     'vi': {
-      COMMON: { LOADING: 'Đang tải...', ERROR: 'Lỗi', SUCCESS: 'Thành công', SAVE: 'Lưu' },
+      COMMON: { LOADING: 'Đang tải...', ERROR: 'Lỗi', SUCCESS: 'Thành công', SAVE: 'Lưu', SEARCH: 'Tìm kiếm', CANCEL: 'Hủy', ACTIONS: 'Thao tác' },
       SIDEBAR: {
         MANAGEMENT: 'Quản lý',
         ACCOUNT: 'Tài khoản',
         ORDERS: 'Đơn hàng',
-        USERS: 'Người dùng'
+        USERS: 'Người dùng',
+        BRANDS: 'Thương hiệu'
+      },
+      BRAND: {
+        TITLE: 'Quản lý Thương hiệu',
+        SUBTITLE: 'Thêm, sửa, xóa các thương hiệu sản phẩm',
+        ADD_NEW: 'Thêm thương hiệu',
+        EDIT: 'Sửa thương hiệu',
+        NAME: 'Tên',
+        NAME_PLACEHOLDER: 'Nhập tên thương hiệu',
+        DESCRIPTION: 'Mô tả',
+        DESC_PLACEHOLDER: 'Nhập mô tả (tùy chọn)',
+        UPLOAD_LOGO: 'Tải logo',
+        EMPTY: 'Chưa có thương hiệu nào'
       },
       NAV: {
         HOME: "Trang chủ", PRODUCTS: "Sản phẩm", CATEGORIES: "Danh mục", CART: "Giỏ hàng",
@@ -96,12 +109,25 @@ class CustomTranslateLoader implements TranslateLoader {
       }
     },
     'en': {
-      COMMON: { LOADING: 'Loading...', ERROR: 'Error', SUCCESS: 'Success', SAVE: 'Save' },
+      COMMON: { LOADING: 'Loading...', ERROR: 'Error', SUCCESS: 'Success', SAVE: 'Save', SEARCH: 'Search', CANCEL: 'Cancel', ACTIONS: 'Actions' },
       SIDEBAR: {
         MANAGEMENT: 'Management',
         ACCOUNT: 'Account',
         ORDERS: 'Orders',
-        USERS: 'Users'
+        USERS: 'Users',
+        BRANDS: 'Brands'
+      },
+      BRAND: {
+        TITLE: 'Brand Management',
+        SUBTITLE: 'Add, edit, delete product brands',
+        ADD_NEW: 'Add Brand',
+        EDIT: 'Edit Brand',
+        NAME: 'Name',
+        NAME_PLACEHOLDER: 'Enter brand name',
+        DESCRIPTION: 'Description',
+        DESC_PLACEHOLDER: 'Enter description (optional)',
+        UPLOAD_LOGO: 'Upload Logo',
+        EMPTY: 'No brands found'
       },
       NAV: {
         HOME: "Home", PRODUCTS: "Products", CATEGORIES: "Categories", CART: "Cart",

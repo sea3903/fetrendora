@@ -1,19 +1,21 @@
 import { AdminComponent } from "./admin.component";
 import { OrderAdminComponent } from "./order/order.admin.component";
 import { DetailOrderAdminComponent } from "./detail-order/detail.order.admin.component";
-import { Route, Router, Routes } from "@angular/router";
-import { NgModule } from "@angular/core";
-import { RouterModule } from "@angular/router";
+import { Routes } from "@angular/router";
 import { ProductAdminComponent } from "./product/product.admin.component";
 import { CategoryAdminComponent } from "./category/category.admin.component";
 import { UpdateProductAdminComponent } from "./product/update/update.product.admin.component";
 import { InsertProductAdminComponent } from "./product/insert/insert.product.admin.component";
-import { InsertCategoryAdminComponent } from "./category/insert/insert.category.admin.component";
-import { UpdateCategoryAdminComponent } from "./category/update/update.category.admin.component";
 import { UserAdminComponent } from "./user/user.admin.component";
 // Admin Profile & Change Password Components
 import { AdminProfileComponent } from "./profile/admin-profile.component";
 import { AdminChangePasswordComponent } from "./change-password/admin-change-password.component";
+// Brand Component
+import { BrandAdminComponent } from "./brand/brand.admin.component";
+// Lookup Tables: Color, Origin, Size
+import { ColorAdminComponent } from "./color/color.admin.component";
+import { OriginAdminComponent } from "./origin/origin.admin.component";
+import { SizeAdminComponent } from "./size/size.admin.component";
 
 export const adminRoutes: Routes = [
     {
@@ -32,7 +34,11 @@ export const adminRoutes: Routes = [
                 path: 'categories',
                 component: CategoryAdminComponent
             },
-            //sub path
+            {
+                path: 'brands',
+                component: BrandAdminComponent
+            },
+            // Product sub paths
             {
                 path: 'orders/:id',
                 component: DetailOrderAdminComponent
@@ -44,15 +50,6 @@ export const adminRoutes: Routes = [
             {
                 path: 'products/insert',
                 component: InsertProductAdminComponent
-            },
-            //categories            
-            {
-                path: 'categories/update/:id',
-                component: UpdateCategoryAdminComponent
-            },
-            {
-                path: 'categories/insert',
-                component: InsertCategoryAdminComponent
             },
             {
                 path: 'users',
@@ -68,6 +65,21 @@ export const adminRoutes: Routes = [
             {
                 path: 'change-password',
                 component: AdminChangePasswordComponent
+            },
+            // ═══════════════════════════════════════════════════════════════
+            // LOOKUP TABLES: COLORS, ORIGINS, SIZES
+            // ═══════════════════════════════════════════════════════════════
+            {
+                path: 'colors',
+                component: ColorAdminComponent
+            },
+            {
+                path: 'origins',
+                component: OriginAdminComponent
+            },
+            {
+                path: 'sizes',
+                component: SizeAdminComponent
             },
         ]
     }

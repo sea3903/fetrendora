@@ -1,29 +1,366 @@
-@use '../../../styles/shared-styles.scss' as *;
+// ═══════════════════════════════════════════════════════════════
+// PRODUCT ADMIN COMPONENT STYLES
+// ═══════════════════════════════════════════════════════════════
 
-.page-number {
+$primary: #1a1a1a;
+$primary-light: #333333; // lighten($primary, 10%)
+$accent: #4CAF50;
+$accent-dark: #43A047; // darken($accent, 8%)
+$danger: #dc3545;
+$text: #333;
+$text-muted: #666;
+$border: #e0e0e0;
+$bg-light: #f8f9fa;
+$white: #fff;
+$shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+.product-admin-page {
+    padding: 0;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PAGE HEADER
+// ═══════════════════════════════════════════════════════════════
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid $border;
+
+    h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: $primary;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════════
+.tabs-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+
+    .tab-btn {
+        padding: 10px 20px;
+        border: 1px solid $border;
+        border-radius: 8px;
+        background: $white;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+            background: $bg-light;
+        }
+
+        &.active {
+            background: $accent;
+            border-color: $accent;
+            color: $white;
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BUTTONS
+// ═══════════════════════════════════════════════════════════════
+.btn-primary {
+    background: $accent;
+    color: $white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
     cursor: pointer;
-    padding: 5px 10px;
-    border: 1px solid #ccc;
-    margin: 0 2px;
-    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+
+    &:hover {
+        background: $accent-dark;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
 }
 
-.page-number.active {
-    background-color: $shopapp-color !important;
-    color: #fff;
-    border-color: $shopapp-color !important;
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+
+    &.edit {
+        background: rgba($accent, 0.1);
+        color: $accent;
+
+        &:hover {
+            background: $accent;
+            color: $white;
+        }
+    }
+
+    &.delete {
+        background: rgba($danger, 0.1);
+        color: $danger;
+
+        &:hover {
+            background: $danger;
+            color: $white;
+        }
+    }
+
+    &.success {
+        background: rgba($accent, 0.1);
+        color: $accent;
+
+        &:hover {
+            background: $accent;
+            color: $white;
+        }
+    }
 }
 
-.btn.btn-primary {
-    margin-left: 10px;
-}
-.container-fluid {
-    background-color: white;
-    padding-left: 0 !important; /* Remove left padding */
-    padding-right: 0 !important; /* Remove right padding */
-    height: 100vh;
+// ═══════════════════════════════════════════════════════════════
+// SEARCH BAR
+// ═══════════════════════════════════════════════════════════════
+.search-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+
+    .search-input-wrapper {
+        flex: 1;
+        max-width: 400px;
+        position: relative;
+
+        i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: $text-muted;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 12px 12px 42px;
+            border: 1px solid $border;
+            border-radius: 8px;
+            font-size: 0.95rem;
+
+            &:focus {
+                outline: none;
+                border-color: $accent;
+            }
+        }
+    }
+
+    .btn-search {
+        background: $primary;
+        color: $white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+
+        &:hover {
+            background: $primary-light;
+        }
+    }
 }
 
-.rounded-square {
-    border-radius: 10px;
+// ═══════════════════════════════════════════════════════════════
+// TABLE
+// ═══════════════════════════════════════════════════════════════
+.table-container {
+    background: $white;
+    border-radius: 12px;
+    box-shadow: $shadow;
+    overflow: hidden;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead {
+        background: $bg-light;
+
+        th {
+            padding: 12px 14px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: $text-muted;
+            border-bottom: 1px solid $border;
+            white-space: nowrap;
+        }
+    }
+
+    tbody {
+        tr {
+            &:hover {
+                background: rgba($accent, 0.03);
+            }
+
+            &:not(:last-child) td {
+                border-bottom: 1px solid $border;
+            }
+        }
+
+        td {
+            padding: 12px 14px;
+            vertical-align: middle;
+            color: $text;
+        }
+    }
+
+    // Columns
+    .col-stt {
+        width: 60px;
+        text-align: center;
+    }
+
+    .col-thumbnail {
+        width: 80px;
+        text-align: center;
+    }
+
+    .col-name {
+        min-width: 200px;
+    }
+
+    .col-price {
+        width: 120px;
+        text-align: right;
+    }
+
+    .col-desc {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .col-actions {
+        width: 100px;
+        text-align: center;
+    }
+}
+
+// Product Image - Fixed size to prevent jitter
+.product-image {
+    width: 60px;
+    height: 60px;
+    min-width: 60px;
+    min-height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid $border;
+    display: block;
+    background-color: #f5f5f5;
+    margin: 0 auto;
+    aspect-ratio: 1 / 1; // Force square ratio
+}
+
+
+// Action buttons
+.action-btns {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+// Empty state
+.empty-state {
+    text-align: center;
+    padding: 48px !important;
+    color: $text-muted;
+
+    i {
+        font-size: 3rem;
+        margin-bottom: 12px;
+        opacity: 0.3;
+    }
+
+    p {
+        margin: 0;
+    }
+}
+
+// Loading
+.loading-container {
+    display: flex;
+    justify-content: center;
+    padding: 48px;
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid $border;
+        border-top-color: $accent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PAGINATION
+// ═══════════════════════════════════════════════════════════════
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 24px;
+}
+
+.page-btn {
+    min-width: 36px;
+    height: 36px;
+    border: 1px solid $border;
+    background: $white;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+
+    &:hover:not(:disabled) {
+        background: $bg-light;
+    }
+
+    &.active {
+        background: $primary;
+        color: $white;
+        border-color: $primary;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 }

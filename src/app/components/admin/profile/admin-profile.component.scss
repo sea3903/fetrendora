@@ -3,6 +3,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 $primary-color: #1a1a1a;
+$primary-light: #333333; // lighten($primary-color, 10%)
 $accent-color: #4CAF50;
 $text-color: #333;
 $text-muted: #666;
@@ -92,7 +93,7 @@ $error-color: #dc3545;
             transition: background 0.2s;
 
             &:hover {
-                background: lighten($primary-color, 10%);
+                background: $primary-light;
             }
         }
     }
@@ -183,7 +184,7 @@ $error-color: #dc3545;
         border: none;
 
         &:hover:not(:disabled) {
-            background: lighten($primary-color, 10%);
+            background: $primary-light;
         }
 
         &:disabled {

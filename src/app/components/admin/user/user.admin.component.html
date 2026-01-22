@@ -1,37 +1,213 @@
-<h1>sss</h1>
-<table class="table table-striped">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Full Name</th>
-        <th>Phone</th>
-        <th>Address</th>
-        <th>State</th>
-        <th>Role</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-        @for(user of users; track user.id) {
+<div class="user-admin-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h2>Quản lý người dùng</h2>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs-bar">
+    <button class="tab-btn" [class.active]="activeTab === 'active'" (click)="switchTab('active')">
+      Đang hoạt động
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'blocked'" (click)="switchTab('blocked')">
+      Đã khóa
+    </button>
+  </div>
+
+  <!-- Tìm kiếm -->
+  <div class="search-bar">
+    <div class="search-input-wrapper">
+      <i class="fas fa-search"></i>
+      <input type="text" [(ngModel)]="keyword" placeholder="Tìm theo email, tên, số điện thoại..."
+        (keyup.enter)="search()">
+    </div>
+    <button class="btn-search" (click)="search()">Tìm kiếm</button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Bảng dữ liệu -->
+  <div class="table-container" *ngIf="!loading">
+    <table class="data-table">
+      <thead>
         <tr>
-            <td>{{ user.id }}</td>
-            <td>{{ user.fullname }}</td>
-            <td>{{ user.phone_number }}</td>
-            <td>{{ user.address }}</td>
-            <td>{{ user.is_active ? 'Active' : 'Inactive' }}</td>
-            <td>{{ user.role.name }}</td>
-            <td>
-                <button class="btn" [ngClass]="{
-                        'btn-danger': user.is_active,
-                        'btn-success': !user.is_active
-                      }" (click)="toggleUserStatus(user)">
-                    {{ user.is_active ? 'Block User' : 'Unblock User' }}
-                </button>
-                <button class="btn btn-primary ms-2" (click)="resetPassword(user.id)">
-                    Reset Password
-                </button>
-            </td>
+          <th class="col-stt">STT</th>
+          <th class="col-avatar">Avatar</th>
+          <th class="col-email">Email</th>
+          <th class="col-name">Họ tên</th>
+          <th class="col-phone">Số điện thoại</th>
+          <th class="col-dob">Ngày sinh</th>
+          <th class="col-address">Địa chỉ</th>
+          <th class="col-type">Loại tài khoản</th>
+          <th class="col-role">Vai trò</th>
+          <th class="col-actions">Thao tác</th>
         </tr>
-        }
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of filteredUsers; let i = index">
+          <td class="col-stt">{{ currentPage * itemsPerPage + i + 1 }}</td>
+          <td class="col-avatar">
+            <div class="avatar">
+              <img *ngIf="getAvatarUrl(user)" [src]="getAvatarUrl(user)" alt="Avatar">
+              <span *ngIf="!getAvatarUrl(user)" class="avatar-placeholder">
+                {{ user.fullname?.charAt(0)?.toUpperCase() || '?' }}
+              </span>
+            </div>
+          </td>
+          <td class="col-email">{{ user.email || '-' }}</td>
+          <td class="col-name">{{ user.fullname || '-' }}</td>
+          <td class="col-phone">{{ user.phone_number || '-' }}</td>
+          <td class="col-dob">{{ formatDate(user.date_of_birth) }}</td>
+          <td class="col-address">{{ user.address || '-' }}</td>
+          <td class="col-type">{{ getAccountType(user) }}</td>
+          <td class="col-role">{{ user.role?.name || '-' }}</td>
+          <td class="col-actions">
+            <div class="action-btns">
+              <button class="btn-icon edit" (click)="openEditModal(user)" title="Chỉnh sửa">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn-icon edit" (click)="openResetPasswordModal(user)" title="Reset mật khẩu">
+                <i class="fas fa-key"></i>
+              </button>
+              <button *ngIf="activeTab === 'active'" class="btn-icon delete" (click)="blockUser(user)"
+                title="Khóa tài khoản">
+                <i class="fas fa-lock"></i>
+              </button>
+              <button *ngIf="activeTab === 'blocked'" class="btn-icon success" (click)="unblockUser(user)"
+                title="Mở khóa">
+                <i class="fas fa-unlock"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredUsers.length === 0">
+          <td colspan="10" class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>{{ activeTab === 'blocked' ? 'Không có tài khoản bị khóa' : 'Không có người dùng' }}</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Phân trang -->
+  <div class="pagination-container" *ngIf="totalPages > 1">
+    <button class="page-btn" [disabled]="currentPage === 0" (click)="onPageChange(0)">
+      <i class="fas fa-angle-double-left"></i>
+    </button>
+    <button class="page-btn" [disabled]="currentPage === 0" (click)="onPageChange(currentPage - 1)">
+      <i class="fas fa-angle-left"></i>
+    </button>
+    <button *ngFor="let page of visiblePages" class="page-btn" [class.active]="page === currentPage + 1"
+      (click)="onPageChange(page - 1)">
+      {{ page }}
+    </button>
+    <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(currentPage + 1)">
+      <i class="fas fa-angle-right"></i>
+    </button>
+    <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(totalPages - 1)">
+      <i class="fas fa-angle-double-right"></i>
+    </button>
+  </div>
+</div>
+
+<!-- Modal chỉnh sửa thông tin -->
+<div class="modal-overlay" *ngIf="showModal && modalMode === 'edit'" (click)="closeModal()">
+  <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Chỉnh sửa thông tin</h3>
+      <button class="btn-close" (click)="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form (ngSubmit)="saveUser()">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Họ tên <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="selectedUser!.fullname" name="fullname" placeholder="Nhập họ tên"
+              [class.error]="errors.fullname">
+            <span class="error-text" *ngIf="errors.fullname">{{ errors.fullname }}</span>
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" [(ngModel)]="selectedUser!.email" name="email" placeholder="Nhập email" readonly
+              class="readonly">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Số điện thoại</label>
+            <input type="text" [(ngModel)]="selectedUser!.phone_number" name="phone_number"
+              placeholder="Nhập số điện thoại" [class.error]="errors.phone_number">
+            <span class="error-text" *ngIf="errors.phone_number">{{ errors.phone_number }}</span>
+          </div>
+          <div class="form-group">
+            <label>Ngày sinh</label>
+            <input type="date" [(ngModel)]="selectedUser!.date_of_birth" name="date_of_birth">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Địa chỉ</label>
+          <input type="text" [(ngModel)]="selectedUser!.address" name="address" placeholder="Nhập địa chỉ">
+        </div>
+        <div class="form-group">
+          <label>Vai trò <span class="required">*</span></label>
+          <select [(ngModel)]="selectedRoleId" name="roleId">
+            <option *ngFor="let role of roles" [value]="role.id">{{ role.name }}</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="closeModal()">Hủy</button>
+          <button type="submit" class="btn-primary" [disabled]="saving">
+            <span *ngIf="saving" class="spinner-small"></span>
+            {{ saving ? 'Đang lưu...' : 'Lưu' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal reset mật khẩu -->
+<div class="modal-overlay" *ngIf="showModal && modalMode === 'resetPassword'" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Reset mật khẩu</h3>
+      <button class="btn-close" (click)="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="user-info">
+        <p><strong>Người dùng:</strong> {{ selectedUser?.fullname || selectedUser?.email }}</p>
+      </div>
+
+      <div *ngIf="!newPassword" class="confirm-message">
+        <p>Bạn có chắc muốn reset mật khẩu cho tài khoản này?</p>
+        <p class="hint">Mật khẩu mới sẽ được tạo tự động (6 ký tự)</p>
+      </div>
+
+      <div *ngIf="newPassword" class="password-result">
+        <p>Mật khẩu mới:</p>
+        <div class="password-box">{{ newPassword }}</div>
+        <p class="hint">Vui lòng sao chép và gửi cho người dùng</p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" (click)="closeModal()">
+          {{ newPassword ? 'Đóng' : 'Hủy' }}
+        </button>
+        <button *ngIf="!newPassword" type="button" class="btn-primary" [disabled]="saving" (click)="resetPassword()">
+          <span *ngIf="saving" class="spinner-small"></span>
+          {{ saving ? 'Đang xử lý...' : 'Xác nhận' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

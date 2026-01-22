@@ -82,7 +82,12 @@ export class HeaderComponent extends BaseComponent implements OnInit, OnDestroy 
 
   getAvatarUrl(user?: UserResponse | null): string {
     // Ưu tiên dùng ảnh profile_image từ server nếu có
-    if (user?.profile_image) {
+    if (user?.profile_image && user.profile_image.trim() !== '') {
+      // Nếu là URL đầy đủ từ social login (Google/Facebook)
+      if (user.profile_image.startsWith('http')) {
+        return user.profile_image;
+      }
+      // Nếu là file local trên server
       return `${environment.apiBaseUrl}/users/profile-images/${user.profile_image}`;
     }
     // Fallback: Sử dụng UI Avatars API để tạo ảnh đại diện từ tên

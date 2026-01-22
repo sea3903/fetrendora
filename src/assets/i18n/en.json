@@ -12,13 +12,27 @@
         "CLOSE": "Close",
         "PROFILE": "Profile",
         "CHANGE_PASSWORD": "Change Password",
-        "LOGOUT": "Logout"
+        "LOGOUT": "Logout",
+        "ACTIONS": "Actions"
     },
     "SIDEBAR": {
         "MANAGEMENT": "Management",
         "ACCOUNT": "Account",
         "ORDERS": "Orders",
-        "USERS": "Users"
+        "USERS": "Users",
+        "BRANDS": "Brands"
+    },
+    "BRAND": {
+        "TITLE": "Brand Management",
+        "SUBTITLE": "Add, edit, delete product brands",
+        "ADD_NEW": "Add Brand",
+        "EDIT": "Edit Brand",
+        "NAME": "Name",
+        "NAME_PLACEHOLDER": "Enter brand name",
+        "DESCRIPTION": "Description",
+        "DESC_PLACEHOLDER": "Enter description (optional)",
+        "UPLOAD_LOGO": "Upload Logo",
+        "EMPTY": "No brands found"
     },
     "NAV": {
         "HOME": "Home",

@@ -1,0 +1,142 @@
+<div class="brand-admin-page">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h2>Quản lý thương hiệu</h2>
+        </div>
+        <button class="btn-primary" (click)="openCreateModal()">
+            <i class="fas fa-plus"></i> Thêm mới
+        </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-bar">
+        <div class="search-input-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" [(ngModel)]="keyword" placeholder="Tìm theo tên..." (keyup.enter)="searchBrands()">
+        </div>
+        <button class="btn-search" (click)="searchBrands()">
+            Tìm kiếm
+        </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-container" *ngIf="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Brand Table -->
+    <div class="table-container" *ngIf="!loading">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="col-stt">STT</th>
+                    <th class="col-logo">Logo</th>
+                    <th class="col-name">Tên thương hiệu</th>
+                    <th class="col-desc">Mô tả</th>
+                    <th class="col-actions">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let brand of brands; let i = index; trackBy: trackById">
+                    <td class="col-stt">{{ currentPage * itemsPerPage + i + 1 }}</td>
+                    <td class="col-logo">
+                        <img [src]="getLogoUrl(brand)" alt="Logo" class="brand-logo" loading="lazy"
+                            (error)="$any($event.target).src = defaultLogo">
+                    </td>
+                    <td class="col-name">{{ brand.name }}</td>
+                    <td class="col-desc">{{ brand.description || '-' }}</td>
+                    <td class="col-actions">
+                        <div class="action-btns">
+                            <button class="btn-icon edit" (click)="openEditModal(brand)" title="Sửa">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon delete" (click)="deleteBrand(brand)" title="Xóa">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr *ngIf="brands.length === 0">
+                    <td colspan="5" class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>Không có thương hiệu nào</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container" *ngIf="totalPages > 1">
+        <button class="page-btn" [disabled]="currentPage === 0" (click)="onPageChange(0)">
+            <i class="fas fa-angle-double-left"></i>
+        </button>
+        <button class="page-btn" [disabled]="currentPage === 0" (click)="onPageChange(currentPage - 1)">
+            <i class="fas fa-angle-left"></i>
+        </button>
+        <button *ngFor="let page of visiblePages" class="page-btn" [class.active]="page === currentPage + 1"
+            (click)="onPageChange(page - 1)">
+            {{ page }}
+        </button>
+        <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(currentPage + 1)">
+            <i class="fas fa-angle-right"></i>
+        </button>
+        <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(totalPages - 1)">
+            <i class="fas fa-angle-double-right"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>{{ modalMode === 'create' ? 'Thêm thương hiệu' : 'Sửa thương hiệu' }}</h3>
+            <button class="btn-close" (click)="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form (ngSubmit)="saveBrand()">
+                <!-- Logo Upload -->
+                <div class="logo-upload-section">
+                    <div class="logo-preview">
+                        <img [src]="previewUrl || defaultLogo" alt="Logo preview" loading="lazy">
+                        <label class="upload-overlay">
+                            <input type="file" accept="image/*" (change)="onFileSelected($event)" hidden>
+                            <i class="fas fa-camera"></i>
+                            <span>Tải logo lên</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Name -->
+                <div class="form-group">
+                    <label>Tên thương hiệu <span class="required">*</span></label>
+                    <input type="text" [(ngModel)]="brandForm.name" name="name" (blur)="validateName()"
+                        (input)="validateName()" [class.error]="nameError" placeholder="Nhập tên thương hiệu">
+                    <span class="error-text" *ngIf="nameError">{{ nameError }}</span>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label>Mô tả</label>
+                    <textarea [(ngModel)]="brandForm.description" name="description" rows="3"
+                        placeholder="Nhập mô tả thương hiệu"></textarea>
+                </div>
+
+                <!-- Actions -->
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" (click)="closeModal()">
+                        Hủy
+                    </button>
+                    <button type="submit" class="btn-primary" [disabled]="saving">
+                        <span *ngIf="saving" class="spinner-small"></span>
+                        {{ saving ? 'Đang lưu...' : 'Lưu' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

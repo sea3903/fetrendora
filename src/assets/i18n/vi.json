@@ -12,13 +12,27 @@
         "CLOSE": "Đóng",
         "PROFILE": "Thông tin cá nhân",
         "CHANGE_PASSWORD": "Đổi mật khẩu",
-        "LOGOUT": "Đăng xuất"
+        "LOGOUT": "Đăng xuất",
+        "ACTIONS": "Thao tác"
     },
     "SIDEBAR": {
         "MANAGEMENT": "Quản lý",
         "ACCOUNT": "Tài khoản",
         "ORDERS": "Đơn hàng",
-        "USERS": "Người dùng"
+        "USERS": "Người dùng",
+        "BRANDS": "Thương hiệu"
+    },
+    "BRAND": {
+        "TITLE": "Quản lý Thương hiệu",
+        "SUBTITLE": "Thêm, sửa, xóa các thương hiệu sản phẩm",
+        "ADD_NEW": "Thêm thương hiệu",
+        "EDIT": "Sửa thương hiệu",
+        "NAME": "Tên",
+        "NAME_PLACEHOLDER": "Nhập tên thương hiệu",
+        "DESCRIPTION": "Mô tả",
+        "DESC_PLACEHOLDER": "Nhập mô tả (tùy chọn)",
+        "UPLOAD_LOGO": "Tải logo",
+        "EMPTY": "Chưa có thương hiệu nào"
     },
     "NAV": {
         "HOME": "Trang chủ",

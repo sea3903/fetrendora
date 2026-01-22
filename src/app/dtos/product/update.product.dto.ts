@@ -1,25 +1,12 @@
-import {
-    IsString, 
-    IsNotEmpty, 
-    IsPhoneNumber,     
-} from 'class-validator';
-
-export class UpdateProductDTO {
-    @IsPhoneNumber()
+export interface UpdateProductDTO {
     name: string;
-
     price: number;
-
-    @IsString()
-    @IsNotEmpty()
     description: string;
-
     category_id: number;
-
-    constructor(data: any) {
-        this.name = data.name;
-        this.price = data.price;
-        this.description = data.description;
-        this.category_id = data.category_id;
-    }
+    brand_id?: number;
+    sku?: string;
+    slug?: string;
+    thumbnail?: string;
+    selling_attributes?: string;
+    is_active?: boolean;
 }

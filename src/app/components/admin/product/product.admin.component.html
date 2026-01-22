@@ -1,89 +1,115 @@
-<div class="container">
-    <h1>Product Admin</h1>
-    <!--Đoạn này có 1 ô searchbox bên trái, 1 combobox bên phải  -->
-    <div class="row mb-3">
-      <div class="col-md-8">
-        <input type="text" class="form-control search-input" placeholder="Tìm sản phẩm" [(ngModel)]="keyword">
-      </div>
-      <div class="col-md-4">
-        <button class="btn btn-primary" (click)="searchProducts()">Tìm kiếm</button>
-      </div>
+<div class="product-admin-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h2>Quản lý sản phẩm</h2>
     </div>
-    <div class="row">
-      <div class="col-md-8 ">
-        <button class="btn btn-success" (click)="insertProduct()">Thêm sản phẩm mới</button>
-      </div>      
+    <button class="btn-primary" (click)="insertProduct()">
+      <i class="fas fa-plus"></i> Thêm mới
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs-bar">
+    <button class="tab-btn" [class.active]="activeTab === 'active'" (click)="switchTab('active')">
+      Đang kinh doanh
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'hidden'" (click)="switchTab('hidden')">
+      Ngừng kinh doanh
+    </button>
+  </div>
+
+  <!-- Tìm kiếm -->
+  <div class="search-bar">
+    <div class="search-input-wrapper">
+      <i class="fas fa-search"></i>
+      <input type="text" [(ngModel)]="keyword" placeholder="Tìm theo tên hoặc mã sản phẩm..."
+        (keyup.enter)="searchProducts()">
     </div>
-    
-    <table class="table">
-      <thead class="table-light">
+    <button class="btn-search" (click)="searchProducts()">Tìm kiếm</button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Bảng dữ liệu -->
+  <div class="table-container" *ngIf="!loading">
+    <table class="data-table">
+      <thead>
         <tr>
-          <th>ID</th>
-          <th>Name</th>
-          <th>Price</th>
-          <th>Thumbnail</th>
-          <th>Description</th>
-          <th>Actions</th>
+          <th class="col-stt">STT</th>
+          <th class="col-thumbnail">Ảnh</th>
+          <th class="col-sku">Mã sản phẩm</th>
+          <th class="col-name">Tên sản phẩm</th>
+          <th class="col-price">Giá</th>
+          <th class="col-actions">Thao tác</th>
         </tr>
       </thead>
-      <tbody>        
-        @for(product of products; track product.id) {
-          <tr>
-            <td>{{ product.id }}</td>
-            <td>{{ product.name }}</td>
-            <td>{{ product.price }}</td>
-            <td>
-              <img src="{{ product.url }}" 
-                class="rounded-square" alt="Thumbnail"
-                width="100" height="100">
-            </td>
-            <td>{{ product.description }}</td>
-            <td>
-              <div style="display: flex; gap: 10px;">
-                <button class="btn btn-primary" 
-                    (click)="updateProduct(product.id)">
-                  Update
-                </button>
-                <button class="btn btn-danger" 
-                  (click)="deleteProduct(product)">Delete
-                </button>            
-                </div>
-            </td>          
-          </tr>
-        }        
+      <tbody>
+        <tr *ngFor="let product of products; let i = index">
+          <td class="col-stt">{{ currentPage * itemsPerPage + i + 1 }}</td>
+          <td class="col-thumbnail">
+            <img [src]="product.url || 'assets/images/product-placeholder.png'" alt="Thumbnail" class="product-image"
+              (error)="$any($event.target).src = 'assets/images/product-placeholder.png'">
+          </td>
+          <td class="col-sku">
+            <strong>{{ product.sku || '-' }}</strong>
+          </td>
+          <td class="col-name">{{ product.name }}</td>
+          <td class="col-price">{{ product.price | number:'1.0-0' }}đ</td>
+          <td class="col-actions">
+            <div class="action-btns">
+              <button class="btn-icon edit" (click)="updateProduct(product.id)" title="Sửa">
+                <i class="fas fa-edit"></i>
+              </button>
+
+              <!-- Active Action -->
+              <button *ngIf="activeTab === 'active'" class="btn-icon delete" (click)="toggleStatus(product, false)"
+                title="Ngừng kinh doanh (Ẩn)">
+                <i class="fas fa-eye-slash"></i>
+              </button>
+
+              <!-- Hidden Action -->
+              <button *ngIf="activeTab === 'hidden'" class="btn-icon success" (click)="toggleStatus(product, true)"
+                title="Mở bán lại">
+                <i class="fas fa-eye"></i>
+              </button>
+
+              <button class="btn-icon delete" (click)="deleteProduct(product)" title="Xóa vĩnh viễn">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="products.length === 0">
+          <td colspan="6" class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>Không có sản phẩm nào</p>
+          </td>
+        </tr>
       </tbody>
     </table>
-    <div class="d-flex justify-content-center">
-      <nav aria-label="Page navigation">
-        <ul class="pagination">
-          @if(currentPage > 0) {
-            <li class="page-item">
-              <a class="page-link" (click)="onPageChange(0)">First</a>
-            </li>
-            <li class="page-item">
-              <a class="page-link" (click)="onPageChange(currentPage - 1)">
-                <i class="fa fa-chevron-left"></i>
-              </a>
-            </li>
-          }          
-          @for(page of visiblePages; track page) {
-            <ng-container>
-              <li class="page-item" [ngClass]="{'active': page === currentPage + 1}">
-                <a class="page-link" (click)="onPageChange(page - 1)">{{ page }}</a>
-              </li>
-            </ng-container>
-          }          
-          @if(currentPage < totalPages - 1)   {
-            <li class="page-item">
-              <a class="page-link" (click)="onPageChange(currentPage + 1)">
-                <i class="fa fa-chevron-right"></i>
-              </a>
-            </li>
-            <li class="page-item" >
-              <a class="page-link" (click)="onPageChange(totalPages - 1)">Last</a>
-            </li>
-          }          
-        </ul>
-      </nav>
-    </div>
   </div>
+
+  <!-- Phân trang -->
+  <div class="pagination-container" *ngIf="totalPages > 1">
+    <button class="page-btn" [disabled]="currentPage === 0" (click)="onPageChange(0)">
+      <i class="fas fa-angle-double-left"></i>
+    </button>
+    <button class="page-btn" [disabled]="currentPage === 0" (click)="onPageChange(currentPage - 1)">
+      <i class="fas fa-angle-left"></i>
+    </button>
+    <button *ngFor="let page of visiblePages" class="page-btn" [class.active]="page === currentPage + 1"
+      (click)="onPageChange(page - 1)">
+      {{ page }}
+    </button>
+    <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(currentPage + 1)">
+      <i class="fas fa-angle-right"></i>
+    </button>
+    <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(totalPages - 1)">
+      <i class="fas fa-angle-double-right"></i>
+    </button>
+  </div>
+</div>

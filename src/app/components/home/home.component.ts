@@ -12,15 +12,15 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { BaseComponent } from '../base/base.component';
 
 @Component({
-    selector: 'app-home',
-    templateUrl: './home.component.html',
-    styleUrls: ['./home.component.scss'],
-    imports: [
-        FooterComponent,
-        HeaderComponent,
-        CommonModule,
-        FormsModule
-    ]
+  selector: 'app-home',
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.scss'],
+  imports: [
+    FooterComponent,
+    HeaderComponent,
+    CommonModule,
+    FormsModule
+  ]
 })
 export class HomeComponent extends BaseComponent implements OnInit {
   products: Product[] = [];
@@ -34,7 +34,7 @@ export class HomeComponent extends BaseComponent implements OnInit {
   keyword: string = "";
   localStorage?: Storage | undefined;
   apiBaseUrl = environment.apiBaseUrl;
-  
+
 
   ngOnInit() {
     this.activatedRoute.queryParams.subscribe(params => {
@@ -43,27 +43,23 @@ export class HomeComponent extends BaseComponent implements OnInit {
       this.selectedCategoryId = Number(params['categoryId']) || 0;
     });
     this.getProducts(this.keyword, this.selectedCategoryId, this.currentPage, this.itemsPerPage);
-    this.getCategories(0, 100);
-  }  
+    this.getCategories();
+  }
 
   constructor() {
     super();
     this.localStorage = this.document.defaultView?.localStorage;
   }
 
-  getCategories(page: number, limit: number) {
-    this.categoryService.getCategories(page, limit).subscribe({
+  getCategories() {
+    this.categoryService.getCategories().subscribe({
       next: (apiResponse: ApiResponse) => {
-        debugger;
         this.categories = apiResponse.data;
-      },
-      complete: () => {
-        debugger;
       },
       error: (error: HttpErrorResponse) => {
         this.toastService.showToast({
           error: error,
-          defaultMsg: 'Lỗi tải danh sách sản phẩm',
+          defaultMsg: 'Lỗi tải danh sách danh mục',
           title: 'Lỗi Tải Dữ Liệu'
         });
       }
@@ -74,11 +70,11 @@ export class HomeComponent extends BaseComponent implements OnInit {
     this.currentPage = 0;
     this.itemsPerPage = 12;
     this.getProducts(this.keyword, this.selectedCategoryId, this.currentPage, this.itemsPerPage);
-    this.router.navigate(['/home'], { 
-      queryParams: 
-      { keyword: this.keyword, categoryId: this.selectedCategoryId, page: this.currentPage } 
+    this.router.navigate(['/home'], {
+      queryParams:
+        { keyword: this.keyword, categoryId: this.selectedCategoryId, page: this.currentPage }
     });
-  }  
+  }
 
   getProducts(keyword: string, selectedCategoryId: number, page: number, limit: number) {
     debugger;
@@ -110,8 +106,8 @@ export class HomeComponent extends BaseComponent implements OnInit {
     this.currentPage = page < 0 ? 0 : page;
     this.getProducts(this.keyword, this.selectedCategoryId, this.currentPage, this.itemsPerPage);
     this.router.navigate(['/home'], { queryParams: { page: this.currentPage } });
-  }  
-  
+  }
+
   // Hàm xử lý sự kiện khi sản phẩm được bấm vào
   onProductClick(productId: number) {
     debugger;

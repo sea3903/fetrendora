@@ -188,6 +188,26 @@ export class UserService {
     return this.http.put<ApiResponse>(url, null, this.apiConfig);
   }
 
+  getBlockedUsers(params: { page: number, limit: number, keyword: string }): Observable<ApiResponse> {
+    const url = `${environment.apiBaseUrl}/users/blocked`;
+    return this.http.get<ApiResponse>(url, { params: params });
+  }
+
+  changeRole(userId: number, roleId: number): Observable<ApiResponse> {
+    const url = `${environment.apiBaseUrl}/users/change-role/${userId}/${roleId}`;
+    return this.http.put<ApiResponse>(url, null, this.apiConfig);
+  }
+
+  getRoles(): Observable<ApiResponse> {
+    const url = `${environment.apiBaseUrl}/roles`;
+    return this.http.get<ApiResponse>(url);
+  }
+
+  adminUpdateUser(userId: number, data: any): Observable<ApiResponse> {
+    const url = `${environment.apiBaseUrl}/users/admin/update/${userId}`;
+    return this.http.put<ApiResponse>(url, data, this.apiConfig);
+  }
+
   forgotPassword(email: string): Observable<ApiResponse> {
     const url = `${environment.apiBaseUrl}/users/forgot-password`;
     return this.http.post<ApiResponse>(`${url}?email=${email}`, null);

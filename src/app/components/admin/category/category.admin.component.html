@@ -1,39 +1,139 @@
-<div class="container">
-    <h1>Category Admin</h1>        
-    <div class="row">
-      <div class="col-md-8 ">
-        <button class="btn btn-success" (click)="insertCategory()">Thêm danh mục mới</button>
-      </div>      
+<div class="category-admin-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h2>Quản lý danh mục</h2>
     </div>
-    <table class="table">
-      <thead class="table-light">
+    <button class="btn-primary" (click)="openCreateModal()">
+      <i class="fas fa-plus"></i> Thêm mới
+    </button>
+  </div>
+
+  <!-- Tìm kiếm -->
+  <div class="search-bar">
+    <div class="search-input-wrapper">
+      <i class="fas fa-search"></i>
+      <input type="text" [(ngModel)]="keyword" placeholder="Tìm theo tên danh mục..." (keyup.enter)="search()">
+    </div>
+    <button class="btn-search" (click)="search()">Tìm kiếm</button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Bảng dữ liệu -->
+  <div class="table-container" *ngIf="!loading">
+    <table class="data-table">
+      <thead>
         <tr>
-          <th>ID</th>
-          <th>Name</th>          
-          <th>Actions</th>
+          <th class="col-stt">STT</th>
+          <th class="col-name">Tên danh mục</th>
+          <th class="col-parent">Danh mục cha</th>
+          <th class="col-slug">Slug</th>
+          <th class="col-actions">Thao tác</th>
         </tr>
       </thead>
-      <tbody>        
-        @for(category of categories; track category.id){
-          <tr>
-            <td>{{ category.id }}</td>
-            <td>{{ category.name }}</td>          
-            <td>
-              <div style="display: flex; gap: 10px;">
-                <button class="btn btn-primary" 
-                    (click)="updateCategory(category.id)">
-                  Update
-                </button>
-                <button class="btn btn-danger" 
-                  (click)="deleteCategory(category)">Delete
-                </button>            
-                </div>
-            </td>          
-          </tr>
-        } @empty {
-          <h2>No categories found</h2>
-        }
-        
+      <tbody>
+        <tr *ngFor="let category of filteredCategories; let i = index">
+          <td class="col-stt">{{ currentPage * itemsPerPage + i + 1 }}</td>
+          <td class="col-name">
+            <span *ngIf="category.parentId" class="indent">└─</span>
+            {{ category.name }}
+          </td>
+          <td class="col-parent">{{ category.parentName || '-' }}</td>
+          <td class="col-slug">{{ category.slug || '-' }}</td>
+          <td class="col-actions">
+            <div class="action-btns">
+              <button class="btn-icon edit" (click)="openEditModal(category)" title="Sửa">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn-icon delete" (click)="deleteCategory(category)" title="Xóa">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredCategories.length === 0">
+          <td colspan="5" class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>Không có danh mục nào</p>
+          </td>
+        </tr>
       </tbody>
-    </table>    
+    </table>
   </div>
+
+  <!-- Phân trang -->
+  <div class="pagination-container" *ngIf="totalPages > 1">
+    <button class="page-btn" [disabled]="currentPage === 0" (click)="onPageChange(0)">
+      <i class="fas fa-angle-double-left"></i>
+    </button>
+    <button class="page-btn" [disabled]="currentPage === 0" (click)="onPageChange(currentPage - 1)">
+      <i class="fas fa-angle-left"></i>
+    </button>
+    <button *ngFor="let page of visiblePages" class="page-btn" [class.active]="page === currentPage + 1"
+      (click)="onPageChange(page - 1)">
+      {{ page }}
+    </button>
+    <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(currentPage + 1)">
+      <i class="fas fa-angle-right"></i>
+    </button>
+    <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(totalPages - 1)">
+      <i class="fas fa-angle-double-right"></i>
+    </button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ modalMode === 'create' ? 'Thêm danh mục' : 'Sửa danh mục' }}</h3>
+      <button class="btn-close" (click)="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form (ngSubmit)="saveCategory()">
+        <!-- Tên danh mục -->
+        <div class="form-group">
+          <label>Tên danh mục <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="categoryForm.name" name="name" (blur)="validateName()"
+            (input)="validateName()" [class.error]="nameError" placeholder="Nhập tên danh mục">
+          <span class="error-text" *ngIf="nameError">{{ nameError }}</span>
+        </div>
+
+        <!-- Danh mục cha -->
+        <div class="form-group">
+          <label>Danh mục cha</label>
+          <select [(ngModel)]="categoryForm.parentId" name="parentId" class="form-select">
+            <option [ngValue]="null">-- Không có (Danh mục gốc) --</option>
+            <option *ngFor="let cat of parentCategories" [ngValue]="cat.id"
+              [disabled]="modalMode === 'edit' && cat.id === editingCategory?.id">
+              {{ cat.name }}
+            </option>
+          </select>
+          <span class="hint">Để trống nếu là danh mục gốc</span>
+        </div>
+
+        <!-- Slug -->
+        <div class="form-group">
+          <label>Slug (URL)</label>
+          <input type="text" [(ngModel)]="categoryForm.slug" name="slug" placeholder="Tự động tạo nếu để trống">
+          <span class="hint">Ví dụ: ao-thun, quan-jean</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="closeModal()">Hủy</button>
+          <button type="submit" class="btn-primary" [disabled]="saving">
+            <span *ngIf="saving" class="spinner-small"></span>
+            {{ saving ? 'Đang lưu...' : 'Lưu' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

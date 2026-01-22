@@ -1,11 +1,10 @@
-import { Component, OnInit, OnDestroy, HostListener, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { UserResponse } from '../../responses/user/user.response';
 import { RouterModule } from "@angular/router";
 import { CommonModule } from '@angular/common';
 import { BaseComponent } from '../base/base.component';
 import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-admin',
@@ -14,21 +13,16 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   imports: [
     CommonModule,
     RouterModule,
-    TranslateModule,
   ]
 })
 export class AdminComponent extends BaseComponent implements OnInit, OnDestroy {
   userResponse?: UserResponse | null;
   dropdownOpen: boolean = false;
-  langDropdownOpen: boolean = false;
-  currentLang: string = 'vi';
 
   private userSubscription?: Subscription;
-  private translate = inject(TranslateService);
 
   constructor() {
     super();
-    this.currentLang = this.translate.currentLang || localStorage.getItem('lang') || 'vi';
   }
 
   ngOnInit() {
@@ -56,24 +50,10 @@ export class AdminComponent extends BaseComponent implements OnInit, OnDestroy {
   // Toggle dropdown menu
   toggleDropdown() {
     this.dropdownOpen = !this.dropdownOpen;
-    this.langDropdownOpen = false;
   }
 
   closeDropdown() {
     this.dropdownOpen = false;
-  }
-
-  // Language dropdown
-  toggleLangDropdown() {
-    this.langDropdownOpen = !this.langDropdownOpen;
-    this.dropdownOpen = false;
-  }
-
-  switchLanguage(lang: string) {
-    this.currentLang = lang;
-    this.translate.use(lang);
-    localStorage.setItem('lang', lang);
-    this.langDropdownOpen = false;
   }
 
   // Close dropdown when clicking outside
@@ -82,9 +62,6 @@ export class AdminComponent extends BaseComponent implements OnInit, OnDestroy {
     const target = event.target as HTMLElement;
     if (!target.closest('.user-dropdown')) {
       this.dropdownOpen = false;
-    }
-    if (!target.closest('.lang-switcher')) {
-      this.langDropdownOpen = false;
     }
   }
 

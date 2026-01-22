@@ -1,0 +1,133 @@
+<div class="color-admin-page">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h2>Quản lý màu sắc</h2>
+        </div>
+        <button class="btn-primary" (click)="openCreateModal()">
+            <i class="fas fa-plus"></i> Thêm mới
+        </button>
+    </div>
+
+    <!-- Tìm kiếm -->
+    <div class="search-bar">
+        <div class="search-input-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" [(ngModel)]="keyword" placeholder="Tìm theo tên màu..." (keyup.enter)="search()">
+        </div>
+        <button class="btn-search" (click)="search()">Tìm kiếm</button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-container" *ngIf="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Bảng dữ liệu -->
+    <div class="table-container" *ngIf="!loading">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="col-stt">STT</th>
+                    <th class="col-color">Màu</th>
+                    <th class="col-name">Tên màu</th>
+                    <th class="col-code">Mã màu</th>
+                    <th class="col-actions">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let color of filteredColors; let i = index">
+                    <td class="col-stt">{{ currentPage * itemsPerPage + i + 1 }}</td>
+                    <td class="col-color">
+                        <div class="color-box" [style.background-color]="color.code || '#ccc'"></div>
+                    </td>
+                    <td class="col-name">{{ color.name }}</td>
+                    <td class="col-code">{{ color.code || '-' }}</td>
+                    <td class="col-actions">
+                        <div class="action-btns">
+                            <button class="btn-icon edit" (click)="openEditModal(color)" title="Sửa">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon delete" (click)="deleteColor(color)" title="Xóa">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr *ngIf="filteredColors.length === 0">
+                    <td colspan="5" class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>Không có màu sắc nào</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Phân trang -->
+    <div class="pagination-container" *ngIf="totalPages > 1">
+        <button class="page-btn" [disabled]="currentPage === 0" (click)="onPageChange(0)">
+            <i class="fas fa-angle-double-left"></i>
+        </button>
+        <button class="page-btn" [disabled]="currentPage === 0" (click)="onPageChange(currentPage - 1)">
+            <i class="fas fa-angle-left"></i>
+        </button>
+        <button *ngFor="let page of visiblePages" class="page-btn" [class.active]="page === currentPage + 1"
+            (click)="onPageChange(page - 1)">
+            {{ page }}
+        </button>
+        <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(currentPage + 1)">
+            <i class="fas fa-angle-right"></i>
+        </button>
+        <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(totalPages - 1)">
+            <i class="fas fa-angle-double-right"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>{{ modalMode === 'create' ? 'Thêm màu' : 'Sửa màu' }}</h3>
+            <button class="btn-close" (click)="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form (ngSubmit)="saveColor()">
+                <!-- Preview màu -->
+                <div class="color-preview-section">
+                    <div class="color-preview-box" [style.background-color]="colorForm.code || '#ccc'"></div>
+                </div>
+
+                <!-- Tên màu -->
+                <div class="form-group">
+                    <label>Tên màu <span class="required">*</span></label>
+                    <input type="text" [(ngModel)]="colorForm.name" name="name" (blur)="validateName()"
+                        (input)="validateName()" [class.error]="nameError" placeholder="Nhập tên màu">
+                    <span class="error-text" *ngIf="nameError">{{ nameError }}</span>
+                </div>
+
+                <!-- Mã màu -->
+                <div class="form-group">
+                    <label>Mã màu (Hex)</label>
+                    <div class="color-input-row">
+                        <input type="color" [(ngModel)]="colorForm.code" name="colorPicker" class="color-picker">
+                        <input type="text" [(ngModel)]="colorForm.code" name="code" placeholder="#FFFFFF"
+                            class="color-text-input">
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" (click)="closeModal()">Hủy</button>
+                    <button type="submit" class="btn-primary" [disabled]="saving">
+                        <span *ngIf="saving" class="spinner-small"></span>
+                        {{ saving ? 'Đang lưu...' : 'Lưu' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

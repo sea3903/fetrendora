@@ -1,0 +1,541 @@
+// ═══════════════════════════════════════════════════════════════
+// INSERT PRODUCT ADMIN STYLES (MATCHES UPDATE PAGE)
+// ═══════════════════════════════════════════════════════════════
+
+$primary: #1a1a1a;
+$accent: #4CAF50;
+$accent-dark: #43A047; // darken($accent, 8%)
+$accent-dark-20: #388E3C; // darken($accent, 20%)
+$accent-light: #E8F5E9; // lighten($accent, 45%)
+$accent-lighter: #F1F8E9; // lighten($accent, 48%)
+$danger: #dc3545;
+$danger-light: #FDEDEE; // lighten($danger, 45%)
+$text: #333;
+$text-muted: #666;
+$border: #e0e0e0;
+$bg-light: #f8f9fa;
+$white: #fff;
+$shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+.insert-product-page {
+    padding: 0;
+}
+
+// Header
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid $border;
+
+    .header-content {
+        h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: $primary;
+        }
+
+        .subtitle {
+            margin: 4px 0 0;
+            font-size: 0.9rem;
+            color: $text-muted;
+        }
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 12px;
+    }
+}
+
+// Buttons
+.btn-primary {
+    background: $accent;
+    color: $white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+        background: $accent-dark;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
+.btn-secondary {
+    background: transparent;
+    color: $text;
+    border: 1px solid $border;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    &:hover {
+        background: $bg-light;
+    }
+}
+
+// Forms
+.form-container {
+    background: $white;
+    border-radius: 12px;
+    box-shadow: $shadow;
+    padding: 24px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group {
+    &.full-width {
+        grid-column: span 2;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        font-size: 0.9rem;
+
+        .required {
+            color: $danger;
+        }
+    }
+
+    input,
+    select,
+    textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid $border;
+        border-radius: 8px;
+        font-size: 0.95rem;
+
+        &:focus {
+            outline: none;
+            border-color: $accent;
+        }
+
+        &.error {
+            border-color: $danger;
+        }
+    }
+
+    .error-text {
+        color: $danger;
+        font-size: 0.8rem;
+        margin-top: 4px;
+        display: block;
+    }
+}
+
+.spinner-small {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: $white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+// Attribute Config Section
+.attribute-config {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 16px;
+    background: $bg-light;
+    border-radius: 8px;
+    border: 1px solid $border;
+    margin-bottom: 8px;
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        user-select: none;
+        transition: color 0.2s;
+
+        &:hover {
+            color: $accent;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: $accent;
+        }
+
+        .checkbox-text {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+    }
+}
+
+.hint-text {
+    font-size: 0.8rem;
+    color: $text-muted;
+    font-style: italic;
+    display: block;
+    margin-top: 6px;
+}
+
+// Form Sections
+.form-section {
+    background: $white;
+    border-radius: 12px;
+    box-shadow: $shadow;
+    padding: 24px;
+    margin-bottom: 20px;
+
+    h3 {
+        margin: 0 0 16px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: $primary;
+        padding-bottom: 12px;
+        border-bottom: 1px solid $border;
+    }
+}
+
+// Attribute Type Checkboxes (Flexible selection)
+.attribute-type-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+
+    .checkbox-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        background: $bg-light;
+        border: 1px solid $border;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+            border-color: $accent;
+            background: $accent-light;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: $accent;
+        }
+
+        span {
+            font-size: 0.95rem;
+        }
+    }
+}
+
+// Attribute Info Display
+.attribute-info {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: $accent-light;
+    border: 1px solid $accent;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: $accent-dark-20;
+
+    i {
+        font-size: 1.1rem;
+    }
+
+    strong {
+        color: $accent;
+    }
+}
+
+.empty-hint {
+    font-size: 0.85rem;
+    color: $text-muted;
+    font-style: italic;
+    margin-top: 8px;
+}
+
+
+// Attribute Values Section
+.attribute-values {
+    margin-top: 16px;
+    padding: 16px;
+    background: $bg-light;
+    border-radius: 8px;
+    border: 1px solid $border;
+
+    .section-label {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 12px;
+        color: $text;
+    }
+
+    .checkbox-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: $white;
+            border: 1px solid $border;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+
+            &:hover {
+                border-color: $accent;
+            }
+
+            input[type="checkbox"] {
+                width: 16px;
+                height: 16px;
+                accent-color: $accent;
+            }
+
+            span {
+                font-size: 0.9rem;
+            }
+        }
+    }
+}
+
+// Variants Table
+.table-responsive {
+    overflow-x: auto;
+}
+
+.variants-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+
+    th,
+    td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid $border;
+    }
+
+    th {
+        background: $bg-light;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: $text-muted;
+        text-transform: uppercase;
+
+        .required {
+            color: $danger;
+        }
+    }
+
+    td {
+        font-size: 0.95rem;
+    }
+
+    .table-input {
+        width: 120px;
+        padding: 8px 10px;
+        border: 1px solid $border;
+        border-radius: 6px;
+        font-size: 0.9rem;
+
+        &:focus {
+            outline: none;
+            border-color: $accent;
+        }
+    }
+}
+
+// Upload Area
+.upload-area {
+    position: relative;
+    border: 2px dashed $border;
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    transition: all 0.2s;
+    background: $bg-light;
+
+    &:hover {
+        border-color: $accent;
+        background: $accent-lighter;
+    }
+
+    input[type="file"] {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .upload-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        color: $text-muted;
+
+        i {
+            font-size: 2.5rem;
+            color: $accent;
+        }
+    }
+
+    &.error {
+        border-color: $danger;
+        background: $danger-light;
+    }
+}
+
+.selected-files {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .file-item {
+        padding: 8px 12px;
+        background: $bg-light;
+        border: 1px solid $border;
+        border-radius: 6px;
+        font-size: 0.85rem;
+    }
+}
+
+.error-text {
+    color: $danger;
+    font-size: 0.8rem;
+    margin-top: 4px;
+    display: block;
+}
+
+// Selling Attribute Select
+.selling-attribute-select {
+    margin-top: 12px;
+
+    select {
+        width: 100%;
+        max-width: 400px;
+        padding: 12px 16px;
+        border: 1px solid $border;
+        border-radius: 8px;
+        font-size: 1rem;
+        background: $white;
+        cursor: pointer;
+
+        &:focus {
+            outline: none;
+            border-color: $accent;
+        }
+    }
+}
+
+.selling-values-section {
+    margin-top: 24px;
+    padding: 16px;
+    background: $accent-lighter;
+    border: 1px solid $accent;
+    border-radius: 8px;
+
+    h4 {
+        margin: 0 0 12px;
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+}
+
+// Display Attribute Rows
+.display-attribute-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+
+    .display-attr-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 16px;
+        background: $bg-light;
+        border: 1px solid $border;
+        border-radius: 8px;
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 120px;
+            cursor: pointer;
+
+            input[type="checkbox"] {
+                width: 16px;
+                height: 16px;
+                accent-color: $accent;
+            }
+        }
+
+        select {
+            flex: 1;
+            max-width: 300px;
+            padding: 8px 12px;
+            border: 1px solid $border;
+            border-radius: 6px;
+            font-size: 0.9rem;
+
+            &:focus {
+                outline: none;
+                border-color: $accent;
+            }
+        }
+    }
+}
+
+.text-muted {
+    color: $text-muted;
+    font-weight: normal;
+}

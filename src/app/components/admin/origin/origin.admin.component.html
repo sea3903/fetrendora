@@ -1,0 +1,138 @@
+<div class="origin-admin-page">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h2>Quản lý xuất xứ</h2>
+        </div>
+        <button class="btn-primary" (click)="openCreateModal()">
+            <i class="fas fa-plus"></i> Thêm mới
+        </button>
+    </div>
+
+    <!-- Tìm kiếm -->
+    <div class="search-bar">
+        <div class="search-input-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" [(ngModel)]="keyword" placeholder="Tìm theo tên xuất xứ..." (keyup.enter)="search()">
+        </div>
+        <button class="btn-search" (click)="search()">Tìm kiếm</button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-container" *ngIf="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Bảng dữ liệu -->
+    <div class="table-container" *ngIf="!loading">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="col-stt">STT</th>
+                    <th class="col-flag">Quốc kỳ</th>
+                    <th class="col-name">Tên xuất xứ</th>
+                    <th class="col-code">Mã quốc gia</th>
+                    <th class="col-actions">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let origin of filteredOrigins; let i = index">
+                    <td class="col-stt">{{ currentPage * itemsPerPage + i + 1 }}</td>
+                    <td class="col-flag">
+                        <img *ngIf="origin.code" [src]="getFlagUrl(origin)" alt="Flag" class="flag-image"
+                            (error)="$any($event.target).src = defaultFlag">
+                        <div *ngIf="!origin.code" class="flag-placeholder">-</div>
+                    </td>
+                    <td class="col-name">{{ origin.name }}</td>
+                    <td class="col-code">{{ origin.code || '-' }}</td>
+                    <td class="col-actions">
+                        <div class="action-btns">
+                            <button class="btn-icon edit" (click)="openEditModal(origin)" title="Sửa">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon delete" (click)="deleteOrigin(origin)" title="Xóa">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr *ngIf="filteredOrigins.length === 0">
+                    <td colspan="5" class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>Không có xuất xứ nào</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Phân trang -->
+    <div class="pagination-container" *ngIf="totalPages > 1">
+        <button class="page-btn" [disabled]="currentPage === 0" (click)="onPageChange(0)">
+            <i class="fas fa-angle-double-left"></i>
+        </button>
+        <button class="page-btn" [disabled]="currentPage === 0" (click)="onPageChange(currentPage - 1)">
+            <i class="fas fa-angle-left"></i>
+        </button>
+        <button *ngFor="let page of visiblePages" class="page-btn" [class.active]="page === currentPage + 1"
+            (click)="onPageChange(page - 1)">
+            {{ page }}
+        </button>
+        <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(currentPage + 1)">
+            <i class="fas fa-angle-right"></i>
+        </button>
+        <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(totalPages - 1)">
+            <i class="fas fa-angle-double-right"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3>{{ modalMode === 'create' ? 'Thêm xuất xứ' : 'Sửa xuất xứ' }}</h3>
+            <button class="btn-close" (click)="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form (ngSubmit)="saveOrigin()">
+                <!-- Preview quốc kỳ -->
+                <div class="flag-preview-section">
+                    <img *ngIf="originForm.code" [src]="getPreviewFlagUrl()" alt="Flag" class="flag-preview"
+                        (error)="$any($event.target).style.display='none'">
+                    <div *ngIf="!originForm.code" class="flag-preview-placeholder">
+                        <i class="fas fa-flag"></i>
+                        <span>Nhập mã quốc gia</span>
+                    </div>
+                </div>
+
+                <!-- Tên xuất xứ -->
+                <div class="form-group">
+                    <label>Tên xuất xứ <span class="required">*</span></label>
+                    <input type="text" [(ngModel)]="originForm.name" name="name" (blur)="validateName()"
+                        (input)="validateName()" [class.error]="nameError" placeholder="Nhập tên quốc gia/vùng">
+                    <span class="error-text" *ngIf="nameError">{{ nameError }}</span>
+                </div>
+
+                <!-- Mã quốc gia -->
+                <div class="form-group">
+                    <label>Mã quốc gia (ISO)</label>
+                    <input type="text" [(ngModel)]="originForm.code" name="code" placeholder="VN, JP, US, KR..."
+                        maxlength="2" class="code-input">
+                    <span class="hint">Nhập mã ISO 2 ký tự để hiển thị quốc kỳ tự động</span>
+                </div>
+
+                <!-- Actions -->
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" (click)="closeModal()">Hủy</button>
+                    <button type="submit" class="btn-primary" [disabled]="saving">
+                        <span *ngIf="saving" class="spinner-small"></span>
+                        {{ saving ? 'Đang lưu...' : 'Lưu' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

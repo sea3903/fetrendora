@@ -7,7 +7,7 @@ import { TokenService } from '../../../services/token.service';
 import { UserResponse } from '../../../responses/user/user.response';
 import { UpdateUserDTO } from '../../../dtos/user/update.user.dto';
 import { ToastService } from '../../../services/toast.service';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 
@@ -19,8 +19,7 @@ import { Router } from '@angular/router';
     imports: [
         CommonModule,
         FormsModule,
-        RouterLink,
-        TranslateModule
+        RouterLink
     ]
 })
 export class AdminChangePasswordComponent implements OnInit {
@@ -43,7 +42,7 @@ export class AdminChangePasswordComponent implements OnInit {
     private userService = inject(UserService);
     private tokenService = inject(TokenService);
     private toastService = inject(ToastService);
-    private translate = inject(TranslateService);
+
     private router = inject(Router);
 
     ngOnInit() {
@@ -162,7 +161,7 @@ export class AdminChangePasswordComponent implements OnInit {
             next: () => {
                 this.changingPassword = false;
                 this.toastService.showToast({
-                    title: this.translate.instant('COMMON.SUCCESS'),
+                    title: 'Thành công',
                     defaultMsg: 'Đổi mật khẩu thành công!'
                 });
 
@@ -181,7 +180,7 @@ export class AdminChangePasswordComponent implements OnInit {
                     msg = 'Mật khẩu hiện tại không đúng';
                 }
                 this.toastService.showToast({
-                    title: this.translate.instant('COMMON.ERROR'),
+                    title: 'Lỗi',
                     defaultMsg: msg,
                     error: err
                 });

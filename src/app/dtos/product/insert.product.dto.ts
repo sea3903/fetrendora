@@ -1,26 +1,15 @@
-import {
-    IsString, 
-    IsNotEmpty, 
-    IsPhoneNumber,     
-} from 'class-validator';
+import { VariantItem } from './variant-item.dto';
 
-export class InsertProductDTO {
-    @IsPhoneNumber()
+export interface InsertProductDTO {
     name: string;
-
     price: number;
-
-    @IsString()
-    @IsNotEmpty()
     description: string;
-
     category_id: number;
-    images: File[] = [];
-    
-    constructor(data: any) {
-        this.name = data.name;
-        this.price = data.price;
-        this.description = data.description;
-        this.category_id = data.category_id;
-    }
+    brand_id?: number;
+    sku?: string;
+    slug?: string;
+    selling_attributes?: string; // 'SIZE', 'COLOR', 'ORIGIN' hoặc kết hợp 'SIZE,COLOR'
+    is_active?: boolean;
+    images: File[];
+    variants?: VariantItem[]; // Danh sách biến thể
 }

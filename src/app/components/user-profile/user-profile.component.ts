@@ -126,8 +126,14 @@ export class UserProfileComponent implements OnInit {
         }
 
         // Lấy avatar từ server nếu có
-        if (this.userResponse.profile_image) {
-            this.avatarUrl = `${environment.apiBaseUrl}/users/profile-images/${this.userResponse.profile_image}`;
+        if (this.userResponse.profile_image && this.userResponse.profile_image.trim() !== '') {
+            // Nếu là URL đầy đủ từ social login (Google/Facebook)
+            if (this.userResponse.profile_image.startsWith('http')) {
+                this.avatarUrl = this.userResponse.profile_image;
+            } else {
+                // Nếu là file local trên server
+                this.avatarUrl = `${environment.apiBaseUrl}/users/profile-images/${this.userResponse.profile_image}`;
+            }
         }
     }
 
@@ -154,8 +160,9 @@ export class UserProfileComponent implements OnInit {
             this.phoneError = '';
             return true;
         }
+        const phone = this.phoneNumber.trim();
         const phoneRegex = /^(03|05|07|08|09)[0-9]{8}$/;
-        if (!phoneRegex.test(this.phoneNumber.trim())) {
+        if (!phoneRegex.test(phone)) {
             this.phoneError = this.translate.instant('PROFILE.VALIDATION.PHONE_INVALID');
             return false;
         }

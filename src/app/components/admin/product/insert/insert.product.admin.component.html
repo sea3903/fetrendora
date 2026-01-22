@@ -1,41 +1,244 @@
-<div class="container">
-    <div class="row">
-      <div class="col-md-6 offset-md-3">
-        <h3>Insert Product</h3>
-        <form (ngSubmit)="insertProduct()" enctype="multipart/form-data">
-          <div class="form-group">
-            <label for="name">Name:</label>
-            <input type="text" id="name" [(ngModel)]="insertProductDTO.name" name="name" class="form-control" required>
-          </div>
-  
-          <div class="form-group mb-3">
-            <label for="price">Price:</label>
-            <input type="text" id="price" [(ngModel)]="insertProductDTO.price" name="price" class="form-control col-md-3" required>
-          </div>
-  
-          <div class="form-group mb-3">
-            <label for="description">Description:</label>
-            <textarea id="description" [(ngModel)]="insertProductDTO.description" name="description" class="form-control" required></textarea>
-          </div>
-  
-          <div class="form-group mb-3">
-            <label for="category">Category:</label>
-            <select id="category" [(ngModel)]="insertProductDTO.category_id" name="category" class="form-control" required>
-              <!-- Display list of categories -->
-              @for(category of categories; track category.id) {
-                <option 
-                [value]="category.id">{{ category.name }}</option>
-              }              
-            </select>
-          </div>
-  
-          <div class="form-group mb-3">
-            <label for="images">Images (up to 5):</label>
-            <input type="file" id="images" name="images" multiple (change)="onFileChange($event)" accept="image/*">
-          </div>
-  
-          <button type="submit" class="btn btn-primary">Insert</button>
-        </form>
-      </div>
+<div class="insert-product-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h2>Thêm sản phẩm mới</h2>
+      <p class="subtitle">Nhập thông tin sản phẩm và cấu hình thuộc tính</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="goBack()">
+        <i class="fas fa-arrow-left"></i> Quay lại
+      </button>
+      <button class="btn-primary" (click)="insertProduct()" [disabled]="loading">
+        <span *ngIf="loading" class="spinner-small"></span>
+        {{ loading ? 'Đang tạo...' : 'Lưu sản phẩm' }}
+      </button>
     </div>
   </div>
+
+  <div class="form-container">
+    <form (ngSubmit)="insertProduct()">
+      <!-- Section 1: Basic Info -->
+      <div class="form-section">
+        <h3>Thông tin cơ bản</h3>
+        <div class="form-grid">
+          <!-- Tên sản phẩm -->
+          <div class="form-group full-width">
+            <label>Tên sản phẩm <span class="required">*</span></label>
+            <input type="text" [(ngModel)]="insertProductDTO.name" name="name"
+              placeholder="VD: Áo Polo Nam, Nước hoa XYZ..." [class.error]="errors.name"
+              (ngModelChange)="onNameChange()">
+            <span class="error-text" *ngIf="errors.name">{{ errors.name }}</span>
+          </div>
+
+          <!-- SKU + Giá gốc -->
+          <div class="form-group">
+            <label>Mã SKU gốc</label>
+            <input type="text" [(ngModel)]="insertProductDTO.sku" name="sku" placeholder="VD: POLO-001">
+          </div>
+          <div class="form-group">
+            <label>Giá gốc (VNĐ) <span class="required">*</span></label>
+            <input type="number" [(ngModel)]="insertProductDTO.price" name="price" placeholder="0" min="0"
+              [class.error]="errors.price">
+            <span class="error-text" *ngIf="errors.price">{{ errors.price }}</span>
+          </div>
+
+          <!-- Danh mục + Thương hiệu -->
+          <div class="form-group">
+            <label>Danh mục <span class="required">*</span></label>
+            <select [(ngModel)]="insertProductDTO.category_id" name="category" [class.error]="errors.category">
+              <option [value]="0" disabled>-- Chọn danh mục --</option>
+              <option *ngFor="let category of categories" [value]="category.id">{{ category.name }}</option>
+            </select>
+            <span class="error-text" *ngIf="errors.category">{{ errors.category }}</span>
+          </div>
+          <div class="form-group">
+            <label>Thương hiệu</label>
+            <select [(ngModel)]="insertProductDTO.brand_id" name="brand">
+              <option [value]="undefined">-- Chọn thương hiệu --</option>
+              <option *ngFor="let brand of brands" [value]="brand.id">{{ brand.name }}</option>
+            </select>
+          </div>
+
+          <!-- Slug (auto-generated) -->
+          <div class="form-group full-width">
+            <label>Slug (URL) <small class="text-muted">- Tự động tạo từ tên</small></label>
+            <input type="text" [(ngModel)]="insertProductDTO.slug" name="slug"
+              placeholder="Tự động tạo từ tên sản phẩm">
+          </div>
+
+          <!-- Mô tả -->
+          <div class="form-group full-width">
+            <label>Mô tả chi tiết</label>
+            <textarea [(ngModel)]="insertProductDTO.description" name="description" rows="5"
+              placeholder="Nhập mô tả sản phẩm..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Selling Attribute Selection -->
+      <div class="form-section">
+        <h3>Khách mua theo thuộc tính nào?</h3>
+        <p class="hint-text">Chọn thuộc tính mà khách hàng sẽ chọn khi mua (dropdown trên trang SP)</p>
+
+        <div class="selling-attribute-select">
+          <select [(ngModel)]="sellingAttribute" name="sellingAttribute" (ngModelChange)="onSellingAttributeChange()">
+            <option value="">Không có (sản phẩm đơn)</option>
+            <option value="SIZE">Kích thước (Size)</option>
+            <option value="COLOR">Màu sắc (Color)</option>
+            <option value="ORIGIN">Xuất xứ (Origin)</option>
+            <option value="SIZE,COLOR">Size + Color</option>
+            <option value="SIZE,ORIGIN">Size + Xuất xứ</option>
+            <option value="COLOR,ORIGIN">Màu + Xuất xứ</option>
+            <option value="SIZE,COLOR,ORIGIN">Size + Màu + Xuất xứ</option>
+          </select>
+        </div>
+
+        <!-- Selling attribute value selection (checkboxes for multiple) -->
+        <div class="selling-values-section" *ngIf="hasSellingAttribute()">
+          <h4>Chọn giá trị cần bán:</h4>
+
+          <div class="attribute-values" *ngIf="isSellingAttribute('SIZE')">
+            <label class="section-label">Kích thước:</label>
+            <div class="checkbox-grid">
+              <label class="checkbox-item" *ngFor="let size of allSizes">
+                <input type="checkbox" [(ngModel)]="size.selected" [ngModelOptions]="{standalone: true}"
+                  (change)="onAttributeValueChange()">
+                <span>{{ size.name }}</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="attribute-values" *ngIf="isSellingAttribute('COLOR')">
+            <label class="section-label">Màu sắc:</label>
+            <div class="checkbox-grid">
+              <label class="checkbox-item" *ngFor="let color of allColors">
+                <input type="checkbox" [(ngModel)]="color.selected" [ngModelOptions]="{standalone: true}"
+                  (change)="onAttributeValueChange()">
+                <span>{{ color.name }}</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="attribute-values" *ngIf="isSellingAttribute('ORIGIN')">
+            <label class="section-label">Xuất xứ:</label>
+            <div class="checkbox-grid">
+              <label class="checkbox-item" *ngFor="let origin of allOrigins">
+                <input type="checkbox" [(ngModel)]="origin.selected" [ngModelOptions]="{standalone: true}"
+                  (change)="onAttributeValueChange()">
+                <span>{{ origin.name }}</span>
+              </label>
+            </div>
+          </div>
+
+          <span class="error-text" *ngIf="errors.variants">{{ errors.variants }}</span>
+        </div>
+      </div>
+
+      <!-- Section 3: Display Attributes (optional, single value) -->
+      <div class="form-section">
+        <h3>Thuộc tính hiển thị (tùy chọn)</h3>
+        <p class="hint-text">Thêm thông tin thuộc tính để hiển thị (khách không cần chọn)</p>
+
+        <div class="display-attribute-checkboxes">
+          <!-- Size as display attribute (if not selling) -->
+          <div class="display-attr-row" *ngIf="!isSellingAttribute('SIZE')">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="enableSize" [ngModelOptions]="{standalone: true}">
+              <span>Kích thước</span>
+            </label>
+            <select *ngIf="enableSize" [(ngModel)]="selectedSizeId" [ngModelOptions]="{standalone: true}"
+              (ngModelChange)="onAttributeValueChange()">
+              <option [ngValue]="undefined">-- Chọn size --</option>
+              <option *ngFor="let s of allSizes" [ngValue]="s.id">{{ s.name }}</option>
+            </select>
+          </div>
+
+          <!-- Color as display attribute (if not selling) -->
+          <div class="display-attr-row" *ngIf="!isSellingAttribute('COLOR')">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="enableColor" [ngModelOptions]="{standalone: true}">
+              <span>Màu sắc</span>
+            </label>
+            <select *ngIf="enableColor" [(ngModel)]="selectedColorId" [ngModelOptions]="{standalone: true}"
+              (ngModelChange)="onAttributeValueChange()">
+              <option [ngValue]="undefined">-- Chọn màu --</option>
+              <option *ngFor="let c of allColors" [ngValue]="c.id">{{ c.name }}</option>
+            </select>
+          </div>
+
+          <!-- Origin as display attribute (if not selling) -->
+          <div class="display-attr-row" *ngIf="!isSellingAttribute('ORIGIN')">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="enableOrigin" [ngModelOptions]="{standalone: true}">
+              <span>Xuất xứ</span>
+            </label>
+            <select *ngIf="enableOrigin" [(ngModel)]="selectedOriginId" [ngModelOptions]="{standalone: true}"
+              (ngModelChange)="onAttributeValueChange()">
+              <option [ngValue]="undefined">-- Chọn xuất xứ --</option>
+              <option *ngFor="let o of allOrigins" [ngValue]="o.id">{{ o.name }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: Variants Table -->
+      <div class="form-section" *ngIf="variants.length > 0">
+        <h3>Bảng biến thể ({{ variants.length }} biến thể)</h3>
+        <p class="hint-text">Nhập giá và tồn kho cho từng biến thể</p>
+
+        <div class="table-responsive">
+          <table class="variants-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th *ngIf="isSellingAttribute('SIZE')">Kích thước</th>
+                <th *ngIf="isSellingAttribute('COLOR')">Màu sắc</th>
+                <th *ngIf="isSellingAttribute('ORIGIN')">Xuất xứ</th>
+                <th>Giá (VNĐ)</th>
+                <th>Tồn kho</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let variant of variants; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td *ngIf="isSellingAttribute('SIZE')"><strong>{{ variant.size_name }}</strong></td>
+                <td *ngIf="isSellingAttribute('COLOR')"><strong>{{ variant.color_name }}</strong></td>
+                <td *ngIf="isSellingAttribute('ORIGIN')"><strong>{{ variant.origin_name }}</strong></td>
+                <td>
+                  <input type="number" [(ngModel)]="variant.price" [ngModelOptions]="{standalone: true}"
+                    class="table-input" min="0">
+                </td>
+                <td>
+                  <input type="number" [(ngModel)]="variant.stock_quantity" [ngModelOptions]="{standalone: true}"
+                    class="table-input" min="0">
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 5: Images -->
+      <div class="form-section">
+        <h3>Hình ảnh sản phẩm <span class="required">*</span></h3>
+        <p class="hint-text">Upload tối đa 5 ảnh. Ảnh đầu tiên sẽ làm thumbnail.</p>
+
+        <div class="upload-area" [class.error]="errors.images">
+          <input type="file" id="file-upload" multiple accept="image/*" (change)="onFileChange($event)">
+          <label for="file-upload" class="upload-label">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span>Chọn ảnh hoặc kéo thả vào đây</span>
+          </label>
+        </div>
+
+        <div class="selected-files" *ngIf="selectedFiles.length > 0">
+          <div class="file-item" *ngFor="let file of selectedFiles; let i = index">
+            <span>{{ i + 1 }}. {{ file.name }}</span>
+          </div>
+        </div>
+        <span class="error-text" *ngIf="errors.images">{{ errors.images }}</span>
+      </div>
+    </form>
+  </div>
+</div>

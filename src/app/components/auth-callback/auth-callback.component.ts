@@ -127,6 +127,10 @@ export class AuthCallbackComponent extends BaseComponent implements OnInit {
               defaultMsg: 'Lỗi xác thực tài khoản',
               title: 'Lỗi Đăng Nhập'
             });
+            // Redirect về trang đăng nhập sau 2 giây
+            setTimeout(() => {
+              this.router.navigate(['/login']);
+            }, 2000);
           },
           // ═══════════════════════════════════════════════════════════
           // BƯỚC 8: Hoàn tất - Refresh giỏ hàng
@@ -143,6 +147,10 @@ export class AuthCallbackComponent extends BaseComponent implements OnInit {
           defaultMsg: 'Lỗi hệ thống xác thực',
           title: 'Lỗi Đăng Nhập'
         });
+        // Redirect về trang đăng nhập sau 2 giây
+        setTimeout(() => {
+          this.router.navigate(['/login']);
+        }, 2000);
       }
     });
   }

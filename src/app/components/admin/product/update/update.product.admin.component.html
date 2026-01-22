@@ -1,67 +1,276 @@
-@if(product) {
-<div>      
-    <!-- Form cập nhật thông tin sản phẩm -->
-    <div class="container">
-      <div class="row">
-        <div class="col-md-6 offset-md-3">
-          <h3>Update Product</h3>
-          <form (ngSubmit)="updateProduct()">
-            <div class="form-group">
-              <label for="name">Name:</label>
-              <input type="text" id="name" [(ngModel)]="updatedProduct.name" name="name" class="form-control" required>
-            </div>
-      
-            <div class="form-group mb-3">
-              <label for="price">Price:</label>
-              <input type="text" id="price" [(ngModel)]="updatedProduct.price" 
-                name="price" class="form-control col-md-3" required>
-            </div>
-      
-            <div class="form-group mb-3">
-              <label for="description">Description:</label>
-              <textarea id="description" [(ngModel)]="updatedProduct.description" name="description" class="form-control" required></textarea>
-            </div>
-      
-            <div class="form-group mb-3">
-              <label for="category">Category:</label>
-              <select id="category" [(ngModel)]="updatedProduct.category_id" 
-              name="category" class="form-control" required>                
-                @for(category of categories; track category.id) {
-                  <option [value]="category.id">{{ category.name }}
-                  </option>
-                }                
-              </select>
-            </div>
-            Copy
-            <div class="row mb-3">
-              <div class="thumbnail-container">
-                @for(productImage of product.product_images;
-                  track productImage.image_url; let i = $index) {
-                    <div 
-                      class="thumbnail-item" 
-                      [ngClass]="{'active': i === currentImageIndex}"
-                      (click)="thumbnailClick(i)">
-                    <img [src]="productImage.image_url" class="thumbnail-image" 
-                      alt="Thumbnail Image">
-                    <button type="button" class="btn btn-sm remove-image" 
-                      (click)="deleteImage(productImage)">
-                      <i class="fa fa-times-circle text-danger"></i>
-                    </button>
-                  </div>
-                } @empty {
-                  <h2>No images found</h2>
-                }               
-              </div>
-            </div>
-            <div class="form-group mb-3">
-              <label for="images">Add images (up to 5):</label>
-              <input type="file" id="images" name="images" 
-                multiple (change)="onFileChange($event)" accept="image/*">
-            </div>            
-            <button type="submit" class="btn btn-primary">Update</button>
-          </form>
+<div class="update-product-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h2>Cập nhật sản phẩm</h2>
+      <p class="subtitle">{{ product.name || 'Đang tải...' }}</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="goBack()">
+        <i class="fas fa-arrow-left"></i> Quay lại
+      </button>
+      <button class="btn-primary" (click)="updateProduct()" [disabled]="loading">
+        <span *ngIf="loading" class="spinner-small"></span>
+        {{ loading ? 'Đang lưu...' : 'Lưu thay đổi' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="tabs-nav">
+    <button class="tab-btn" [class.active]="activeTab === 'info'" (click)="switchTab('info')">
+      <i class="fas fa-info-circle"></i> Thông tin chung
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'attributes'" (click)="switchTab('attributes')">
+      <i class="fas fa-tags"></i> Thuộc tính ({{ productDetails.length }})
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'images'" (click)="switchTab('images')">
+      <i class="fas fa-images"></i> Hình ảnh
+    </button>
+  </div>
+
+  <!-- Tab Content: General Info -->
+  <div class="tab-content" *ngIf="activeTab === 'info'">
+    <form class="form-container">
+      <div class="form-grid">
+        <div class="form-group full-width">
+          <label>Tên sản phẩm <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="updatedProduct.name" name="name" [class.error]="errors.name">
+          <span class="error-text" *ngIf="errors.name">{{ errors.name }}</span>
         </div>
+
+        <div class="form-group">
+          <label>Mã SKU</label>
+          <input type="text" [(ngModel)]="updatedProduct.sku" name="sku">
+        </div>
+
+        <div class="form-group">
+          <label>Giá niêm yết (VNĐ) <span class="required">*</span></label>
+          <input type="number" [(ngModel)]="updatedProduct.price" name="price" min="0" [class.error]="errors.price">
+          <span class="error-text" *ngIf="errors.price">{{ errors.price }}</span>
+        </div>
+
+        <div class="form-group">
+          <label>Danh mục <span class="required">*</span></label>
+          <select [(ngModel)]="updatedProduct.category_id" name="category" [class.error]="errors.category">
+            <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+          </select>
+          <span class="error-text" *ngIf="errors.category">{{ errors.category }}</span>
+        </div>
+
+        <div class="form-group">
+          <label>Thương hiệu</label>
+          <select [(ngModel)]="updatedProduct.brand_id" name="brand">
+            <option [value]="undefined">-- Chọn thương hiệu --</option>
+            <option *ngFor="let b of brands" [value]="b.id">{{ b.name }}</option>
+          </select>
+        </div>
+
+        <div class="form-group full-width">
+          <label>Slug (URL)</label>
+          <input type="text" [(ngModel)]="updatedProduct.slug" name="slug">
+        </div>
+
+        <div class="form-group full-width">
+          <label>Mô tả</label>
+          <textarea [(ngModel)]="updatedProduct.description" name="description" rows="5"></textarea>
+        </div>
+
+        <!-- Selling Attributes Config -->
+        <div class="form-group full-width">
+          <label>Thuộc tính bán (khách sẽ chọn khi mua)</label>
+          <div class="selling-attr-info">
+            <span class="badge" *ngIf="enableSize">Size</span>
+            <span class="badge" *ngIf="enableColor">Color</span>
+            <span class="badge" *ngIf="enableOrigin">Origin</span>
+            <span class="text-muted" *ngIf="!enableSize && !enableColor && !enableOrigin">
+              Sản phẩm đơn (không có thuộc tính)
+            </span>
+          </div>
+          <p class="hint-text">Cấu hình thuộc tính trong tab "Thuộc tính"</p>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Tab Content: Attributes (Product Details) -->
+  <div class="tab-content" *ngIf="activeTab === 'attributes'">
+    <div class="attributes-container">
+
+      <!-- Section 1: Config selling attributes -->
+      <div class="config-section">
+        <h4>Cấu hình thuộc tính bán</h4>
+        <p class="hint-text">Chọn loại thuộc tính mà khách hàng sẽ chọn khi mua</p>
+        <div class="config-checkboxes">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="enableSize"> Kích thước (Size)
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="enableColor"> Màu sắc (Color)
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="enableOrigin"> Xuất xứ (Origin)
+          </label>
+        </div>
+        <button class="btn-primary btn-sm" (click)="saveAttributeConfig()" style="margin-top: 12px;">
+          <i class="fas fa-save"></i> Lưu cấu hình
+        </button>
+      </div>
+
+      <!-- Toolbar + Table -->
+      <div class="toolbar">
+        <h4>Danh sách thuộc tính ({{ productDetails.length }})</h4>
+        <button class="btn-primary btn-sm" (click)="openDetailModal()">
+          <i class="fas fa-plus"></i> Thêm mới
+        </button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table compact-table">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th *ngIf="enableColor || hasColorInVariants">Màu sắc</th>
+              <th *ngIf="enableSize || hasSizeInVariants">Kích thước</th>
+              <th *ngIf="enableOrigin || hasOriginInVariants">Xuất xứ</th>
+              <th>Giá</th>
+              <th>Tồn kho</th>
+              <th style="width: 100px;">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let detail of productDetails; trackBy: trackByProductDetail">
+              <td><strong>{{ detail.sku }}</strong></td>
+              <td *ngIf="enableColor || hasColorInVariants">{{ detail.color_name || '-' }}</td>
+              <td *ngIf="enableSize || hasSizeInVariants">{{ detail.size_name || '-' }}</td>
+              <td *ngIf="enableOrigin || hasOriginInVariants">{{ detail.origin_name || '-' }}</td>
+              <td>{{ detail.price | number: '1.0-0' }}đ</td>
+              <td>
+                <span class="badge" [class.badge-success]="detail.stock_quantity > 0"
+                  [class.badge-danger]="detail.stock_quantity <= 0">
+                  {{ detail.stock_quantity }}
+                </span>
+              </td>
+              <td>
+                <div class="action-btns">
+                  <button class="btn-icon edit" (click)="openDetailModal(detail)" title="Sửa">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn-icon delete" (click)="deleteDetail(detail.id)" title="Xóa">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="productDetails.length === 0">
+              <td [attr.colspan]="8" class="empty-state">
+                <i class="fas fa-box-open"></i>
+                <p>Chưa có thuộc tính nào. Hãy thêm mới.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
-}
+
+  <!-- Tab Content: Images -->
+  <div class="tab-content" *ngIf="activeTab === 'images'">
+    <div class="images-container">
+      <div class="upload-section">
+        <label class="upload-area">
+          <input type="file" multiple (change)="onFileChange($event)" accept="image/*">
+          <div class="upload-placeholder">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>Chọn hoặc kéo thả ảnh vào đây (Tối đa 5 ảnh)</p>
+          </div>
+        </label>
+      </div>
+
+      <div class="gallery-grid" *ngIf="product.product_images && product.product_images.length > 0">
+        <div class="image-card" *ngFor="let img of product.product_images; let i = index">
+          <img [src]="img.image_url" alt="Product Image"
+            (error)="$any($event.target).src = 'assets/images/product-placeholder.png'">
+          <div class="image-overlay">
+            <button class="btn-icon delete" (click)="deleteImage(img)">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+          <span class="main-tag" *ngIf="i === 0">Ảnh chính</span>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="!product.product_images || product.product_images.length === 0">
+        <i class="fas fa-image"></i>
+        <p>Chưa có hình ảnh nào. Hãy tải lên ảnh cho sản phẩm.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Add/Edit Detail -->
+<div class="modal-overlay" *ngIf="showDetailModal" (click)="closeDetailModal()">
+  <div class="modal-content modal-sm" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ isEditingDetail ? 'Cập nhật thuộc tính' : 'Thêm thuộc tính mới' }}</h3>
+      <button class="btn-close" (click)="closeDetailModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <form (ngSubmit)="saveDetail()">
+        <div class="form-group">
+          <label>Mã SKU <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="currentDetail.sku" name="detail_sku" [class.error]="detailErrors.sku"
+            (ngModelChange)="updateAutoSku()">
+          <span class="error-text" *ngIf="detailErrors.sku">{{ detailErrors.sku }}</span>
+        </div>
+
+        <div class="form-group" *ngIf="enableColor">
+          <label>Màu sắc</label>
+          <select [(ngModel)]="currentDetail.color_id" name="detail_color" (ngModelChange)="updateAutoSku()">
+            <option [ngValue]="undefined">-- Không chọn --</option>
+            <option *ngFor="let c of colors" [ngValue]="c.id">{{ c.name }}</option>
+          </select>
+        </div>
+
+        <div class="form-group" *ngIf="enableSize">
+          <label>Kích thước</label>
+          <select [(ngModel)]="currentDetail.size_id" name="detail_size" (ngModelChange)="updateAutoSku()">
+            <option [ngValue]="undefined">-- Không chọn --</option>
+            <option *ngFor="let s of sizes" [ngValue]="s.id">{{ s.name }}</option>
+          </select>
+        </div>
+
+        <div class="form-group" *ngIf="enableOrigin">
+          <label>Xuất xứ</label>
+          <select [(ngModel)]="currentDetail.origin_id" name="detail_origin" (ngModelChange)="updateAutoSku()">
+            <option [ngValue]="undefined">-- Không chọn --</option>
+            <option *ngFor="let o of origins" [ngValue]="o.id">{{ o.name }}</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Giá (VNĐ) <span class="required">*</span></label>
+            <input type="number" [(ngModel)]="currentDetail.price" name="detail_price" min="0"
+              [class.error]="detailErrors.price">
+            <span class="error-text" *ngIf="detailErrors.price">{{ detailErrors.price }}</span>
+          </div>
+          <div class="form-group">
+            <label>Tồn kho <span class="required">*</span></label>
+            <input type="number" [(ngModel)]="currentDetail.stock_quantity" name="detail_stock" min="0"
+              [class.error]="detailErrors.stock">
+            <span class="error-text" *ngIf="detailErrors.stock">{{ detailErrors.stock }}</span>
+          </div>
+        </div>
+
+
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="closeDetailModal()">Hủy</button>
+          <button type="submit" class="btn-primary">
+            {{ isEditingDetail ? 'Cập nhật' : 'Thêm' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
