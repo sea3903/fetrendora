@@ -1,67 +1,396 @@
-@import "../../../styles.scss";
+/**
+ * HEADER COMPONENT - Trendora Fashion
+ * Layout: Flexbox 3 columns (Left - Center - Right)
+ */
+
+// Variables
+$color-black: #000000;
+$color-white: #ffffff;
+$color-gray-100: #f5f5f5;
+$color-gray-200: #e5e5e5;
+$color-gray-400: #a3a3a3;
+$color-gray-600: #525252;
+$font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
 header {
-    background-color: #ffffff !important;
-    border-bottom: 1px solid #eaeaea;
+    background: $color-white;
+    border-bottom: 1px solid $color-gray-200;
     position: sticky;
     top: 0;
-    z-index: 1020;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+    height: 64px;
 }
 
-.navbar-brand {
-    font-family: 'Inter', sans-serif;
-    font-weight: 800;
-    letter-spacing: 3px;
-    color: #000;
+.navbar {
+    height: 100%;
+}
+
+.nav-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 32px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+// 1. LEFT: CATEGORIES
+.nav-categories {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.category-item {
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.category-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: $color-black;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+    padding: 8px 0;
+
+    i {
+        font-size: 10px;
+        transition: transform 0.2s;
+        margin-top: -2px;
+    }
 
     &:hover {
-        color: #333;
+        opacity: 0.7;
     }
 }
 
-.nav-link {
-    font-weight: 500;
-    color: #555 !important;
-    text-transform: uppercase;
-    font-size: 13px;
-    letter-spacing: 1px;
-    padding: 10px 15px !important;
-    transition: color 0.2s;
+// 2. CENTER: LOGO
+.logo {
+    flex: 0 0 auto;
+    font-family: $font-family;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: $color-black;
+    text-decoration: none;
+    text-align: center;
+    padding: 0 24px;
+    transition: opacity 0.2s;
 
-    &:hover,
-    &.active {
-        color: #000 !important;
+    &:hover {
+        opacity: 0.8;
+    }
+}
+
+// 3. RIGHT: ACTIONS
+.nav-actions {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 20px;
+}
+
+.action-btn {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: $color-black;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 50%;
+
+    i {
+        font-size: 20px;
+    }
+
+    &:hover {
+        background-color: $color-gray-100;
+    }
+
+    .badge {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        font-size: 10px;
         font-weight: 700;
+        line-height: 18px;
+        text-align: center;
+        background: $color-black;
+        color: $color-white;
+        border-radius: 9px;
+        border: 2px solid $color-white;
     }
 }
 
-.desktop-actions {
-    .btn-link {
-        color: #333;
-        transition: color 0.2s;
+// Avatar
+.avatar-btn {
+    padding: 4px;
+
+    &:hover {
+        background: transparent;
+    }
+}
+
+.avatar-img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid $color-gray-200;
+    transition: border-color 0.2s;
+
+    &:hover {
+        border-color: $color-black;
+    }
+}
+
+// DROPDOWNS
+// ══════════════════════════════════════════════════════════════
+.dropdown-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1050;
+    cursor: default;
+    background: transparent;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    background: $color-white;
+    border: 1px solid #ebebeb;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    border-radius: 8px;
+    min-width: 200px;
+
+    // Mặc định ẩn
+    display: none;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+
+    // Hiển thị khi có class .show
+    &.show {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Category Dropdown
+.nav-categories .dropdown-menu {
+    left: 0;
+    min-width: 220px;
+}
+
+// User Dropdown
+.user-dropdown {
+    position: relative;
+    z-index: 1101;
+}
+
+.user-menu {
+    right: 0;
+    left: auto;
+    width: 280px;
+    padding: 8px 0;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: $color-gray-600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s;
+
+    i {
+        width: 20px;
+        font-size: 16px;
+        color: $color-gray-400;
+        text-align: center;
+    }
+
+    &:hover {
+        background: $color-gray-100;
+        color: $color-black;
+    }
+
+    &.logout {
+        color: #dc3545;
+        border-top: 1px solid $color-gray-200;
+        margin-top: 4px;
+        padding-top: 12px;
+
+        i {
+            color: #dc3545;
+        }
 
         &:hover {
-            color: #000;
+            background: #fff5f5;
         }
     }
 }
 
-.dropdown-toggle-no-caret::after {
-    display: none;
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid $color-gray-200;
+    margin-bottom: 8px;
 }
 
-// Fix dropdown visibility
-.dropdown-menu {
-    border: none;
-    border-radius: 8px;
-    margin-top: 10px !important;
+.user-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
-// Mobile responsive ajustes
-@media (max-width: 991px) {
-    .desktop-actions {
-        margin-top: 20px;
-        justify-content: flex-start;
+.user-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow: hidden;
+}
+
+.user-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: $color-black;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-email {
+    font-size: 12px;
+    color: $color-gray-400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// Guest info (chưa đăng nhập)
+.guest-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px;
+    text-align: center;
+
+    .guest-icon {
+        font-size: 40px;
+        color: $color-gray-400;
+    }
+
+    span {
+        font-size: 14px;
+        font-weight: 500;
+        color: $color-black;
+    }
+}
+
+.menu-divider {
+    height: 1px;
+    background: $color-gray-200;
+    margin: 4px 0;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// RESPONSIVE
+@media (max-width: 1024px) {
+    .nav-container {
+        padding: 0 20px;
+    }
+
+    .nav-categories {
+        gap: 16px;
+    }
+
+    .category-link {
+        font-size: 12px;
+    }
+
+    .logo {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    header {
+        height: 56px;
+    }
+
+    .nav-container {
+        padding: 0 16px;
+    }
+
+    // Mobile: Hide Categories, Logo Center/Left
+    .nav-categories {
+        display: none;
+    }
+
+    .logo {
+        flex: 1; // Take available space
+        text-align: left;
+        padding: 0;
+        font-size: 18px;
+    }
+
+    .nav-actions {
+        flex: 0 0 auto;
+        gap: 12px;
+    }
+
+    .action-btn {
+        width: 36px;
+        height: 36px;
+
+        i {
+            font-size: 18px;
+        }
     }
 }

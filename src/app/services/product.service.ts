@@ -64,5 +64,19 @@ export class ProductService {
   deleteProductImage(id: number): Observable<any> {
     return this.http.delete<string>(`${this.apiBaseUrl}/product_images/${id}`);
   }
+
+  // Yêu thích sản phẩm
+  likeProduct(productId: number): Observable<ApiResponse> {
+    return this.http.post<ApiResponse>(`${this.apiBaseUrl}/products/like/${productId}`, {});
+  }
+
+  // Bỏ yêu thích sản phẩm
+  unlikeProduct(productId: number): Observable<ApiResponse> {
+    return this.http.post<ApiResponse>(`${this.apiBaseUrl}/products/unlike/${productId}`, {});
+  }
+
+  // Lấy danh sách sản phẩm yêu thích của user hiện tại
+  getFavoriteProducts(): Observable<ApiResponse> {
+    return this.http.post<ApiResponse>(`${this.apiBaseUrl}/products/favorite-products`, {});
+  }
 }
-//update.category.admin.component.html

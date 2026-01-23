@@ -40,8 +40,12 @@ export class UserService {
     @Inject(DOCUMENT) private document: Document
   ) {
     this.localStorage = document.defaultView?.localStorage;
+    console.log('UserService: localStorage available:', !!this.localStorage);
+
     // Khởi tạo user từ localStorage khi service được tạo
     const savedUser = this.getUserResponseFromLocalStorage();
+    console.log('UserService: Saved user from localStorage:', savedUser);
+
     if (savedUser) {
       this.userSubject.next(savedUser);
     }

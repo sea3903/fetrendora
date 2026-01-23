@@ -218,7 +218,7 @@ export const appConfig: ApplicationConfig = {
     // TranslateModule with custom loader
     importProvidersFrom(
       TranslateModule.forRoot({
-        defaultLanguage: 'vi',
+        fallbackLang: 'vi',
         loader: {
           provide: TranslateLoader,
           useClass: CustomTranslateLoader

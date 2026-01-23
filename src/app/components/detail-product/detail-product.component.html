@@ -1,75 +1,294 @@
 <app-header></app-header>
-<div class="container">
-  <div class="intro-section">
-    <h1>Đây là trang chi tiết sản phẩm</h1>
-    <p>Sử dụng Bootstrap</p>
-  </div>
-  <div class="row">
-    <div class="col-md-6">
-      <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner">
-          @if(product?.product_images && product?.product_images?.length! > 0) {
-          @for(image of product?.product_images;
-          track image.image_url;let i = $index;) {
-          <div class="carousel-item" [ngClass]="{'active': i === currentImageIndex}">
-            <div class="square-image">
-              <img [src]="image.image_url" class="product-image" alt="Product Image"
-                (error)="$any($event.target).src = 'assets/images/product-placeholder.png'">
-            </div>
-          </div>
-          }
-          } @else {
-          <div class="carousel-item active">
-            <div class="square-image">
-              <img src="assets/images/product-placeholder.png" class="product-image" alt="Placeholder Image">
-            </div>
-          </div>
-          }
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev"
-          (click)="previousImage()" *ngIf="product?.product_images && product?.product_images?.length! > 1">
-          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next"
-          (click)="nextImage()" *ngIf="product?.product_images && product?.product_images?.length! > 1">
-          <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Next</span>
-        </button>
-      </div>
-      <div class="row">
-        <div class="thumbnail-container" *ngIf="product?.product_images && product?.product_images?.length! > 1">
-          @for(image of product?.product_images;
-          track image.image_url; let i = $index) {
-          <div class="thumbnail-item" [ngClass]="{'active': i === currentImageIndex}" (click)="thumbnailClick(i)">
-            <img [src]="image.image_url" class="thumbnail-image" alt="Thumbnail Image"
+
+<div class="detail-page">
+  <div class="container">
+    @if(product) {
+    <!-- Layout chính: 60% Ảnh | 40% Thông tin -->
+    <div class="product-layout">
+
+      <!-- Cột Trái: Thư viện ảnh -->
+      <div class="product-gallery">
+        <!-- Grid ảnh: 2 trên bằng nhau + 3 dưới bằng nhau -->
+        <div class="gallery-grid">
+          @for(image of product.product_images?.slice(0, 5); track image.image_url; let i = $index) {
+          <div class="gallery-item" [class.top-row]="i < 2" [class.bottom-row]="i >= 2" (click)="openLightbox(i)">
+            <img [src]="image.image_url" [alt]="product.name + ' - Ảnh ' + (i + 1)" class="gallery-image"
               (error)="$any($event.target).src = 'assets/images/product-placeholder.png'">
+            <div class="zoom-overlay">
+              <i class="fas fa-search-plus"></i>
+            </div>
           </div>
           }
-
-
         </div>
       </div>
-    </div>
-    <div class="col-md-6">
-      <div class="product-details">
-        <h2>{{ product?.name }}</h2>
-        <p>{{ product?.description }}</p>
-        <p>Giá: {{ product?.price | currency:'VND':'symbol':'1.0-0':'vi' }}</p>
-        <p>Tổng tiền: {{ getTotalPrice() | currency:'VND':'symbol':'1.0-0':'vi' }}</p>
-        <div class="product-actions">
-          <button class="btn btn-primary" (click)="addToCart()">Thêm vào giỏ hàng</button>
-          <button class="btn btn-success" (click)="buyNow()">Mua ngay</button>
+
+      <!-- Cột Phải: Thông tin sản phẩm -->
+      <div class="product-info">
+        <!-- Breadcrumbs -->
+        <nav class="breadcrumbs">
+          <a routerLink="/home">Trang chủ</a>
+          <span class="sep">/</span>
+          @if(product.category_name) {
+          <a [routerLink]="['/home']" [queryParams]="{categoryId: product.category_id}">{{ product.category_name }}</a>
+          <span class="sep">/</span>
+          }
+          <span class="current">{{ product.name }}</span>
+        </nav>
+
+        <!-- Tên sản phẩm -->
+        <h1 class="product-title">{{ product.name }}</h1>
+
+        <!-- Giá -->
+        <div class="product-price">
+          {{ (selectedVariant?.price || product.price) | currency:'VND':'symbol':'1.0-0':'vi' }}
         </div>
-        <div class="product-quantity">
-          <div class="border-wrapper">
-            <button (click)="decreaseQuantity()">-</button>
-            <input type="text" [value]="quantity">
-            <button (click)="increaseQuantity()">+</button>
+
+        <!-- Màu sắc -->
+        @if(getUniqueColors().length > 0) {
+        <div class="variant-section">
+          <div class="variant-label">Màu sắc</div>
+          <div class="color-options">
+            @for(colorVariant of getUniqueColors(); track colorVariant.color_id) {
+            <div class="color-chip" [class.active]="selectedColorId === colorVariant.color_id"
+              [style.background-color]="colorVariant.color_code || '#ccc'" [title]="colorVariant.color_name"
+              (click)="selectColor(colorVariant.color_id!)">
+            </div>
+            }
+          </div>
+        </div>
+        }
+
+        <!-- Kích thước -->
+        @if(getAvailableSizes().length > 0) {
+        <div class="variant-section">
+          <div class="variant-label">Kích thước</div>
+          <div class="size-options">
+            @for(sizeVariant of getAvailableSizes(); track sizeVariant.size_id) {
+            <button class="size-btn" [class.active]="selectedSizeId === sizeVariant.size_id"
+              [disabled]="!isSizeAvailable(sizeVariant.size_id!)" (click)="selectSize(sizeVariant.size_id!)">
+              {{ sizeVariant.size_name }}
+            </button>
+            }
+          </div>
+        </div>
+        }
+
+        <!-- Số lượng - Compact -->
+        <div class="variant-section">
+          <div class="variant-label">Số lượng</div>
+          <div class="quantity-control">
+            <button class="qty-btn" (click)="decreaseQuantity()">−</button>
+            <span class="qty-value">{{ quantity }}</span>
+            <button class="qty-btn" (click)="increaseQuantity()">+</button>
+          </div>
+        </div>
+
+        <!-- Nút hành động -->
+        <div class="product-actions">
+          <button class="btn-add-cart" (click)="addToCart()">
+            <i class="fas fa-shopping-bag"></i>
+            Thêm vào giỏ
+          </button>
+          <button class="btn-favorite" [class.active]="isFavorite" (click)="toggleFavorite()">
+            <i class="fas fa-heart"></i>
+          </button>
+        </div>
+
+        <!-- Thông tin giao hàng -->
+        <div class="shipping-info">
+          <div class="info-row">
+            <i class="fas fa-truck"></i>
+            <span>Giao hàng: 2-5 ngày làm việc</span>
+          </div>
+          <div class="info-row">
+            <i class="fas fa-undo"></i>
+            <span>Đổi trả trong 7 ngày</span>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Tabs phía dưới -->
+    <div class="tabs-section">
+      <div class="tabs-header">
+        <button class="tab-btn" [class.active]="activeTab === 'details'" (click)="switchTab('details')">
+          Chi tiết sản phẩm
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'warranty'" (click)="switchTab('warranty')">
+          Chính sách bảo hành
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'reviews'" (click)="switchTab('reviews')">
+          Đánh giá ({{ comments.length }})
+        </button>
+      </div>
+
+      <div class="tabs-content">
+        <!-- Tab: Chi tiết sản phẩm - Thiết kế mới gọn gàng -->
+        @if(activeTab === 'details') {
+        <div class="tab-panel details-panel">
+          <!-- Tên sản phẩm + Mã -->
+          <div class="product-header-info">
+            <h2 class="detail-product-name">{{ product.name }}</h2>
+            @if(product.sku) {
+            <span class="product-sku">Mã SP: {{ product.sku }}</span>
+            }
+          </div>
+
+          <!-- Thuộc tính sản phẩm -->
+          <div class="product-attributes">
+            @if(getUniqueColors().length > 0) {
+            <div class="attribute-item">
+              <span class="attr-label">Màu sắc:</span>
+              <span class="attr-value">
+                @for(color of getUniqueColors(); track color.color_id; let last = $last) {
+                {{ color.color_name }}{{ last ? '' : ', ' }}
+                }
+              </span>
+            </div>
+            }
+
+            @if(getAvailableSizes().length > 0) {
+            <div class="attribute-item">
+              <span class="attr-label">Kích thước:</span>
+              <span class="attr-value">
+                @for(size of getAvailableSizes(); track size.size_id; let last = $last) {
+                {{ size.size_name }}{{ last ? '' : ', ' }}
+                }
+              </span>
+            </div>
+            }
+          </div>
+
+          <!-- Mô tả sản phẩm -->
+          <div class="product-description">
+            <h3>Mô tả sản phẩm</h3>
+            @if(product.description) {
+            <p>{{ product.description }}</p>
+            } @else {
+            <p class="no-content">Chưa có mô tả cho sản phẩm này.</p>
+            }
+          </div>
+        </div>
+        }
+
+        <!-- Tab: Chính sách đổi trả và bảo hành -->
+        @if(activeTab === 'warranty') {
+        <div class="tab-panel warranty-panel">
+          <h3>1. Quy định chính sách Bảo hành</h3>
+          <ul>
+            <li>Bảo hành là khắc phục những lỗi hỏng hóc, sự cố kỹ thuật xảy ra do lỗi của nhà sản xuất trong thời hạn
+              bảo hành và hỗ trợ khắc phục hư hại phát sinh trong quá trình sử dụng của khách hàng.</li>
+            <li>Bảo hành không được chuyển nhượng của sản phẩm này sang sản phẩm khác, từ khách hàng này sang khách hàng
+              khác.</li>
+            <li>Thời hạn bảo hành được xác định từ ngày mua trên chứng từ mua hàng/ đổi hàng.</li>
+            <li><strong>Điều kiện Bảo hành miễn phí:</strong> Sản phẩm bị lỗi sản xuất; bị lỗi không do tác động ngoại
+              quan, không sửa chữa trước đó ở một đơn vị khác.</li>
+          </ul>
+
+          <h3>2. Nội dung chính sách Bảo hành</h3>
+          <table class="warranty-table">
+            <thead>
+              <tr>
+                <th>Nhóm hàng</th>
+                <th>Thời hạn bảo hành</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Áo Vest, Jacket, Lông vũ, Dạ (dòng cao cấp)</td>
+                <td>30 ngày</td>
+              </tr>
+              <tr>
+                <td>Áo Polo, T-shirt, Tanktop, Quần Shorts</td>
+                <td>30 ngày</td>
+              </tr>
+              <tr>
+                <td>Dây lưng / Cặp / Túi / Clutch / Ví / Vali</td>
+                <td>6 tháng</td>
+              </tr>
+              <tr>
+                <td>Giày / Áo Da thật</td>
+                <td>12 tháng</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        }
+
+        <!-- Tab: Đánh giá -->
+        @if(activeTab === 'reviews') {
+        <div class="tab-panel reviews-panel">
+          <!-- Form thêm đánh giá -->
+          @if(isLoggedIn) {
+          <div class="review-form">
+            <textarea [(ngModel)]="newCommentContent" placeholder="Viết đánh giá của bạn..." rows="3"></textarea>
+            <button class="btn-submit" (click)="submitComment()"
+              [disabled]="submittingComment || !newCommentContent.trim()">
+              @if(submittingComment) {
+              <span class="spinner-small"></span>
+              }
+              Gửi đánh giá
+            </button>
+          </div>
+          } @else {
+          <p class="login-prompt">
+            <a routerLink="/login">Đăng nhập</a> để viết đánh giá
+          </p>
+          }
+
+          <!-- Danh sách -->
+          @if(loadingComments) {
+          <div class="loading">Đang tải...</div>
+          } @else if(comments.length === 0) {
+          <p class="no-reviews">Chưa có đánh giá nào.</p>
+          } @else {
+          <div class="reviews-list">
+            @for(comment of comments; track comment.id) {
+            <div class="review-item">
+              <div class="review-header">
+                <img [src]="getAvatarUrl(comment.user)" class="reviewer-avatar">
+                <div>
+                  <div class="reviewer-name">{{ comment.user?.fullname || 'Ẩn danh' }}</div>
+                  <div class="review-date">{{ formatDate(comment.created_at) }}</div>
+                </div>
+              </div>
+              <div class="review-content">{{ comment.content }}</div>
+            </div>
+            }
+          </div>
+          }
+        </div>
+        }
+      </div>
+    </div>
+
+    } @else {
+    <div class="loading-page">
+      <div class="spinner"></div>
+      <span>Đang tải sản phẩm...</span>
+    </div>
+    }
   </div>
 </div>
+
+<!-- Lightbox xem ảnh phóng to -->
+@if(lightboxOpen && product?.product_images) {
+<div class="lightbox" (click)="closeLightbox()">
+  <button class="lightbox-close" (click)="closeLightbox()">
+    <i class="fas fa-times"></i>
+  </button>
+  <button class="lightbox-nav prev" (click)="prevImage($event)">
+    <i class="fas fa-chevron-left"></i>
+  </button>
+  <img [src]="product?.product_images?.[lightboxIndex]?.image_url" [alt]="product?.name || 'Product'"
+    class="lightbox-image" (click)="$event.stopPropagation()">
+  <button class="lightbox-nav next" (click)="nextImage($event)">
+    <i class="fas fa-chevron-right"></i>
+  </button>
+  <div class="lightbox-counter">
+    {{ lightboxIndex + 1 }} / {{ product?.product_images?.length || 0 }}
+  </div>
+</div>
+}
+
 <app-footer></app-footer>

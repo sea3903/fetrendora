@@ -1,9 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ToastService {
+  private platformId = inject(PLATFORM_ID);
 
   constructor() { }
 
@@ -13,6 +15,12 @@ export class ToastService {
     title?: string,
     delay?: number
   }) {
+    // Chỉ chạy trên browser, không chạy trên server (SSR)
+    if (!isPlatformBrowser(this.platformId)) {
+      console.log(`[Toast] ${title}: ${defaultMessage}`);
+      return;
+    }
+
     // Xác định message và loại toast
     let message = defaultMessage;
     const isError = !!error;

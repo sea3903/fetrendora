@@ -138,9 +138,9 @@ export class LoginComponent extends BaseComponent implements OnInit {
               date_of_birth: new Date(apiResponse2.data.date_of_birth),
             };
 
-            if (this.rememberMe) {
-              this.userService.saveUserResponseToLocalStorage(this.userResponse);
-            }
+            // Luôn lưu user vào localStorage để Header có thể hiển thị
+            this.userService.saveUserResponseToLocalStorage(this.userResponse);
+            console.log('Login: User saved to localStorage:', this.userResponse);
 
             if (this.userResponse?.role.name === 'admin') {
               this.router.navigate(['/admin']);

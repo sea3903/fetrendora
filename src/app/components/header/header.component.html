@@ -1,96 +1,110 @@
 <header>
-  <nav class="navbar navbar-expand-lg">
-    <div class="container">
-      <!-- Logo -->
-      <a class="navbar-brand" routerLink="/">
-        TRENDORA
-      </a>
-
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <!-- Navigation Menu -->
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link" [class.active]="activeNavItem === 0" (click)="setActiveNavItem(0)" routerLink="/">
-              {{ 'NAV.HOME' | translate }}
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" [class.active]="activeNavItem === 1" (click)="setActiveNavItem(1)" routerLink="/">
-              {{ 'NAV.CATEGORIES' | translate }}
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" [class.active]="activeNavItem === 2" (click)="setActiveNavItem(2)" routerLink="/">
-              {{ 'NAV.PRODUCTS' | translate }}
-            </a>
-          </li>
-        </ul>
-
-        <!-- Right Actions using Flexbox -->
-        <div class="d-flex align-items-center gap-3 desktop-actions">
-
-          <!-- Language Switcher -->
-          <div class="dropdown" ngbDropdown display="dynamic" placement="bottom-end">
-            <button class="btn btn-link text-dark text-decoration-none dropdown-toggle-no-caret" ngbDropdownToggle>
-              <i class="fas fa-globe fa-lg"></i>
-              <span class="ms-1 fw-bold">{{ currentLang | uppercase }}</span>
-            </button>
-            <div ngbDropdownMenu class="dropdown-menu-end shadow-sm">
-              <button ngbDropdownItem (click)="switchLanguage('vi')" [class.active]="currentLang === 'vi'">
-                🇻🇳 Tiếng Việt
-              </button>
-              <button ngbDropdownItem (click)="switchLanguage('en')" [class.active]="currentLang === 'en'">
-                🇺🇸 English
-              </button>
-            </div>
-          </div>
-
-          <!-- Cart -->
-          <a routerLink="/cart" class="btn btn-link text-dark position-relative">
-            <i class="fas fa-shopping-cart fa-lg"></i>
-            <!-- <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">3</span> -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <!-- Bên trái: Danh mục -->
+      <div class="nav-categories">
+        @for(category of categoryTree; track category.id) {
+        <div class="category-item" (mouseenter)="toggleCategory(category.id)" (mouseleave)="activeParentId = undefined">
+          <a class="category-link" (click)="navigateToCategory(category)">
+            {{ category.name }}
+            @if(category.children && category.children.length > 0) {
+            <i class="fas fa-chevron-down"></i>
+            }
           </a>
 
-          <!-- User Profile / Login -->
-          <ng-container *ngIf="userResponse; else loginTemplate">
-            <div class="dropdown" ngbDropdown display="dynamic" placement="bottom-end">
-              <button class="btn btn-link text-dark text-decoration-none p-0" ngbDropdownToggle>
-                <img [src]="getAvatarUrl(userResponse)" alt="Avatar" class="rounded-circle border border-secondary"
-                  style="width: 40px; height: 40px; object-fit: cover;">
-              </button>
-              <div ngbDropdownMenu class="dropdown-menu-end shadow-sm" style="min-width: 220px;">
-                <div class="px-3 py-2 border-bottom">
-                  <p class="mb-0 fw-bold">{{ userResponse.fullname }}</p>
-                  <small class="text-muted">{{ userResponse.email || userResponse.role.name }}</small>
-                </div>
-                <button ngbDropdownItem (click)="handleItemClick(0)" class="py-2">
-                  <i class="fas fa-user me-2"></i> {{ 'NAV.PROFILE' | translate }}
-                </button>
-                <button ngbDropdownItem routerLink="/change-password" class="py-2">
-                  <i class="fas fa-lock me-2"></i> {{ 'NAV.CHANGE_PASSWORD' | translate }}
-                </button>
-                <button ngbDropdownItem *ngIf="userResponse.role.name === 'ADMIN'" routerLink="/admin" class="py-2">
-                  <i class="fas fa-cog me-2"></i> {{ 'NAV.ADMIN' | translate }}
-                </button>
-                <div class="dropdown-divider"></div>
-                <button ngbDropdownItem (click)="handleItemClick(2)" class="text-danger py-2">
-                  <i class="fas fa-sign-out-alt me-2"></i> {{ 'NAV.LOGOUT' | translate }}
-                </button>
+          <!-- Dropdown danh mục con -->
+          <div class="dropdown-menu" [class.show]="activeParentId === category.id"
+            *ngIf="category.children && category.children.length > 0">
+            @for(child of category.children; track child.id) {
+            <a class="dropdown-item" (click)="navigateToCategory(child); $event.stopPropagation()">
+              {{ child.name }}
+            </a>
+            }
+          </div>
+        </div>
+        }
+      </div>
+
+      <!-- Giữa: Logo -->
+      <a class="logo" routerLink="/">TRENDORA</a>
+
+      <!-- Bên phải: Icons -->
+      <div class="nav-actions">
+        <!-- Tìm kiếm -->
+        <button class="action-btn" title="Tìm kiếm">
+          <i class="fas fa-search"></i>
+        </button>
+
+        <!-- User Dropdown - Dùng pattern giống Admin -->
+        <div class="user-dropdown" *ngIf="userResponse">
+          <button class="action-btn avatar-btn" (click)="toggleUserMenu(); $event.stopPropagation()" title="Tài khoản">
+            <img [src]="getAvatarUrl(userResponse)" alt="Avatar" class="avatar-img" (error)="onImageError($event)">
+          </button>
+
+          <div class="dropdown-menu user-menu" [class.show]="showUserMenu" (click)="$event.stopPropagation()">
+            <div class="user-info">
+              <img [src]="getAvatarUrl(userResponse)" alt="Avatar" class="user-avatar" (error)="onImageError($event)">
+              <div class="user-details">
+                <span class="user-name">{{ userResponse.fullname || 'Người dùng' }}</span>
+                <span class="user-email">{{ userResponse.email || '' }}</span>
               </div>
             </div>
-          </ng-container>
+            <div class="menu-divider"></div>
 
-          <ng-template #loginTemplate>
-            <a routerLink="/login" class="btn btn-dark rounded-0 px-4">
-              {{ 'NAV.LOGIN' | translate }}
+            <a class="dropdown-item" routerLink="/user-profile" (click)="closeDropdown()">
+              <i class="fas fa-user"></i> Thông tin cá nhân
             </a>
-          </ng-template>
+            <a class="dropdown-item" routerLink="/orders" (click)="closeDropdown()">
+              <i class="fas fa-box"></i> Đơn hàng của tôi
+            </a>
+            <a class="dropdown-item" routerLink="/change-password" (click)="closeDropdown()">
+              <i class="fas fa-lock"></i> Đổi mật khẩu
+            </a>
 
+            <div class="menu-divider" *ngIf="userResponse.role && userResponse.role.name === 'ADMIN'"></div>
+            <a class="dropdown-item" routerLink="/admin" (click)="closeDropdown()"
+              *ngIf="userResponse.role && userResponse.role.name === 'ADMIN'">
+              <i class="fas fa-cog"></i> Quản trị
+            </a>
+
+            <div class="menu-divider"></div>
+            <a class="dropdown-item logout" (click)="logout()">
+              <i class="fas fa-sign-out-alt"></i> Đăng xuất
+            </a>
+          </div>
         </div>
+
+        <!-- Chưa đăng nhập -->
+        <div class="user-dropdown" *ngIf="!userResponse">
+          <button class="action-btn" (click)="toggleUserMenu(); $event.stopPropagation()" title="Tài khoản">
+            <i class="fas fa-user-circle"></i>
+          </button>
+
+          <div class="dropdown-menu user-menu" [class.show]="showUserMenu" (click)="$event.stopPropagation()">
+            <div class="guest-info">
+              <i class="fas fa-user-circle guest-icon"></i>
+              <span>Chào mừng bạn!</span>
+            </div>
+            <div class="menu-divider"></div>
+            <a class="dropdown-item" routerLink="/login" (click)="closeDropdown()">
+              <i class="fas fa-sign-in-alt"></i> Đăng nhập
+            </a>
+            <a class="dropdown-item" routerLink="/register" (click)="closeDropdown()">
+              <i class="fas fa-user-plus"></i> Đăng ký tài khoản
+            </a>
+          </div>
+        </div>
+
+        <!-- Giỏ hàng -->
+        <a routerLink="/cart" class="action-btn" title="Giỏ hàng">
+          <i class="fas fa-shopping-bag"></i>
+          <span class="badge" *ngIf="getCartItemCount() > 0">{{ getCartItemCount() }}</span>
+        </a>
+
+        <!-- Yêu thích -->
+        <a routerLink="/favorites" class="action-btn" title="Yêu thích">
+          <i class="fas fa-heart"></i>
+        </a>
       </div>
     </div>
   </nav>

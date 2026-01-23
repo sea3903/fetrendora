@@ -1,72 +1,108 @@
 <app-header></app-header>
-<div class="container">
-    <div class="intro-section">
-        <h1>Chi tiết đơn hàng</h1>
-        <p>Xem thông tin chi tiết đơn hàng</p>
+
+<div class="detail-order-page">
+  <div class="container mx-auto px-5 py-10">
+    <div class="intro-section mb-8">
+      <h1 class="text-2xl font-medium text-black mb-2">Chi tiết đơn hàng</h1>
+      <p class="text-sm text-gray-600">Xem thông tin chi tiết đơn hàng</p>
     </div>
-    
-    <!-- Thông tin người nhận -->
+
     @if(orderResponse) {
-        <div class="row">
-            <div class="col-md-6">
-                <h2 class="product-header">Thông tin người nhận</h2>
-                <div class="mb-3">
-                    <p class="form-label">Họ và tên: {{ orderResponse.fullname }}</p>
-                </div>
-                <!-- Các trường thông tin khác -->
-                <div class="mb-3">
-                    <p class="form-label">Email: {{ orderResponse.email }}</p>
-                </div>
-                <div class="mb-3">
-                    <p class="form-label">Số điện thoại: {{ orderResponse.phone_number }}</p>
-                </div>
-                <div class="mb-3">
-                    <p class="form-label">Địa chỉ: {{ orderResponse.address }}</p>
-                </div>
-                <div class="mb-3">
-                    <p class="form-label">Ghi chú: {{ orderResponse.note }}</p>
-                </div>
-                <div class="mb-3">
-                    <p class="form-label">Phương thức vận chuyển: {{ orderResponse.shipping_method }}</p>
-                </div>
-                <div class="mb-3">
-                    <p class="form-label">Phương thức thanh toán: {{ orderResponse.payment_method }}</p>
-                </div>                        
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Cột trái: Thông tin người nhận -->
+        <div>
+          <h2 class="text-lg font-medium text-black mb-6">Thông tin người nhận</h2>
+          
+          <div class="space-y-4">
+            <div>
+              <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Họ và tên</p>
+              <p class="text-sm text-black">{{ orderResponse.fullname }}</p>
             </div>
-    
-            <!-- Sản phẩm đã đặt hàng -->
-            <div class="col-md-6">
-                <h2 class="product-order">Sản phẩm đã đặt hàng</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th scope="col" class="text-start">Sản phẩm</th>
-                            <th scope="col">Số lượng</th>
-                            <th scope="col">Đơn giá</th>
-                            <th scope="col">Tổng giá</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for(item of orderResponse.order_details; track item.product.name) {
-                            <tr>
-                                <td>
-                                    <div class="product-info">
-                                        <img [src]="item.product.thumbnail" alt="Product Image" class="product-image">
-                                        <span class="product-name">{{ item.product.name }}</span>
-                                    </div>
-                                </td>
-                                <td>{{ item.number_of_products }}</td>
-                                <td>{{ item.price | currency:'VND':'symbol':'1.0-0':'vi' }}</td>
-                                <td>{{ item.total_money | currency:'VND':'symbol':'1.0-0':'vi' }}</td>
-                            </tr>
-                        }                        
-                    </tbody>
-                </table>
-                <h4 class="header-text text-end">
-                    Tổng giá: {{ orderResponse.total_money | currency:'VND':'symbol':'1.0-0':'vi' }}
-                </h4>        
+
+            <div>
+              <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Email</p>
+              <p class="text-sm text-black">{{ orderResponse.email }}</p>
             </div>
-        </div>    
-}    
+
+            <div>
+              <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Số điện thoại</p>
+              <p class="text-sm text-black">{{ orderResponse.phone_number }}</p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Địa chỉ</p>
+              <p class="text-sm text-black">{{ orderResponse.address }}</p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Ghi chú</p>
+              <p class="text-sm text-black">{{ orderResponse.note || 'Không có' }}</p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Phương thức vận chuyển</p>
+              <p class="text-sm text-black">{{ orderResponse.shipping_method }}</p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Phương thức thanh toán</p>
+              <p class="text-sm text-black">{{ orderResponse.payment_method }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột phải: Sản phẩm đã đặt hàng -->
+        <div>
+          <h2 class="text-lg font-medium text-black mb-6">Sản phẩm đã đặt hàng</h2>
+
+          <!-- Bảng sản phẩm -->
+          <div class="border border-gray-200 mb-6">
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead>
+                  <tr class="border-b border-gray-200 bg-gray-50">
+                    <th class="p-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wide">Sản phẩm</th>
+                    <th class="p-4 text-center text-xs font-medium text-gray-600 uppercase tracking-wide">Số lượng</th>
+                    <th class="p-4 text-center text-xs font-medium text-gray-600 uppercase tracking-wide">Đơn giá</th>
+                    <th class="p-4 text-center text-xs font-medium text-gray-600 uppercase tracking-wide">Tổng giá</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for(item of orderResponse.order_details; track item.product.name) {
+                    <tr class="border-b border-gray-200 last:border-b-0">
+                      <td class="p-4">
+                        <div class="flex items-center gap-3">
+                          <img
+                            [src]="item.product.thumbnail"
+                            [alt]="item.product.name"
+                            class="w-20 h-20 object-cover">
+                          <span class="text-sm text-black">{{ item.product.name }}</span>
+                        </div>
+                      </td>
+                      <td class="p-4 text-sm text-black text-center">{{ item.number_of_products }}</td>
+                      <td class="p-4 text-sm text-black text-center">
+                        {{ item.price | currency:'VND':'symbol':'1.0-0':'vi' }}
+                      </td>
+                      <td class="p-4 text-sm text-black text-center font-medium">
+                        {{ item.total_money | currency:'VND':'symbol':'1.0-0':'vi' }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Tổng giá -->
+          <div class="text-right">
+            <h4 class="text-lg font-medium text-black">
+              Tổng giá: {{ orderResponse.total_money | currency:'VND':'symbol':'1.0-0':'vi' }}
+            </h4>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
 </div>
+
 <app-footer></app-footer>

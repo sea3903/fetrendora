@@ -1,0 +1,178 @@
+<app-header></app-header>
+
+<div class="checkout-page">
+    <div class="container">
+        <h1 class="page-title">Thanh toán</h1>
+
+        <div class="checkout-layout">
+            <!-- Cột trái: Form thông tin -->
+            <div class="checkout-form-section">
+                <form [formGroup]="checkoutForm">
+                    <!-- Thông tin người nhận -->
+                    <div class="form-section">
+                        <h2 class="section-title">Thông tin người nhận</h2>
+
+                        <div class="form-group">
+                            <label for="fullname">Họ và tên <span class="required">*</span></label>
+                            <input type="text" id="fullname" formControlName="fullname" placeholder="Nhập họ và tên">
+                            @if(checkoutForm.get('fullname')?.invalid && checkoutForm.get('fullname')?.touched) {
+                            <span class="error-text">Họ và tên là bắt buộc</span>
+                            }
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email">Email <span class="required">*</span></label>
+                                <input type="email" id="email" formControlName="email" placeholder="email@example.com">
+                                @if(checkoutForm.get('email')?.invalid && checkoutForm.get('email')?.touched) {
+                                <span class="error-text">Email không hợp lệ</span>
+                                }
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Số điện thoại <span class="required">*</span></label>
+                                <input type="tel" id="phone" formControlName="phone_number" placeholder="0123 456 789">
+                                @if(checkoutForm.get('phone_number')?.invalid &&
+                                checkoutForm.get('phone_number')?.touched) {
+                                <span class="error-text">Số điện thoại không hợp lệ</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address">Địa chỉ <span class="required">*</span></label>
+                            <input type="text" id="address" formControlName="address"
+                                placeholder="Số nhà, đường, quận/huyện, tỉnh/TP">
+                            @if(checkoutForm.get('address')?.invalid && checkoutForm.get('address')?.touched) {
+                            <span class="error-text">Địa chỉ là bắt buộc</span>
+                            }
+                        </div>
+
+                        <div class="form-group">
+                            <label for="note">Ghi chú</label>
+                            <textarea id="note" formControlName="note" placeholder="Ghi chú cho đơn hàng (tùy chọn)"
+                                rows="3"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Phương thức vận chuyển -->
+                    <div class="form-section">
+                        <h2 class="section-title">Phương thức vận chuyển</h2>
+                        <div class="radio-options">
+                            <label class="radio-option">
+                                <input type="radio" formControlName="shipping_method" value="express">
+                                <span class="radio-label">
+                                    <span class="option-title">Giao nhanh (Express)</span>
+                                    <span class="option-desc">Nhận hàng trong 1-2 ngày</span>
+                                </span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" formControlName="shipping_method" value="normal">
+                                <span class="radio-label">
+                                    <span class="option-title">Giao tiêu chuẩn</span>
+                                    <span class="option-desc">Nhận hàng trong 3-5 ngày</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Phương thức thanh toán -->
+                    <div class="form-section">
+                        <h2 class="section-title">Phương thức thanh toán</h2>
+                        <div class="radio-options">
+                            <label class="radio-option">
+                                <input type="radio" formControlName="payment_method" value="cod">
+                                <span class="radio-label">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span class="option-title">Thanh toán khi nhận hàng (COD)</span>
+                                </span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" formControlName="payment_method" value="vnpay">
+                                <span class="radio-label">
+                                    <i class="fas fa-credit-card"></i>
+                                    <span class="option-title">Thanh toán qua VNPAY</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Cột phải: Tóm tắt đơn hàng -->
+            <div class="order-summary-section">
+                <div class="order-summary">
+                    <h2 class="section-title">Đơn hàng của bạn</h2>
+
+                    <!-- Danh sách sản phẩm -->
+                    <div class="order-items">
+                        @for(item of checkoutItems; track item.product.id) {
+                        <div class="order-item">
+                            <img [src]="item.product.thumbnail" [alt]="item.product.name" class="item-image">
+                            <div class="item-details">
+                                <span class="item-name">{{ item.product.name }}</span>
+                                <span class="item-qty">x{{ item.quantity }}</span>
+                            </div>
+                            <span class="item-price">{{ (item.product.price * item.quantity) |
+                                currency:'VND':'symbol':'1.0-0':'vi' }}</span>
+                        </div>
+                        }
+                    </div>
+
+                    <div class="order-divider"></div>
+
+                    <!-- Mã giảm giá -->
+                    <div class="coupon-section">
+                        <div class="coupon-input">
+                            <input type="text" [(ngModel)]="couponCode" placeholder="Nhập mã giảm giá"
+                                [disabled]="couponApplied">
+                            <button (click)="applyCoupon()" [disabled]="couponApplied || !couponCode">
+                                {{ couponApplied ? 'Đã áp dụng' : 'Áp dụng' }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="order-divider"></div>
+
+                    <!-- Tổng tiền -->
+                    <div class="order-totals">
+                        <div class="total-row">
+                            <span>Tạm tính</span>
+                            <span>{{ totalAmount | currency:'VND':'symbol':'1.0-0':'vi' }}</span>
+                        </div>
+                        @if(discountAmount > 0) {
+                        <div class="total-row discount">
+                            <span>Giảm giá</span>
+                            <span>-{{ discountAmount | currency:'VND':'symbol':'1.0-0':'vi' }}</span>
+                        </div>
+                        }
+                        <div class="total-row shipping">
+                            <span>Phí vận chuyển</span>
+                            <span>Miễn phí</span>
+                        </div>
+                        <div class="total-row final">
+                            <span>Tổng cộng</span>
+                            <span class="final-amount">{{ finalAmount | currency:'VND':'symbol':'1.0-0':'vi' }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Nút đặt hàng -->
+                    <button class="btn-place-order" (click)="placeOrder()" [disabled]="isSubmitting">
+                        @if(isSubmitting) {
+                        <span class="spinner"></span>
+                        Đang xử lý...
+                        } @else {
+                        Đặt hàng
+                        }
+                    </button>
+
+                    <button class="btn-back" (click)="goBack()">
+                        <i class="fas fa-arrow-left"></i>
+                        Quay lại giỏ hàng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<app-footer></app-footer>

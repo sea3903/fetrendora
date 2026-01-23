@@ -43,11 +43,9 @@ export class OrderDetailComponent extends BaseComponent implements OnInit {
   }
   
   getOrderDetails(): void {
-    debugger
     const orderId = Number(this.activatedRoute.snapshot.paramMap.get('orderId'));
     this.orderService.getOrderById(orderId).subscribe({
-      next: (apiResponse: ApiResponse) => {        
-        debugger;   
+      next: (apiResponse: ApiResponse) => {
         const response = apiResponse.data    
         this.orderResponse.id = response.id;
         this.orderResponse.user_id = response.user_id;
@@ -80,10 +78,8 @@ export class OrderDetailComponent extends BaseComponent implements OnInit {
         this.orderResponse.total_money = response.total_money;
       },
       complete: () => {
-        debugger;        
       },
       error: (error: HttpErrorResponse) => {
-        debugger;
         console.error(error?.error?.message ?? '');
       } 
     });
