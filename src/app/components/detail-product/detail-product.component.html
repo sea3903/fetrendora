@@ -10,7 +10,7 @@
       <div class="product-gallery">
         <!-- Grid ảnh: 2 trên bằng nhau + 3 dưới bằng nhau -->
         <div class="gallery-grid">
-          @for(image of product.product_images?.slice(0, 5); track image.image_url; let i = $index) {
+          @for(image of product.product_images.slice(0, 5); track image.image_url; let i = $index) {
           <div class="gallery-item" [class.top-row]="i < 2" [class.bottom-row]="i >= 2" (click)="openLightbox(i)">
             <img [src]="image.image_url" [alt]="product.name + ' - Ảnh ' + (i + 1)" class="gallery-image"
               (error)="$any($event.target).src = 'assets/images/product-placeholder.png'">
@@ -248,7 +248,7 @@
               <div class="review-header">
                 <img [src]="getAvatarUrl(comment.user)" class="reviewer-avatar">
                 <div>
-                  <div class="reviewer-name">{{ comment.user?.fullname || 'Ẩn danh' }}</div>
+                  <div class="reviewer-name">{{ comment.user.fullname || 'Ẩn danh' }}</div>
                   <div class="review-date">{{ formatDate(comment.created_at) }}</div>
                 </div>
               </div>

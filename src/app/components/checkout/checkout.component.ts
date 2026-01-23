@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { Product } from '../../models/product';
 import { environment } from '../../../environments/environment';
 import { OrderDTO } from '../../dtos/order/order.dto';
@@ -10,12 +10,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { BaseComponent } from '../base/base.component';
 import { HeaderComponent } from '../header/header.component';
 import { FooterComponent } from '../footer/footer.component';
-import { CartItem } from '../../services/cart.service';
 import { UserResponse } from '../../responses/user/user.response';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 interface CheckoutItem {
     product: Product;
     quantity: number;
+    productDetailId?: number; // ID biến thể để trừ tồn kho
 }
 
 @Component({
@@ -26,51 +27,46 @@ interface CheckoutItem {
     imports: [
         CommonModule,
         RouterModule,
-        ReactiveFormsModule,
         FormsModule,
         HeaderComponent,
-        FooterComponent
+        FooterComponent,
+        TranslateModule
     ]
 })
 export class CheckoutComponent extends BaseComponent implements OnInit {
-    private formBuilder = inject(FormBuilder);
+    private translate = inject(TranslateService);
 
-    checkoutForm!: FormGroup;
+    // Form fields - giống user-profile (KHÔNG CÓ EMAIL)
+    fullName: string = '';
+    phoneNumber: string = '';
+    address: string = '';
+    note: string = '';
+    shippingMethod: string = 'express';
+    paymentMethod: string = 'cod';
+
+    // Validation errors
+    fullNameError: string = '';
+    phoneError: string = '';
+    addressError: string = '';
+
+    // Checkout data
     checkoutItems: CheckoutItem[] = [];
-
     totalAmount: number = 0;
     discountAmount: number = 0;
     finalAmount: number = 0;
 
     couponCode: string = '';
     couponApplied: boolean = false;
-
     isSubmitting: boolean = false;
     userResponse?: UserResponse | null;
 
     constructor() {
         super();
-        this.initForm();
     }
 
     ngOnInit(): void {
-        // Lấy thông tin user
         this.loadUserInfo();
-        // Lấy selected items từ cart
         this.loadCheckoutItems();
-    }
-
-    // Khởi tạo form
-    initForm(): void {
-        this.checkoutForm = this.formBuilder.group({
-            fullname: ['', [Validators.required, Validators.minLength(2)]],
-            email: ['', [Validators.required, Validators.email]],
-            phone_number: ['', [Validators.required, Validators.minLength(10)]],
-            address: ['', [Validators.required, Validators.minLength(5)]],
-            note: [''],
-            shipping_method: ['express'],
-            payment_method: ['cod'] // Mặc định COD
-        });
     }
 
     // Load thông tin user và pre-fill form
@@ -78,12 +74,9 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
         this.userResponse = this.userService.getUserResponseFromLocalStorage();
 
         if (this.userResponse) {
-            this.checkoutForm.patchValue({
-                fullname: this.userResponse.fullname || '',
-                email: this.userResponse.email || '',
-                phone_number: this.userResponse.phone_number || '',
-                address: this.userResponse.address || ''
-            });
+            this.fullName = this.userResponse.fullname || '';
+            this.phoneNumber = this.userResponse.phone_number || '';
+            this.address = this.userResponse.address || '';
         }
     }
 
@@ -92,7 +85,6 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
         const selectedItems = this.cartService.getSelectedItems();
 
         if (selectedItems.length === 0) {
-            // Nếu không có items được chọn, quay lại cart
             this.router.navigate(['/cart']);
             return;
         }
@@ -110,7 +102,8 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
                     }
                     return {
                         product: product!,
-                        quantity: cartItem.quantity
+                        quantity: cartItem.quantity,
+                        productDetailId: cartItem.productDetailId
                     };
                 }).filter(item => item.product);
 
@@ -127,7 +120,72 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
         });
     }
 
-    // Tính tổng tiền
+    // ═══════════════════════════════════════════════════════════════
+    // VALIDATION - Copy từ user-profile
+    // ═══════════════════════════════════════════════════════════════
+
+    validateFullName(): boolean {
+        if (!this.fullName || this.fullName.trim() === '') {
+            this.fullNameError = 'Họ và tên là bắt buộc';
+            return false;
+        }
+        const nameRegex = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẵếưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\s]+$/;
+        if (!nameRegex.test(this.fullName.trim())) {
+            this.fullNameError = 'Họ tên chỉ được chứa chữ cái và khoảng trắng';
+            return false;
+        }
+        this.fullNameError = '';
+        return true;
+    }
+
+    validatePhone(): boolean {
+        if (!this.phoneNumber || this.phoneNumber.trim() === '') {
+            this.phoneError = 'Số điện thoại là bắt buộc';
+            return false;
+        }
+        const phone = this.phoneNumber.trim();
+        const phoneRegex = /^(03|05|07|08|09)[0-9]{8}$/;
+        if (!phoneRegex.test(phone)) {
+            this.phoneError = 'Số điện thoại không hợp lệ (VD: 0912345678)';
+            return false;
+        }
+        this.phoneError = '';
+        return true;
+    }
+
+    validateAddress(): boolean {
+        if (!this.address || this.address.trim() === '') {
+            this.addressError = 'Địa chỉ giao hàng là bắt buộc';
+            return false;
+        }
+        if (this.address.trim().length < 10) {
+            this.addressError = 'Địa chỉ phải có ít nhất 10 ký tự';
+            return false;
+        }
+        this.addressError = '';
+        return true;
+    }
+
+    isFormValid(): boolean {
+        return this.fullNameError === '' &&
+            this.phoneError === '' &&
+            this.addressError === '' &&
+            this.fullName.trim() !== '' &&
+            this.phoneNumber.trim() !== '' &&
+            this.address.trim() !== '';
+    }
+
+    validateAll(): boolean {
+        const isNameValid = this.validateFullName();
+        const isPhoneValid = this.validatePhone();
+        const isAddressValid = this.validateAddress();
+        return isNameValid && isPhoneValid && isAddressValid;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TÍNH TOÁN
+    // ═══════════════════════════════════════════════════════════════
+
     calculateTotal(): void {
         this.totalAmount = this.checkoutItems.reduce(
             (total, item) => total + item.product.price * item.quantity,
@@ -136,7 +194,6 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
         this.finalAmount = this.totalAmount - this.discountAmount;
     }
 
-    // Áp dụng mã giảm giá
     applyCoupon(): void {
         if (!this.couponCode || this.couponApplied) return;
 
@@ -162,13 +219,15 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
             });
     }
 
-    // Đặt hàng
+    // ═══════════════════════════════════════════════════════════════
+    // ĐẶT HÀNG
+    // ═══════════════════════════════════════════════════════════════
+
     placeOrder(): void {
-        if (this.checkoutForm.invalid) {
-            this.checkoutForm.markAllAsTouched();
+        if (!this.validateAll()) {
             this.toastService.showToast({
-                error: 'Vui lòng điền đầy đủ thông tin',
-                defaultMsg: 'Vui lòng điền đầy đủ thông tin',
+                error: 'Vui lòng điền đầy đủ thông tin hợp lệ',
+                defaultMsg: 'Vui lòng điền đầy đủ thông tin hợp lệ',
                 title: 'Lỗi'
             });
             return;
@@ -178,19 +237,24 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
 
         const orderData: OrderDTO = {
             user_id: this.tokenService.getUserId(),
-            ...this.checkoutForm.value,
+            fullname: this.fullName.trim(),
+            email: this.userResponse?.email || '', // Lấy email từ user đã đăng nhập
+            phone_number: this.phoneNumber.trim(),
+            address: this.address.trim(),
+            note: this.note.trim(),
             status: 'pending',
             total_money: this.finalAmount,
+            payment_method: this.paymentMethod,
+            shipping_method: this.shippingMethod,
             coupon_code: this.couponApplied ? this.couponCode : '',
             cart_items: this.checkoutItems.map(item => ({
                 product_id: item.product.id,
-                quantity: item.quantity
+                quantity: item.quantity,
+                product_detail_id: item.productDetailId // ID biến thể để trừ tồn kho
             }))
         };
 
-        const paymentMethod = this.checkoutForm.get('payment_method')?.value;
-
-        if (paymentMethod === 'vnpay') {
+        if (this.paymentMethod === 'vnpay') {
             this.processVNPayOrder(orderData);
         } else {
             this.processCODOrder(orderData);
@@ -202,7 +266,7 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
         this.orderService.placeOrder(orderData).subscribe({
             next: (response: ApiResponse) => {
                 this.isSubmitting = false;
-                // Xóa các items đã checkout khỏi cart
+                // CHỈ xóa cart SAU KHI đặt hàng THÀNH CÔNG
                 this.cartService.clearSelectedItems();
 
                 this.toastService.showToast({
@@ -211,14 +275,14 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
                     title: 'Thành công'
                 });
 
-                // Chuyển đến trang orders
                 this.router.navigate(['/orders']);
             },
             error: (error: HttpErrorResponse) => {
                 this.isSubmitting = false;
+                // KHÔNG xóa cart khi đặt hàng thất bại
                 this.toastService.showToast({
                     error: error,
-                    defaultMsg: 'Lỗi đặt hàng',
+                    defaultMsg: 'Lỗi đặt hàng. Vui lòng thử lại.',
                     title: 'Lỗi'
                 });
             }
@@ -227,7 +291,6 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
 
     // Xử lý đơn hàng VNPay
     private processVNPayOrder(orderData: OrderDTO): void {
-        // Bước 1: Tạo link thanh toán VNPay
         this.paymentService.createPaymentUrl({
             amount: this.finalAmount,
             language: 'vn'
@@ -236,22 +299,22 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
                 const paymentUrl = res.data;
                 const vnp_TxnRef = new URL(paymentUrl).searchParams.get('vnp_TxnRef') || '';
 
-                // Bước 2: Tạo đơn hàng với vnp_txn_ref
                 this.orderService.placeOrder({
                     ...orderData,
                     vnp_txn_ref: vnp_TxnRef
                 }).subscribe({
                     next: () => {
-                        // Xóa các items đã checkout khỏi cart
+                        // CHỈ xóa cart SAU KHI đặt hàng THÀNH CÔNG
                         this.cartService.clearSelectedItems();
                         // Redirect đến VNPay
                         window.location.href = paymentUrl;
                     },
                     error: (error: HttpErrorResponse) => {
                         this.isSubmitting = false;
+                        // KHÔNG xóa cart khi tạo đơn thất bại
                         this.toastService.showToast({
                             error: error,
-                            defaultMsg: 'Lỗi tạo đơn hàng',
+                            defaultMsg: 'Lỗi tạo đơn hàng. Vui lòng thử lại.',
                             title: 'Lỗi'
                         });
                     }
@@ -259,16 +322,16 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
             },
             error: (error: HttpErrorResponse) => {
                 this.isSubmitting = false;
+                // KHÔNG xóa cart khi kết nối payment thất bại
                 this.toastService.showToast({
                     error: error,
-                    defaultMsg: 'Lỗi kết nối cổng thanh toán',
+                    defaultMsg: 'Lỗi kết nối cổng thanh toán. Vui lòng thử lại.',
                     title: 'Lỗi'
                 });
             }
         });
     }
 
-    // Quay lại trang cart
     goBack(): void {
         this.router.navigate(['/cart']);
     }

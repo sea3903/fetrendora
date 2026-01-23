@@ -11,10 +11,17 @@ import { BaseComponent } from '../base/base.component';
 import { CartItem } from '../../services/cart.service';
 import { Subscription } from 'rxjs';
 
+interface VariantInfo {
+  colorName?: string;
+  sizeName?: string;
+  originName?: string;
+}
+
 interface CartItemWithProduct {
   product: Product;
   quantity: number;
   selected: boolean;
+  variant?: VariantInfo;
 }
 
 @Component({
@@ -68,17 +75,37 @@ export class OrderComponent extends BaseComponent implements OnInit, OnDestroy {
       next: (apiResponse: ApiResponse) => {
         const products: Product[] = apiResponse.data || [];
 
+        interface CartItemWithProduct {
+          product: Product;
+          quantity: number;
+          selected: boolean;
+          variant?: VariantInfo;
+          productDetailId?: number; // Thêm field này để xác định biến thể
+        }
+
+        // ... (giữa các đoạn code)
+
         this.cartItems = cartItems.map(cartItem => {
           const product = products.find(p => p.id === cartItem.productId);
           if (product) {
             product.thumbnail = `${environment.apiBaseUrl}/products/images/${product.thumbnail}`;
           }
+
           return {
             product: product!,
             quantity: cartItem.quantity,
-            selected: cartItem.selected
+            selected: cartItem.selected,
+            productDetailId: cartItem.productDetailId, // Map productDetailId
+            variant: {
+              colorName: cartItem.colorName,
+              sizeName: cartItem.sizeName,
+              originName: cartItem.originName
+            }
           };
-        }).filter(item => item.product); // Lọc bỏ các item không có product
+        }).filter(item => item.product);
+
+        // Debug log
+        console.log('Cart Items with variants:', this.cartItems);
 
         this.calculateTotal();
         this.updateSelectionState();

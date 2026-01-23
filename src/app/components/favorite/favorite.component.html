@@ -1,0 +1,43 @@
+<app-header></app-header>
+
+<div class="favorite-page">
+    <div class="container">
+        <h1 class="page-title">Sản phẩm yêu thích ({{ products.length }})</h1>
+
+        @if(loading) {
+        <div class="loading-state">
+            <div class="spinner"></div>
+        </div>
+        } @else if(products.length === 0) {
+        <div class="empty-state">
+            <i class="far fa-heart"></i>
+            <p>Danh sách yêu thích đang trống</p>
+            <a routerLink="/home" class="btn-start">Khám phá ngay</a>
+        </div>
+        } @else {
+        <div class="favorite-list">
+            @for(product of products; track product.id) {
+            <div class="favorite-item" [routerLink]="['/products', product.id]">
+                <div class="item-image">
+                    <img [src]="product.thumbnail" [alt]="product.name"
+                        (error)="$any($event.target).src = 'assets/images/product-placeholder.png'">
+                </div>
+
+                <div class="item-info">
+                    <h3 class="item-name">{{ product.name }}</h3>
+                    <p class="item-price">{{ product.price | currency:'VND':'symbol':'1.0-0':'vi' }}</p>
+                </div>
+
+                <div class="item-actions">
+                    <button class="btn-remove" (click)="removeFavorite(product.id, $event)" title="Xóa">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+            }
+        </div>
+        }
+    </div>
+</div>
+
+<app-footer></app-footer>

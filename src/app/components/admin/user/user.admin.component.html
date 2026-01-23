@@ -55,7 +55,7 @@
             <div class="avatar">
               <img *ngIf="getAvatarUrl(user)" [src]="getAvatarUrl(user)" alt="Avatar">
               <span *ngIf="!getAvatarUrl(user)" class="avatar-placeholder">
-                {{ user.fullname?.charAt(0)?.toUpperCase() || '?' }}
+                {{ user.fullname.charAt(0).toUpperCase() || '?' }}
               </span>
             </div>
           </td>
@@ -65,7 +65,7 @@
           <td class="col-dob">{{ formatDate(user.date_of_birth) }}</td>
           <td class="col-address">{{ user.address || '-' }}</td>
           <td class="col-type">{{ getAccountType(user) }}</td>
-          <td class="col-role">{{ user.role?.name || '-' }}</td>
+          <td class="col-role">{{ user.role.name || '-' }}</td>
           <td class="col-actions">
             <div class="action-btns">
               <button class="btn-icon edit" (click)="openEditModal(user)" title="Chỉnh sửa">

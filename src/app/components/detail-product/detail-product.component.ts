@@ -354,8 +354,24 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
       return;
     }
 
-    const productIdToAdd = this.selectedVariant ? this.productId : this.product.id;
-    this.cartService.addToCart(productIdToAdd, this.quantity);
+    if (this.productDetails.length > 0 && !this.selectedVariant) {
+      this.toastService.showToast({
+        error: null,
+        defaultMsg: 'Vui lòng chọn màu sắc và kích thước',
+        title: 'Thông báo'
+      });
+      return;
+    }
+
+    // Prepare variant info
+    const variantInfo = this.selectedVariant ? {
+      productDetailId: this.selectedVariant.id,
+      colorName: this.selectedVariant.color_name,
+      sizeName: this.selectedVariant.size_name,
+      originName: this.selectedVariant.origin_name
+    } : undefined;
+
+    this.cartService.addToCart(this.productId, this.quantity, variantInfo);
     this.isPressedAddToCart = true;
 
     this.toastService.showToast({

@@ -2,7 +2,7 @@
 
 <div class="cart-page">
   <div class="container">
-    <h1 class="page-title">Giỏ hàng</h1>
+    <h1 class="page-title">Giỏ hàng của bạn</h1>
 
     @if(cartItems.length === 0) {
     <div class="empty-cart">
@@ -12,88 +12,89 @@
     </div>
     } @else {
 
-    <div class="cart-content">
-      <!-- Bảng sản phẩm -->
-      <div class="cart-table">
+    <div class="cart-layout">
+      <!-- Danh sách sản phẩm -->
+      <div class="cart-items-section">
         <!-- Header -->
         <div class="cart-header">
-          <div class="col-checkbox">
-            <input type="checkbox" [checked]="isAllSelected" (change)="toggleSelectAll()" id="selectAll">
-            <label for="selectAll">Tất cả</label>
-          </div>
-          <div class="col-product">Sản phẩm</div>
-          <div class="col-price">Đơn giá</div>
-          <div class="col-quantity">Số lượng</div>
-          <div class="col-total">Thành tiền</div>
-          <div class="col-action"></div>
+          <label class="select-all">
+            <input type="checkbox" [checked]="isAllSelected" (change)="toggleSelectAll()">
+            <span>Chọn tất cả ({{ cartItems.length }})</span>
+          </label>
         </div>
 
         <!-- Cart Items -->
-        @for(item of cartItems; track item.product.id; let i = $index) {
-        <div class="cart-item">
-          <!-- Checkbox -->
-          <div class="col-checkbox">
-            <input type="checkbox" [checked]="item.selected" (change)="toggleItemSelection(item.product.id)"
-              [id]="'item-' + item.product.id">
-          </div>
+        <div class="cart-items-list">
+          @for(item of cartItems; track item.product.id; let i = $index) {
+          <div class="cart-item">
+            <!-- Checkbox -->
+            <input type="checkbox" class="item-checkbox" [checked]="item.selected"
+              (change)="toggleItemSelection(item.product.id)">
 
-          <!-- Product Info -->
-          <div class="col-product">
-            <img [src]="item.product.thumbnail" [alt]="item.product.name" class="product-image"
+            <!-- Product Image -->
+            <img [src]="item.product.thumbnail" [alt]="item.product.name" class="item-image"
               (error)="$any($event.target).src = 'assets/images/product-placeholder.png'">
-            <div class="product-details">
-              <a [routerLink]="['/products', item.product.id]" class="product-name">{{ item.product.name }}</a>
-              @if(item.product.sku) {
-              <span class="product-sku">Mã: {{ item.product.sku }}</span>
+
+            <!-- Product Info -->
+            <div class="item-info">
+              <a [routerLink]="['/products', item.product.id]" class="item-name">{{ item.product.name }}</a>
+              <!-- Thuộc tính đã chọn -->
+              @if(item.variant?.colorName || item.variant?.sizeName) {
+              <div class="item-attrs">
+                @if(item.variant?.sizeName) {
+                <span class="attr-tag">{{ item.variant?.sizeName }}</span>
+                }
+                @if(item.variant?.colorName) {
+                <span class="attr-tag">{{ item.variant?.colorName }}</span>
+                }
+              </div>
               }
             </div>
-          </div>
 
-          <!-- Unit Price -->
-          <div class="col-price">
-            {{ item.product.price | currency:'VND':'symbol':'1.0-0':'vi' }}
-          </div>
+            <!-- Giá + Số lượng + Tổng (cùng hàng) -->
+            <div class="item-price">{{ item.product.price | currency:'VND':'symbol':'1.0-0':'vi' }}</div>
 
-          <!-- Quantity -->
-          <div class="col-quantity">
-            <div class="quantity-control">
-              <button class="qty-btn" (click)="decreaseQuantity(i)" [disabled]="item.quantity <= 1">−</button>
-              <span class="qty-value">{{ item.quantity }}</span>
-              <button class="qty-btn" (click)="increaseQuantity(i)">+</button>
+            <div class="item-quantity">
+              <button (click)="decreaseQuantity(i)" [disabled]="item.quantity <= 1">−</button>
+              <span>{{ item.quantity }}</span>
+              <button (click)="increaseQuantity(i)">+</button>
             </div>
-          </div>
 
-          <!-- Total -->
-          <div class="col-total">
-            {{ (item.product.price * item.quantity) | currency:'VND':'symbol':'1.0-0':'vi' }}
-          </div>
+            <div class="item-total">{{ (item.product.price * item.quantity) | currency:'VND':'symbol':'1.0-0':'vi' }}
+            </div>
 
-          <!-- Delete -->
-          <div class="col-action">
-            <button class="btn-delete" (click)="removeItem(item.product.id)" title="Xóa">
+            <!-- Delete -->
+            <button class="item-delete" (click)="removeItem(item.product.id)">
               <i class="fas fa-trash-alt"></i>
             </button>
           </div>
+          }
         </div>
-        }
       </div>
 
-      <!-- Cart Summary -->
+      <!-- Order Summary -->
       <div class="cart-summary">
+        <h3>Thông tin đơn hàng</h3>
         <div class="summary-row">
-          <span>Đã chọn {{ selectedCount }} sản phẩm</span>
+          <span>Đã chọn</span>
+          <span>{{ selectedCount }} sản phẩm</span>
         </div>
-        <div class="summary-row total">
-          <span>Tổng tiền:</span>
-          <span class="total-amount">{{ totalAmount | currency:'VND':'symbol':'1.0-0':'vi' }}</span>
+        <div class="summary-row">
+          <span>Tạm tính</span>
+          <span>{{ totalAmount | currency:'VND':'symbol':'1.0-0':'vi' }}</span>
+        </div>
+        <div class="summary-row">
+          <span>Vận chuyển</span>
+          <span class="free">Miễn phí</span>
+        </div>
+        <div class="summary-total">
+          <span>Tổng</span>
+          <span>{{ totalAmount | currency:'VND':'symbol':'1.0-0':'vi' }}</span>
         </div>
         <button class="btn-checkout" (click)="proceedToCheckout()" [disabled]="selectedCount === 0">
-          Tiến hành thanh toán
+          Thanh toán
         </button>
-        <a routerLink="/home" class="btn-continue-shopping">
-          <i class="fas fa-arrow-left"></i>
-          Tiếp tục mua sắm
-        </a>
+        <a routerLink="/home" class="btn-back">← Tiếp tục mua sắm</a>
       </div>
     </div>
     }

@@ -6,6 +6,11 @@ export interface CartItem {
   productId: number;
   quantity: number;
   selected: boolean; // Checkbox selection
+  // Thông tin biến thể sản phẩm
+  productDetailId?: number;
+  colorName?: string;
+  sizeName?: string;
+  originName?: string;
 }
 
 @Injectable({
@@ -89,54 +94,70 @@ export class CartService {
     this.emitCart();
   }
 
-  // Thêm sản phẩm vào giỏ
-  addToCart(productId: number, quantity: number = 1): void {
-    if (this.cart.has(productId)) {
-      const item = this.cart.get(productId)!;
+  // Thêm sản phẩm vào giỏ (có thể kèm thông tin variant)
+  addToCart(
+    productId: number,
+    quantity: number = 1,
+    variantInfo?: {
+      productDetailId?: number;
+      colorName?: string;
+      sizeName?: string;
+      originName?: string;
+    }
+  ): void {
+    // Dùng productDetailId làm key nếu có, ngược lại dùng productId
+    const cartKey = variantInfo?.productDetailId || productId;
+
+    if (this.cart.has(cartKey)) {
+      const item = this.cart.get(cartKey)!;
       item.quantity += quantity;
-      this.cart.set(productId, item);
+      this.cart.set(cartKey, item);
     } else {
-      this.cart.set(productId, {
+      this.cart.set(cartKey, {
         productId,
         quantity,
-        selected: true // Mặc định được chọn
+        selected: true,
+        productDetailId: variantInfo?.productDetailId,
+        colorName: variantInfo?.colorName,
+        sizeName: variantInfo?.sizeName,
+        originName: variantInfo?.originName
       });
     }
     this.saveCartToLocalStorage();
   }
 
   // Cập nhật số lượng
-  updateQuantity(productId: number, quantity: number): void {
-    if (this.cart.has(productId) && quantity > 0) {
-      const item = this.cart.get(productId)!;
+  updateQuantity(key: number, quantity: number): void {
+    if (this.cart.has(key) && quantity > 0) {
+      const item = this.cart.get(key)!;
       item.quantity = quantity;
-      this.cart.set(productId, item);
+      this.cart.set(key, item);
       this.saveCartToLocalStorage();
     }
   }
 
   // Toggle selection
-  toggleSelection(productId: number): void {
-    if (this.cart.has(productId)) {
-      const item = this.cart.get(productId)!;
+  toggleSelection(key: number): void {
+    if (this.cart.has(key)) {
+      const item = this.cart.get(key)!;
       item.selected = !item.selected;
-      this.cart.set(productId, item);
+      this.cart.set(key, item);
       this.saveCartToLocalStorage();
     }
   }
 
   // Chọn tất cả / Bỏ chọn tất cả
   selectAll(selected: boolean): void {
-    this.cart.forEach((item, productId) => {
+    this.cart.forEach((item, key) => {
       item.selected = selected;
-      this.cart.set(productId, item);
+      this.cart.set(key, item);
     });
     this.saveCartToLocalStorage();
   }
 
   // Xóa sản phẩm khỏi giỏ
-  removeItem(productId: number): void {
-    this.cart.delete(productId);
+  removeItem(key: number): void {
+    this.cart.delete(key);
     this.saveCartToLocalStorage();
   }
 

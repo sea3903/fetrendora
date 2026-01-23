@@ -38,6 +38,7 @@ export const routes: Routes = [
   { path: 'orders', component: OrderDetailComponent, canActivate: [AuthGuardFn] },
   { path: 'orders/:id', component: OrderDetailComponent },
   { path: 'user-profile', component: UserProfileComponent, canActivate: [AuthGuardFn] },
+
   { path: 'change-password', component: ChangePasswordComponent, canActivate: [AuthGuardFn] },
   // Admin   
   {

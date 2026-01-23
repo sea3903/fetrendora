@@ -1,13 +1,101 @@
-<footer>
-    <!-- Footer content goes here -->
-    <div class="footer">
+<footer class="footer">
+    <!-- Top Section: Newsletter -->
+    <div class="footer-top">
         <div class="container">
-            <div class="row footer-description">
-                <div class="col-md-6">
-                    <p>&copy; 2025 Your Company. All rights reserved.</p>
+            <div class="newsletter-content">
+                <div class="newsletter-text">
+                    <h3>Đăng ký nhận tin</h3>
+                    <p>Nhận thông tin cập nhật sản phẩm mới và khuyến mãi đặc biệt</p>
                 </div>
-                <div class="col-md-6">
-                    <p class="text-end">Terms of Service | Privacy Policy</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Nhập địa chỉ email của bạn...">
+                    <button type="button">Đăng ký</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="footer-main">
+        <div class="container">
+            <div class="footer-grid">
+                <!-- Column 1: Company Info -->
+                <div class="footer-col company-info">
+                    <a routerLink="/" class="footer-logo">TRENDORA</a>
+                    <p class="company-desc">
+                        Trendora là biểu tượng của sự thanh lịch và đẳng cấp trong thế giới thời trang hiện đại. Chúng
+                        tôi mang đến những thiết kế tinh tế, được tuyển chọn kỹ lưỡng từ chất liệu cao cấp, nhằm tôn
+                        vinh vẻ đẹp và phong cách riêng biệt của mỗi khách hàng. Với sự kết hợp hài hòa giữa xu hướng
+                        quốc tế và gu thẩm mỹ tinh tế, Trendora không chỉ đơn thuần là một cửa hàng quần áo – mà còn là
+                        nơi khơi nguồn cảm hứng cho phong cách sống sang trọng và khác biệt.
+                    </p>
+                    <div class="contact-info">
+                        <p><i class="fas fa-map-marker-alt"></i> Xã Hữu Hòa, Huyện Thanh Trì, Thành Phố Hà Nội</p>
+                        <p><i class="fas fa-phone-alt"></i> 0358948853</p>
+                        <p><i class="fas fa-envelope"></i> trendora&#64;gmail.com</p>
+                    </div>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/sea.3903" class="social-link facebook"><i
+                                class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/sea3903._/" class="social-link instagram"><i
+                                class="fab fa-instagram"></i></a>
+                        <a href="https://www.tiktok.com/@sea3903_" class="social-link tiktok"><i
+                                class="fab fa-tiktok"></i></a>
+                        <a href="https://www.youtube.com/@khanhnguyen-lv8wj" class="social-link youtube"><i
+                                class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <!-- Column 2: About Us -->
+                <div class="footer-col">
+                    <h4>Về Trendora</h4>
+                    <ul class="footer-links">
+                        <li><a routerLink="/about">Giới thiệu</a></li>
+                        <li><a routerLink="/recruitment">Tuyển dụng</a></li>
+                        <li><a routerLink="/stores">Hệ thống cửa hàng</a></li>
+                        <li><a routerLink="/news">Tin tức & Sự kiện</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 3: Customer Support -->
+                <div class="footer-col">
+                    <h4>Hỗ trợ khách hàng</h4>
+                    <ul class="footer-links">
+                        <li><a routerLink="/guide">Hướng dẫn mua hàng</a></li>
+                        <li><a routerLink="/payment">Phương thức thanh toán</a></li>
+                        <li><a routerLink="/shipping">Chính sách vận chuyển</a></li>
+                        <li><a routerLink="/faq">Câu hỏi thường gặp</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 4: Policies -->
+                <div class="footer-col">
+                    <h4>Chính sách</h4>
+                    <ul class="footer-links">
+                        <li><a routerLink="/return-policy">Chính sách đổi trả</a></li>
+                        <li><a routerLink="/warranty-policy">Chính sách bảo hành</a></li>
+                        <li><a routerLink="/privacy-policy">Chính sách bảo mật</a></li>
+                        <li><a routerLink="/terms">Điều khoản sử dụng</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Section: Copyright & Payment -->
+    <div class="footer-bottom">
+        <div class="container">
+            <div class="bottom-content">
+                <p class="copyright">&copy; 2024 Trendora Fashion. All rights reserved.</p>
+                <div class="payment-methods">
+                    <img src="assets/images/payment-visa.png" alt="Visa"
+                        (error)="$any($event.target).style.display='none'">
+                    <img src="assets/images/payment-mastercard.png" alt="Mastercard"
+                        (error)="$any($event.target).style.display='none'">
+                    <img src="assets/images/payment-vnpay.png" alt="VNPAY"
+                        (error)="$any($event.target).style.display='none'">
+                    <img src="assets/images/payment-cod.png" alt="COD"
+                        (error)="$any($event.target).style.display='none'">
                 </div>
             </div>
         </div>

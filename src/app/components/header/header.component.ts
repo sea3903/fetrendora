@@ -11,7 +11,9 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { environment } from '../../../environments/environment';
 import { Subscription } from 'rxjs';
 import { Category } from '../../models/category';
+import { Product } from '../../models/product';
 import { ApiResponse } from '../../responses/api.response';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-header',
@@ -187,5 +189,61 @@ export class HeaderComponent extends BaseComponent implements OnInit, OnDestroy 
   // Lấy số lượng giỏ hàng
   getCartItemCount(): number {
     return this.cartService.getCart().size;
+  }
+
+  // Favorite Sidebar
+  showFavorites: boolean = false;
+  favoriteProducts: Product[] = [];
+  loadingFavorites: boolean = false;
+
+  toggleFavorites(): void {
+    this.showFavorites = !this.showFavorites;
+    if (this.showFavorites) {
+      if (!this.userResponse) {
+        this.openLoginModal();
+      } else {
+        this.loadFavorites();
+      }
+    }
+  }
+
+  loadFavorites(): void {
+    this.loadingFavorites = true;
+    this.productService.getFavoriteProducts().subscribe({
+      next: (apiResponse: ApiResponse) => {
+        this.favoriteProducts = apiResponse.data || [];
+        // Fix thumbnail URLs
+        this.favoriteProducts.forEach(p => {
+          if (p.thumbnail && !p.thumbnail.startsWith('http')) {
+            p.thumbnail = `${environment.apiBaseUrl}/products/images/${p.thumbnail}`;
+          }
+        });
+        this.loadingFavorites = false;
+      },
+      error: () => {
+        this.loadingFavorites = false;
+      }
+    });
+  }
+
+  removeFavorite(productId: number, event: Event): void {
+    event.stopPropagation();
+    this.productService.unlikeProduct(productId).subscribe({
+      next: () => {
+        this.favoriteProducts = this.favoriteProducts.filter(p => p.id !== productId);
+        this.toastService.showToast({
+          title: 'Thành công',
+          defaultMsg: 'Đã xóa khỏi yêu thích',
+          error: null
+        });
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error(err);
+      }
+    });
+  }
+
+  openLoginModal() {
+    this.router.navigate(['/login']);
   }
 }
