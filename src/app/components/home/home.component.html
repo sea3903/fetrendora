@@ -1,20 +1,45 @@
 <app-header></app-header>
 
 <div class="home-page">
+
+  <!-- Hero Banner Slider -->
+  <div class="hero-banner">
+    <div class="banner-slides" [style.transform]="'translateX(-' + currentBannerIndex * 100 + '%)'">
+      @for(banner of banners; track banner) {
+      <div class="banner-slide">
+        <img [src]="banner" alt="Trendora Collection">
+        <div class="banner-content">
+          <!-- Optional content overlay -->
+        </div>
+      </div>
+      }
+    </div>
+
+    <button class="banner-control prev" (click)="prevBanner()">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <button class="banner-control next" (click)="nextBanner()">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+
+    <div class="banner-indicators">
+      @for(banner of banners; track banner; let i = $index) {
+      <span class="indicator" [class.active]="i === currentBannerIndex" (click)="goToBanner(i)">
+      </span>
+      }
+    </div>
+  </div>
+
   <div class="container">
     <!-- Search và Filter -->
     <div class="search-section">
       <div class="search-box">
-        <input 
-          type="text" 
-          class="search-input" 
-          placeholder="Tìm sản phẩm" 
-          [(ngModel)]="keyword"
+        <input type="text" class="search-input" placeholder="Tìm sản phẩm" [(ngModel)]="keyword"
           (keyup.enter)="searchProducts()">
         <select class="category-select" [(ngModel)]="selectedCategoryId">
           <option [value]="0">Tất cả danh mục</option>
           @for(category of categories; track category.id) {
-            <option [value]="category.id">{{ category.name }}</option>
+          <option [value]="category.id">{{ category.name }}</option>
           }
         </select>
         <button class="btn-search" (click)="searchProducts()">Tìm kiếm</button>
@@ -24,73 +49,64 @@
     <!-- Danh sách sản phẩm -->
     <div class="products-grid">
       @for(product of products; track product.id) {
-        <div class="product-card" (click)="onProductClick(product.id)">
-          <!-- Ảnh sản phẩm -->
-          <div class="product-image-wrapper">
-            <img 
-              [src]="product.url || 'assets/images/product-placeholder.png'" 
-              [alt]="product.name" 
-              class="product-image"
-              (error)="$any($event.target).src = 'assets/images/product-placeholder.png'">
-            
-            <!-- Icon yêu thích -->
-            <button 
-              class="favorite-btn" 
-              (click)="toggleFavorite($event, product.id)"
-              [class.active]="isFavorite(product.id)">
-              <i class="fas" [class.fa-heart]="isFavorite(product.id)" [class.fa-heart-o]="!isFavorite(product.id)"></i>
-            </button>
-          </div>
+      <div class="product-card" (click)="onProductClick(product.id)">
+        <!-- Ảnh sản phẩm -->
+        <div class="product-image-wrapper">
+          <img [src]="product.url || 'assets/images/product-placeholder.png'" [alt]="product.name" class="product-image"
+            (error)="$any($event.target).src = 'assets/images/product-placeholder.png'">
 
-          <!-- Thông tin sản phẩm -->
-          <div class="product-info">
-            <!-- Tên brand (đậm, đen) -->
-            @if(product.brand_name) {
-              <div class="product-brand">{{ product.brand_name }}</div>
-            }
-            
-            <!-- Tên sản phẩm -->
-            <h3 class="product-name">{{ product.name }}</h3>
-            
-            <!-- Giá -->
-            <div class="product-price">
-              {{ product.price | currency:'VND':'symbol':'1.0-0':'vi' }}
-            </div>
+          <!-- Icon yêu thích -->
+          <button class="favorite-btn" (click)="toggleFavorite($event, product.id)"
+            [class.active]="isFavorite(product.id)">
+            <i class="fas" [class.fa-heart]="isFavorite(product.id)" [class.fa-heart-o]="!isFavorite(product.id)"></i>
+          </button>
+        </div>
+
+        <!-- Thông tin sản phẩm -->
+        <div class="product-info">
+          <!-- Tên brand (đậm, đen) -->
+          @if(product.brand_name) {
+          <div class="product-brand">{{ product.brand_name }}</div>
+          }
+
+          <!-- Tên sản phẩm -->
+          <h3 class="product-name">{{ product.name }}</h3>
+
+          <!-- Giá -->
+          <div class="product-price">
+            {{ product.price | currency:'VND':'symbol':'1.0-0':'vi' }}
           </div>
         </div>
+      </div>
       }
     </div>
 
     <!-- Pagination -->
     @if(totalPages > 1) {
-      <div class="pagination-wrapper">
-        <nav class="pagination">
-          @if(currentPage > 0) {
-            <button class="page-btn" (click)="onPageChange(0)">Đầu</button>
-          }
-          @if(currentPage > 0) {
-            <button class="page-btn" (click)="onPageChange(currentPage - 1)">
-              <i class="fas fa-chevron-left"></i>
-            </button>
-          }
-          
-          @for(page of visiblePages; track page) {
-            <button 
-              class="page-btn" 
-              [class.active]="page - 1 === currentPage"
-              (click)="onPageChange(page - 1)">
-              {{ page }}
-            </button>
-          }
+    <div class="pagination-wrapper">
+      <nav class="pagination">
+        @if(currentPage > 0) {
+        <button class="page-btn" (click)="onPageChange(0)">Đầu</button>
+        }
+        @if(currentPage > 0) {
+        <button class="page-btn" (click)="onPageChange(currentPage - 1)">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        }
 
-          @if(currentPage < totalPages - 1) {
-            <button class="page-btn" (click)="onPageChange(currentPage + 1)">
-              <i class="fas fa-chevron-right"></i>
-            </button>
-            <button class="page-btn" (click)="onPageChange(totalPages - 1)">Cuối</button>
+        @for(page of visiblePages; track page) {
+        <button class="page-btn" [class.active]="page - 1 === currentPage" (click)="onPageChange(page - 1)">
+          {{ page }}
+        </button>
+        }
+
+        @if(currentPage < totalPages - 1) { <button class="page-btn" (click)="onPageChange(currentPage + 1)">
+          <i class="fas fa-chevron-right"></i>
+          </button>
+          <button class="page-btn" (click)="onPageChange(totalPages - 1)">Cuối</button>
           }
-        </nav>
-      </div>
+      </nav>
+    </div>
     }
   </div>
 </div>

@@ -8,99 +8,96 @@
     </div>
 
     @if(orderResponse) {
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Cột trái: Thông tin người nhận -->
-        <div>
-          <h2 class="text-lg font-medium text-black mb-6">Thông tin người nhận</h2>
-          
-          <div class="space-y-4">
-            <div>
-              <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Họ và tên</p>
-              <p class="text-sm text-black">{{ orderResponse.fullname }}</p>
-            </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Cột trái: Thông tin người nhận -->
+      <div>
+        <h2 class="text-lg font-medium text-black mb-6">Thông tin người nhận</h2>
 
-            <div>
-              <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Email</p>
-              <p class="text-sm text-black">{{ orderResponse.email }}</p>
-            </div>
-
-            <div>
-              <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Số điện thoại</p>
-              <p class="text-sm text-black">{{ orderResponse.phone_number }}</p>
-            </div>
-
-            <div>
-              <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Địa chỉ</p>
-              <p class="text-sm text-black">{{ orderResponse.address }}</p>
-            </div>
-
-            <div>
-              <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Ghi chú</p>
-              <p class="text-sm text-black">{{ orderResponse.note || 'Không có' }}</p>
-            </div>
-
-            <div>
-              <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Phương thức vận chuyển</p>
-              <p class="text-sm text-black">{{ orderResponse.shipping_method }}</p>
-            </div>
-
-            <div>
-              <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Phương thức thanh toán</p>
-              <p class="text-sm text-black">{{ orderResponse.payment_method }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Cột phải: Sản phẩm đã đặt hàng -->
-        <div>
-          <h2 class="text-lg font-medium text-black mb-6">Sản phẩm đã đặt hàng</h2>
-
-          <!-- Bảng sản phẩm -->
-          <div class="border border-gray-200 mb-6">
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead>
-                  <tr class="border-b border-gray-200 bg-gray-50">
-                    <th class="p-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wide">Sản phẩm</th>
-                    <th class="p-4 text-center text-xs font-medium text-gray-600 uppercase tracking-wide">Số lượng</th>
-                    <th class="p-4 text-center text-xs font-medium text-gray-600 uppercase tracking-wide">Đơn giá</th>
-                    <th class="p-4 text-center text-xs font-medium text-gray-600 uppercase tracking-wide">Tổng giá</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for(item of orderResponse.order_details; track item.product.name) {
-                    <tr class="border-b border-gray-200 last:border-b-0">
-                      <td class="p-4">
-                        <div class="flex items-center gap-3">
-                          <img
-                            [src]="item.product.thumbnail"
-                            [alt]="item.product.name"
-                            class="w-20 h-20 object-cover">
-                          <span class="text-sm text-black">{{ item.product.name }}</span>
-                        </div>
-                      </td>
-                      <td class="p-4 text-sm text-black text-center">{{ item.number_of_products }}</td>
-                      <td class="p-4 text-sm text-black text-center">
-                        {{ item.price | currency:'VND':'symbol':'1.0-0':'vi' }}
-                      </td>
-                      <td class="p-4 text-sm text-black text-center font-medium">
-                        {{ item.total_money | currency:'VND':'symbol':'1.0-0':'vi' }}
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
+        <div class="space-y-4">
+          <div>
+            <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Họ và tên</p>
+            <p class="text-sm text-black">{{ orderResponse.fullname }}</p>
           </div>
 
-          <!-- Tổng giá -->
-          <div class="text-right">
-            <h4 class="text-lg font-medium text-black">
-              Tổng giá: {{ orderResponse.total_money | currency:'VND':'symbol':'1.0-0':'vi' }}
-            </h4>
+          <div>
+            <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Email</p>
+            <p class="text-sm text-black">{{ orderResponse.email }}</p>
+          </div>
+
+          <div>
+            <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Số điện thoại</p>
+            <p class="text-sm text-black">{{ orderResponse.phone_number }}</p>
+          </div>
+
+          <div>
+            <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Địa chỉ</p>
+            <p class="text-sm text-black">{{ orderResponse.address }}</p>
+          </div>
+
+          <div>
+            <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Ghi chú</p>
+            <p class="text-sm text-black">{{ orderResponse.note || 'Không có' }}</p>
+          </div>
+
+          <div>
+            <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Phương thức vận chuyển</p>
+            <p class="text-sm text-black">{{ orderResponse.shipping_method }}</p>
+          </div>
+
+          <div>
+            <p class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-1">Phương thức thanh toán</p>
+            <p class="text-sm text-black">{{ orderResponse.payment_method }}</p>
           </div>
         </div>
       </div>
+
+      <!-- Cột phải: Sản phẩm đã đặt hàng -->
+      <div>
+        <h2 class="text-lg font-medium text-black mb-6">Sản phẩm đã đặt hàng</h2>
+
+        <!-- Bảng sản phẩm -->
+        <div class="border border-gray-200 mb-6">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b border-gray-200 bg-gray-50">
+                  <th class="p-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wide">Sản phẩm</th>
+                  <th class="p-4 text-center text-xs font-medium text-gray-600 uppercase tracking-wide">Số lượng</th>
+                  <th class="p-4 text-center text-xs font-medium text-gray-600 uppercase tracking-wide">Đơn giá</th>
+                  <th class="p-4 text-center text-xs font-medium text-gray-600 uppercase tracking-wide">Tổng giá</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for(item of orderResponse.order_details; track item.product_name) {
+                <tr class="border-b border-gray-200 last:border-b-0">
+                  <td class="p-4">
+                    <div class="flex items-center gap-3">
+                      <img [src]="item.thumbnail" [alt]="item.product_name" class="w-20 h-20 object-cover">
+                      <span class="text-sm text-black">{{ item.product_name }}</span>
+                    </div>
+                  </td>
+                  <td class="p-4 text-sm text-black text-center">{{ item.number_of_products }}</td>
+                  <td class="p-4 text-sm text-black text-center">
+                    {{ item.price | currency:'VND':'symbol':'1.0-0':'vi' }}
+                  </td>
+                  <td class="p-4 text-sm text-black text-center font-medium">
+                    {{ item.total_money | currency:'VND':'symbol':'1.0-0':'vi' }}
+                  </td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tổng giá -->
+        <div class="text-right">
+          <h4 class="text-lg font-medium text-black">
+            Tổng giá: {{ orderResponse.total_money | currency:'VND':'symbol':'1.0-0':'vi' }}
+          </h4>
+        </div>
+      </div>
+    </div>
     }
   </div>
 </div>

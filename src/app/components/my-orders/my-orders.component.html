@@ -1,0 +1,67 @@
+<app-header></app-header>
+
+<div class="orders-page">
+    <div class="container">
+        <h1 class="page-title">Lịch sử đơn hàng</h1>
+
+        <div *ngIf="isLoading" class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i> Đang tải đơn hàng...
+        </div>
+
+        <div *ngIf="!isLoading && orders.length === 0" class="empty-state">
+            <i class="fas fa-box-open"></i>
+            <p>Bạn chưa có đơn hàng nào.</p>
+            <a routerLink="/home" class="btn-shop-now">Mua sắm ngay</a>
+        </div>
+
+        <div class="orders-list" *ngIf="orders.length > 0">
+            <div class="order-card" *ngFor="let order of orders">
+                <!-- Order Header -->
+                <div class="order-header">
+                    <div class="order-info">
+                        <span class="order-id">Đơn hàng #{{ order.id }}</span>
+                        <span class="order-date">{{ order.order_date | date:'dd/MM/yyyy HH:mm' }}</span>
+                    </div>
+                    <div class="order-status" [ngClass]="getStatusClass(order.status)">
+                        {{ getStatusText(order.status) }}
+                    </div>
+                </div>
+
+                <!-- Order Details (Products) -->
+                <div class="order-items">
+                    <div class="order-item" *ngFor="let detail of order.order_details">
+                        <div class="item-image">
+                            <!-- Placeholder nếu không có ảnh, hoặc xử lý URL trong TS -->
+                            <img [src]="detail.thumbnail ? ('http://localhost:8088/api/v1/products/images/' + detail.thumbnail) : 'assets/images/product-placeholder.png'"
+                                alt="{{ detail.product_name }}"
+                                onerror="this.src='assets/images/product-placeholder.png'">
+                        </div>
+                        <div class="item-details">
+                            <h4 class="item-name">{{ detail.product_name }}</h4>
+                            <div class="item-meta">
+                                <span *ngIf="detail.color">Màu: {{ detail.color }}</span>
+                                <span *ngIf="detail.number_of_products">SL: {{ detail.number_of_products }}</span>
+                            </div>
+                        </div>
+                        <div class="item-price">
+                            {{ detail.price | currency:'VND':'symbol':'1.0-0':'vi' }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Footer -->
+                <div class="order-footer">
+                    <div class="shipping-info">
+                        <small><i class="fas fa-map-marker-alt"></i> {{ order.address }}</small>
+                    </div>
+                    <div class="order-total">
+                        <span>Tổng tiền:</span>
+                        <span class="total-amount">{{ order.total_money | currency:'VND':'symbol':'1.0-0':'vi' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<app-footer></app-footer>

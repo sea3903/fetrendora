@@ -1,13 +1,32 @@
-<div class="payment-callback">
+<div class="payment-callback-container">
     @if (loading) {
-    <p>Đang xử lý thanh toán...</p>
+    <div class="status-card loading">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <h2>Đang xử lý thanh toán...</h2>
+        <p>Vui lòng đợi trong giây lát.</p>
+    </div>
     }
 
     @if (!loading && paymentSuccess) {
-    <p>Thanh toán thành công!</p>
+    <div class="status-card success">
+        <i class="fas fa-check-circle icon"></i>
+        <h2>Thanh toán thành công!</h2>
+        <p>Cảm ơn bạn đã mua hàng. Hệ thống sẽ chuyển hướng bạn đến trang đơn hàng trong giây lát.</p>
+        <div class="redirect-info">
+            <div class="spinner-border spinner-border-sm text-success" role="status"></div>
+            <span>Đang chuyển hướng...</span>
+        </div>
+    </div>
     }
 
     @if (!loading && !paymentSuccess) {
-    <p>Thanh toán thất bại. Vui lòng thử lại.</p>
+    <div class="status-card error">
+        <i class="fas fa-times-circle icon"></i>
+        <h2>Thanh toán thất bại</h2>
+        <p>Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.</p>
+        <button class="btn btn-primary" routerLink="/checkout">Thử lại</button>
+    </div>
     }
 </div>

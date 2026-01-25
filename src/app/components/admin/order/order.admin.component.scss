@@ -1,28 +1,307 @@
-@use '../../../styles/shared-styles.scss' as *;
+@import "../../../../styles.scss";
 
-.page-number {
+// Trendora Variables
+$primary: #1a1a1a;
+$accent: #4CAF50;
+$accent-dark: #43A047;
+$danger: #dc3545;
+$warning: #ffb700;
+$text: #333;
+$text-muted: #666;
+$border: #e0e0e0;
+$bg-light: #f8f9fa;
+$white: #fff;
+$shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+.order-admin-page {
+    padding: 0;
+}
+
+// Header
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid $border;
+
+    h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: $primary;
+    }
+}
+
+// Search Bar
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+
+    .search-input-wrapper {
+        flex: 1;
+        max-width: 400px;
+        position: relative;
+
+        i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: $text-muted;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 12px 12px 42px;
+            border: 1px solid $border;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+
+            &:focus {
+                outline: none;
+                border-color: $accent;
+            }
+        }
+    }
+
+    .btn-search {
+        background: $accent;
+        color: $white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+
+        &:hover {
+            background: $accent-dark;
+        }
+    }
+}
+
+// Table
+.table-container {
+    background: $white;
+    border-radius: 12px;
+    box-shadow: $shadow;
+    overflow: hidden;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead {
+        background: $bg-light;
+
+        th {
+            padding: 12px 14px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: $text-muted;
+            border-bottom: 1px solid $border;
+            white-space: nowrap;
+        }
+    }
+
+    tbody {
+        tr {
+            &:hover {
+                background: rgba($accent, 0.03);
+            }
+
+            &:not(:last-child) td {
+                border-bottom: 1px solid $border;
+            }
+        }
+
+        td {
+            padding: 12px 14px;
+            vertical-align: middle;
+            font-size: 0.9rem;
+            color: $text;
+        }
+    }
+
+    // Column resizing
+    .col-id {
+        width: 10%;
+        font-weight: 600;
+    }
+
+    .col-customer {
+        width: 25%;
+    }
+
+    .col-date {
+        width: 15%;
+    }
+
+    .col-status {
+        width: 15%;
+    }
+
+    .col-total {
+        width: 15%;
+        font-weight: 600;
+    }
+
+    .col-actions {
+        width: 20%;
+    }
+
+    .main-text {
+        font-weight: 600;
+        color: $primary;
+    }
+
+    .customer-name {
+        font-weight: 500;
+    }
+
+    .customer-phone {
+        font-size: 0.8rem;
+        color: $text-muted;
+    }
+}
+
+// Action Buttons
+.action-btns {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
     cursor: pointer;
-    padding: 5px 10px;
-    border: 1px solid #ccc;
-    margin: 0 2px;
-    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+
+    &.edit {
+        background: rgba($primary, 0.1);
+        color: $primary;
+
+        &:hover {
+            background: $primary;
+            color: $white;
+        }
+    }
+
+    &.warning {
+        background: rgba($warning, 0.1);
+        color: #d4a017;
+
+        &:hover {
+            background: $warning;
+            color: $white;
+        }
+    }
+
+    &.delete {
+        background: rgba($danger, 0.1);
+        color: $danger;
+
+        &:hover {
+            background: $danger;
+            color: $white;
+        }
+    }
 }
 
-.page-number.active {
-    background-color: $shopapp-color !important;
-    color: #fff;
-    border-color: $shopapp-color !important;
+// Status Badges
+.badge-status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    display: inline-block;
+
+    &.pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    &.processing {
+        background-color: #d1ecf1;
+        color: #0c5460;
+    }
+
+    &.shipped {
+        background-color: #cce5ff;
+        color: #004085;
+    }
+
+    &.delivered {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    &.cancelled {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
 }
 
-.btn.btn-primary {
-    margin-left: 10px;
+// Empty State
+.empty-state {
+    text-align: center;
+    padding: 48px !important;
+    color: $text-muted;
+
+    i {
+        font-size: 3rem;
+        margin-bottom: 12px;
+        opacity: 0.3;
+    }
 }
-.container-fluid {
-    background-color: white;
-    padding-left: 0 !important; /* Remove left padding */
-    padding-right: 0 !important; /* Remove right padding */
-    height: 100vh;
-}
-.button-primary {
-    white-space: nowrap;
+
+// Pagination
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+
+    .page-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: 1px solid $border;
+        background: $white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $text;
+
+        &:hover:not(:disabled) {
+            border-color: $accent;
+            color: $accent;
+        }
+
+        &.active {
+            background: $accent;
+            border-color: $accent;
+            color: $white;
+        }
+
+        &:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+    }
 }

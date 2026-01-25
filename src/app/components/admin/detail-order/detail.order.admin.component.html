@@ -1,56 +1,188 @@
-<h1>This is detail order admin</h1>
-<div class="container">
-  <h1>Order Details</h1>
-  
+<div class="category-admin-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h2>Chi Tiết Đơn Hàng #{{ orderId }}</h2>
+    </div>
+    <button class="btn-secondary" (click)="goBack()">
+      <i class="fas fa-arrow-left"></i> Quay lại
+    </button>
+  </div>
+
   <div class="row">
-    <div class="col-md-6">
-      <h3>Order Information</h3>
-      <p><strong>Order ID:</strong> {{ orderResponse.id }}</p>
-      <p><strong>User ID:</strong> {{ orderResponse.user_id }}</p>
-      <p><strong>Full Name:</strong> {{ orderResponse.fullname }}</p>
-      <p><strong>Phone Number:</strong> {{ orderResponse.phone_number }}</p>
-      <p><strong>Email:</strong> {{ orderResponse.email }}</p>
-      <p><strong>Address:</strong> {{ orderResponse.address }}</p>
-      <p><strong>Note:</strong> {{ orderResponse.note }}</p>
-      <p><strong>Order Date:</strong> {{ orderResponse.order_date | date }}</p>
-      
-      <div class="form-group">
-        <label for="statusSelect"><strong>Status:</strong></label>
-        <select class="form-control" id="statusSelect" 
-          [(ngModel)]="orderResponse.status">
-          <option value="pending">Pending</option>
-          <option value="processing">Processing</option>
-          <option value="shipped">Shipped</option>
-          <option value="delivered">Delivered</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-      </div>          
-  </div>  
-  <h3>Order Details</h3>
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Product</th>
-        <th>Price</th>
-        <th>Quantity</th>
-        <!--<th>Total</th>-->
-      </tr>
-    </thead>
-    <tbody>
-      @for(order_detail of orderResponse.order_details; 
-        track order_detail.product.name) {
-          <tr>
-            <td>{{ order_detail.product.name }}</td>
-            <td>
-              <p>{{order_detail.product.price}}</p>          
-            <td>
-              <p>{{order_detail.number_of_products}}</p>          
-            </td>
-            <!--<td>{{ order_detail.total_money }}</td>-->
-          </tr>
-      }      
-    </tbody>
-  </table>  
-  <button class="btn btn-primary col-md-2" 
-    (click)="saveOrder()">Save</button>
+    <!-- Left Column: Order Info & Status -->
+    <div class="col-lg-4">
+      <!-- Status Card -->
+      <div class="card mb-4"
+        style="background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
+        <div class="card-header" style="background: #f8f9fa; padding: 16px 20px; border-bottom: 1px solid #e0e0e0;">
+          <h3
+            style="margin: 0; font-size: 1rem; font-weight: 600; color: #333; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-info-circle" style="color: #4CAF50;"></i> Trạng Thái
+          </h3>
+        </div>
+        <div class="card-body" style="padding: 24px;">
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">Trạng thái hiện
+              tại</label>
+            <select class="form-select" [(ngModel)]="orderResponse.status" (change)="onStatusChange()"
+              style="width: 100%; padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 8px;">
+              <option value="pending">Chờ xử lý</option>
+              <option value="processing">Đang xử lý</option>
+              <option value="shipped">Đang giao hàng</option>
+              <option value="delivered">Đã giao hàng</option>
+              <option value="cancelled">Đã hủy</option>
+            </select>
+          </div>
+          @if(orderResponse.status == 'cancelled') {
+          <div class="alert alert-danger" role="alert"
+            style="background-color: #ffe3e3; color: #dc3545; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem; border: 1px solid rgba(220, 53, 69, 0.2);">
+            <i class="fas fa-exclamation-triangle"></i> Lưu ý: Hủy đơn hàng sẽ tự động hoàn lại số lượng tồn kho.
+          </div>
+          }
+          <button class="btn-primary w-100" (click)="updateStatus()">
+            Cập nhật trạng thái
+          </button>
+        </div>
+      </div>
+
+      <!-- Customer Info -->
+      <div class="card mb-4"
+        style="background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
+        <div class="card-header" style="background: #f8f9fa; padding: 16px 20px; border-bottom: 1px solid #e0e0e0;">
+          <h3
+            style="margin: 0; font-size: 1rem; font-weight: 600; color: #333; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-user" style="color: #4CAF50;"></i> Khách Hàng
+          </h3>
+        </div>
+        <div class="card-body" style="padding: 24px;">
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">Họ tên</label>
+            <input type="text" [(ngModel)]="orderResponse.fullname"
+              style="width: 100%; padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 8px;">
+          </div>
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">Email</label>
+            <input type="email" [(ngModel)]="orderResponse.email"
+              style="width: 100%; padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 8px;">
+          </div>
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">Số điện thoại</label>
+            <input type="text" [(ngModel)]="orderResponse.phone_number"
+              style="width: 100%; padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 8px;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Shipping & Items -->
+    <div class="col-lg-8">
+      <!-- Order Items -->
+      <div class="card mb-4"
+        style="background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
+        <div class="card-header" style="background: #f8f9fa; padding: 16px 20px; border-bottom: 1px solid #e0e0e0;">
+          <h3
+            style="margin: 0; font-size: 1rem; font-weight: 600; color: #333; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-box" style="color: #4CAF50;"></i> Sản Phẩm ({{ orderResponse.order_details.length }})
+          </h3>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th class="col-product">Sản Phẩm</th>
+                  <th class="col-qty">SL</th>
+                  <th class="col-price">Đơn Giá</th>
+                  <th class="col-total">Thành Tiền</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for(item of orderResponse.order_details; track item.id) {
+                <tr>
+                  <td class="col-product">
+                    <div class="product-info">
+                      <img [src]="item.thumbnail" alt="Product" class="product-thumb">
+                      <div>
+                        <div class="product-name">{{ item.product_name }}</div>
+                        @if(item.color) { <span class="badge-color">Màu: {{ item.color }}</span> }
+                      </div>
+                    </div>
+                  </td>
+                  <td class="col-qty">{{ item.number_of_products }}</td>
+                  <td class="col-price">{{ item.price | number }} đ</td>
+                  <td class="col-total">{{ item.price * item.number_of_products | number }} đ</td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="summary-section" style="padding: 16px 24px; background: #f8f9fa; border-top: 1px solid #e0e0e0;">
+            <div class="summary-row total"
+              style="display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 700; color: #1a1a1a;">
+              <span>Tổng Tiền Thanh Toán:</span>
+              <span>{{ orderResponse.total_money | number }} đ</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping Info -->
+      <div class="card mb-4"
+        style="background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden;">
+        <div class="card-header" style="background: #f8f9fa; padding: 16px 20px; border-bottom: 1px solid #e0e0e0;">
+          <h3
+            style="margin: 0; font-size: 1rem; font-weight: 600; color: #333; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-shipping-fast" style="color: #4CAF50;"></i> Giao Hàng
+          </h3>
+        </div>
+        <div class="card-body" style="padding: 24px;">
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">Địa chỉ giao hàng</label>
+            <input type="text" [(ngModel)]="orderResponse.address"
+              style="width: 100%; padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 8px;">
+          </div>
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">Ghi chú</label>
+            <textarea rows="3" [(ngModel)]="orderResponse.note"
+              style="width: 100%; padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 8px;"></textarea>
+          </div>
+          <div class="row">
+            <div class="col-md-6 form-group" style="margin-bottom: 20px;">
+              <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">Phương thức vận
+                chuyển</label>
+              <input type="text" [(ngModel)]="orderResponse.shipping_method"
+                style="width: 100%; padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 8px;">
+            </div>
+            <div class="col-md-6 form-group" style="margin-bottom: 20px;">
+              <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">Phương thức thanh
+                toán</label>
+              <input type="text" [(ngModel)]="orderResponse.payment_method" readonly
+                style="width: 100%; padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f8f9fa; cursor: not-allowed; color: #666;">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 form-group" style="margin-bottom: 20px;">
+              <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">Ngày đặt hàng</label>
+              <input type="text" [value]="orderResponse.order_date | date:'dd/MM/yyyy'" readonly
+                style="width: 100%; padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f8f9fa; cursor: not-allowed; color: #666;">
+            </div>
+            <div class="col-md-6 form-group" style="margin-bottom: 20px;">
+              <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">Ngày giao hàng (Dự
+                kiến)</label>
+              <input type="date" [ngModel]="orderResponse.shipping_date | date:'yyyy-MM-dd'"
+                (ngModelChange)="orderResponse.shipping_date = $event"
+                style="width: 100%; padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 8px;">
+            </div>
+          </div>
+          <div class="modal-actions" style="display: flex; justify-content: flex-end; margin-top: 24px;">
+            <button class="btn-primary" (click)="saveOrderInfo()">
+              <i class="fas fa-save"></i> Lưu Thông Tin
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

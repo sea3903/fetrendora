@@ -28,8 +28,7 @@
           @for(item of cartItems; track item.product.id; let i = $index) {
           <div class="cart-item">
             <!-- Checkbox -->
-            <input type="checkbox" class="item-checkbox" [checked]="item.selected"
-              (change)="toggleItemSelection(item.product.id)">
+            <input type="checkbox" class="item-checkbox" [checked]="item.selected" (change)="toggleItemSelection(i)">
 
             <!-- Product Image -->
             <img [src]="item.product.thumbnail" [alt]="item.product.name" class="item-image"
@@ -39,7 +38,6 @@
             <div class="item-info">
               <a [routerLink]="['/products', item.product.id]" class="item-name">{{ item.product.name }}</a>
               <!-- Thuộc tính đã chọn -->
-              @if(item.variant?.colorName || item.variant?.sizeName) {
               <div class="item-attrs">
                 @if(item.variant?.sizeName) {
                 <span class="attr-tag">{{ item.variant?.sizeName }}</span>
@@ -47,8 +45,11 @@
                 @if(item.variant?.colorName) {
                 <span class="attr-tag">{{ item.variant?.colorName }}</span>
                 }
+                @if(item.variant?.originName) {
+                <span class="attr-tag">{{ item.variant?.originName }}</span>
+                }
               </div>
-              }
+
             </div>
 
             <!-- Giá + Số lượng + Tổng (cùng hàng) -->
@@ -64,7 +65,7 @@
             </div>
 
             <!-- Delete -->
-            <button class="item-delete" (click)="removeItem(item.product.id)">
+            <button class="item-delete" (click)="removeItem(i)">
               <i class="fas fa-trash-alt"></i>
             </button>
           </div>

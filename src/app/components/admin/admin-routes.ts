@@ -16,6 +16,8 @@ import { BrandAdminComponent } from "./brand/brand.admin.component";
 import { ColorAdminComponent } from "./color/color.admin.component";
 import { OriginAdminComponent } from "./origin/origin.admin.component";
 import { SizeAdminComponent } from "./size/size.admin.component";
+import { CouponComponent } from "./coupon/coupon.component";
+import { DetailCouponComponent } from "./coupon/detail-coupon/detail-coupon.component";
 
 export const adminRoutes: Routes = [
     {
@@ -81,6 +83,22 @@ export const adminRoutes: Routes = [
                 path: 'sizes',
                 component: SizeAdminComponent
             },
+
+            // ═══════════════════════════════════════════════════════════════
+            // COUPON MANAGEMENT
+            // ═══════════════════════════════════════════════════════════════
+            {
+                path: 'coupons',
+                component: CouponComponent
+            },
+            {
+                path: 'coupons/insert',
+                component: DetailCouponComponent
+            },
+            {
+                path: 'coupons/update/:id',
+                component: DetailCouponComponent
+            }
         ]
     }
 ];

@@ -32,6 +32,15 @@ export class HomeComponent extends BaseComponent implements OnInit {
   pages: number[] = [];
   totalPages: number = 0;
   visiblePages: number[] = [];
+
+  // Banner Slide Config
+  banners: string[] = [
+    'https://cdn.hstatic.net/files/1000184601/file/1910x770__2__fbe43212b6954e7f8aa2019217a5c249.jpg',
+    'https://cdn.hstatic.net/files/1000184601/file/1910x770__1__55bc721e92c2419ea46aabe86ab0aac4.jpg'
+  ];
+  currentBannerIndex: number = 0;
+  bannerInterval: any;
+
   keyword: string = "";
   localStorage?: Storage | undefined;
   apiBaseUrl = environment.apiBaseUrl;
@@ -57,6 +66,36 @@ export class HomeComponent extends BaseComponent implements OnInit {
     });
     this.getProducts(this.keyword, this.selectedCategoryId, this.currentPage, this.itemsPerPage);
     this.getCategories();
+    this.startBannerSlide();
+  }
+
+  ngOnDestroy() {
+    if (this.bannerInterval) {
+      clearInterval(this.bannerInterval);
+    }
+  }
+
+  startBannerSlide() {
+    this.bannerInterval = setInterval(() => {
+      this.nextBanner();
+    }, 5000); // 5 seconds
+  }
+
+  nextBanner() {
+    this.currentBannerIndex = (this.currentBannerIndex + 1) % this.banners.length;
+  }
+
+  prevBanner() {
+    this.currentBannerIndex = (this.currentBannerIndex - 1 + this.banners.length) % this.banners.length;
+  }
+
+  goToBanner(index: number) {
+    this.currentBannerIndex = index;
+    // Reset timer on manual interaction
+    if (this.bannerInterval) {
+      clearInterval(this.bannerInterval);
+      this.startBannerSlide();
+    }
   }
 
 

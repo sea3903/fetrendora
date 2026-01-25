@@ -1,0 +1,50 @@
+<div class="coupon-admin-page">
+    <div class="page-header">
+        <div class="header-content">
+            <h2>Quản lý Mã giảm giá</h2>
+        </div>
+        <button class="btn-primary" (click)="insertCoupon()">
+            <i class="fas fa-plus"></i> Thêm mới
+        </button>
+    </div>
+
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Mã Code</th>
+                    <th>Trạng thái</th>
+                    <th style="text-align: center;">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let coupon of coupons">
+                    <td>#{{ coupon.id }}</td>
+                    <td>
+                        <span class="badge badge-info">{{ coupon.code }}</span>
+                    </td>
+                    <td>
+                        <span *ngIf="coupon.active" class="badge badge-success">Hoạt động</span>
+                        <span *ngIf="!coupon.active" class="badge badge-secondary">Tạm ngừng</span>
+                    </td>
+                    <td style="text-align: center;">
+                        <button class="btn-icon edit" (click)="updateCoupon(coupon.id!)" title="Chỉnh sửa">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-icon delete" (click)="deleteCoupon(coupon.id!)" title="Xóa">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr *ngIf="coupons.length === 0">
+                    <td colspan="4">
+                        <div class="empty-state">
+                            Chưa có mã giảm giá nào
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,15 +1,16 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Product } from '../../models/product';
 import { environment } from '../../../environments/environment';
 import { HeaderComponent } from '../header/header.component';
 import { FooterComponent } from '../footer/footer.component';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { ApiResponse } from '../../responses/api.response';
 import { HttpErrorResponse } from '@angular/common/http';
 import { BaseComponent } from '../base/base.component';
 import { CartItem } from '../../services/cart.service';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin, of } from 'rxjs';
+import { ProductDetailService } from '../../services/product-detail.service';
 
 interface VariantInfo {
   colorName?: string;
@@ -22,6 +23,7 @@ interface CartItemWithProduct {
   quantity: number;
   selected: boolean;
   variant?: VariantInfo;
+  productDetailId?: number;
 }
 
 @Component({
@@ -41,8 +43,10 @@ export class OrderComponent extends BaseComponent implements OnInit, OnDestroy {
   totalAmount: number = 0;
   selectedCount: number = 0;
   isAllSelected: boolean = false;
+  isValidatingStock: boolean = false;
 
   private cartSubscription?: Subscription;
+  private productDetailService = inject(ProductDetailService);
 
   constructor() {
     super();
@@ -74,16 +78,6 @@ export class OrderComponent extends BaseComponent implements OnInit, OnDestroy {
     this.productService.getProductsByIds(productIds).subscribe({
       next: (apiResponse: ApiResponse) => {
         const products: Product[] = apiResponse.data || [];
-
-        interface CartItemWithProduct {
-          product: Product;
-          quantity: number;
-          selected: boolean;
-          variant?: VariantInfo;
-          productDetailId?: number; // Thêm field này để xác định biến thể
-        }
-
-        // ... (giữa các đoạn code)
 
         this.cartItems = cartItems.map(cartItem => {
           const product = products.find(p => p.id === cartItem.productId);
@@ -125,10 +119,10 @@ export class OrderComponent extends BaseComponent implements OnInit, OnDestroy {
   decreaseQuantity(index: number): void {
     if (this.cartItems[index].quantity > 1) {
       this.cartItems[index].quantity--;
-      this.cartService.updateQuantity(
-        this.cartItems[index].product.id,
-        this.cartItems[index].quantity
-      );
+      const item = this.cartItems[index];
+      // FIX logic: Dùng productDetailId làm key nếu có
+      const key = item.productDetailId || item.product.id;
+      this.cartService.updateQuantity(key, item.quantity);
       this.calculateTotal();
     }
   }
@@ -136,19 +130,21 @@ export class OrderComponent extends BaseComponent implements OnInit, OnDestroy {
   // Tăng số lượng
   increaseQuantity(index: number): void {
     this.cartItems[index].quantity++;
-    this.cartService.updateQuantity(
-      this.cartItems[index].product.id,
-      this.cartItems[index].quantity
-    );
+    const item = this.cartItems[index];
+    // FIX logic: Dùng productDetailId làm key nếu có
+    const key = item.productDetailId || item.product.id;
+    this.cartService.updateQuantity(key, item.quantity);
     this.calculateTotal();
   }
 
-  // Toggle checkbox một item
-  toggleItemSelection(productId: number): void {
-    const item = this.cartItems.find(i => i.product.id === productId);
+  // Toggle checkbox một item (nhận index thay vì ID để chuẩn xác)
+  toggleItemSelection(index: number): void {
+    const item = this.cartItems[index];
     if (item) {
       item.selected = !item.selected;
-      this.cartService.toggleSelection(productId);
+      // FIX logic: Dùng productDetailId làm key nếu có
+      const key = item.productDetailId || item.product.id;
+      this.cartService.toggleSelection(key);
       this.calculateTotal();
       this.updateSelectionState();
     }
@@ -170,12 +166,20 @@ export class OrderComponent extends BaseComponent implements OnInit, OnDestroy {
       this.cartItems.every(item => item.selected);
   }
 
-  // Xóa sản phẩm
-  removeItem(productId: number): void {
-    this.cartService.removeItem(productId);
-    this.cartItems = this.cartItems.filter(item => item.product.id !== productId);
-    this.calculateTotal();
-    this.updateSelectionState();
+  // Xóa sản phẩm (nhận index thay vì ID)
+  removeItem(index: number): void {
+    const item = this.cartItems[index];
+    if (item) {
+      // FIX logic: Dùng productDetailId làm key nếu có
+      const key = item.productDetailId || item.product.id;
+      this.cartService.removeItem(key); // Gọi service xóa đúng item
+
+      // Xóa khỏi list local
+      this.cartItems.splice(index, 1);
+
+      this.calculateTotal();
+      this.updateSelectionState();
+    }
   }
 
   // Tính tổng tiền (chỉ các item được chọn)
@@ -186,7 +190,7 @@ export class OrderComponent extends BaseComponent implements OnInit, OnDestroy {
     this.selectedCount = this.cartItems.filter(item => item.selected).length;
   }
 
-  // Chuyển đến trang thanh toán
+  // Chuyển đến trang thanh toán - có kiểm tra tồn kho
   proceedToCheckout(): void {
     if (this.selectedCount === 0) {
       this.toastService.showToast({
@@ -196,7 +200,63 @@ export class OrderComponent extends BaseComponent implements OnInit, OnDestroy {
       });
       return;
     }
-    // Navigate đến trang checkout
-    this.router.navigate(['/checkout']);
+
+    // Lấy các item đã chọn có productDetailId
+    const selectedItems = this.cartItems.filter(item => item.selected);
+    const itemsWithVariant = selectedItems.filter(item => item.productDetailId);
+
+    // Nếu không có variant nào cần check -> đi thẳng checkout
+    if (itemsWithVariant.length === 0) {
+      this.router.navigate(['/checkout']);
+      return;
+    }
+
+    // Kiểm tra tồn kho cho từng variant
+    this.isValidatingStock = true;
+    const stockChecks = itemsWithVariant.map(item =>
+      this.productDetailService.getById(item.productDetailId!)
+    );
+
+    forkJoin(stockChecks).subscribe({
+      next: (responses: ApiResponse[]) => {
+        this.isValidatingStock = false;
+        const outOfStockItems: string[] = [];
+
+        responses.forEach((response, index) => {
+          const variant = response.data;
+          const cartItem = itemsWithVariant[index];
+
+          if (variant && cartItem.quantity > variant.stock_quantity) {
+            // Tên sản phẩm + thông tin variant
+            let itemName = cartItem.product.name;
+            if (cartItem.variant?.colorName) itemName += ` - ${cartItem.variant.colorName}`;
+            if (cartItem.variant?.sizeName) itemName += ` - ${cartItem.variant.sizeName}`;
+            if (cartItem.variant?.originName) itemName += ` - ${cartItem.variant.originName}`;
+            outOfStockItems.push(`${itemName}: còn ${variant.stock_quantity}, bạn chọn ${cartItem.quantity}`);
+          }
+        });
+
+        if (outOfStockItems.length > 0) {
+          this.toastService.showToast({
+            error: null,
+            defaultMsg: `Số lượng vượt quá tồn kho:\n${outOfStockItems.join('\n')}`,
+            title: 'Không đủ hàng'
+          });
+        } else {
+          // Đồng bộ cart trước khi chuyển trang
+          selectedItems.forEach(item => {
+            const key = item.productDetailId || item.product.id;
+            this.cartService.updateQuantity(key, item.quantity);
+          });
+          this.router.navigate(['/checkout']);
+        }
+      },
+      error: (error: HttpErrorResponse) => {
+        this.isValidatingStock = false;
+        console.error('Error checking stock:', error);
+        // Nếu lỗi API, vẫn cho đi checkout (backend sẽ check lại)
+        this.router.navigate(['/checkout']);
+      }
+    });
   }
 }

@@ -202,14 +202,29 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
                 next: (apiResponse: ApiResponse) => {
                     this.finalAmount = apiResponse.data;
                     this.discountAmount = this.totalAmount - this.finalAmount;
-                    this.couponApplied = true;
-                    this.toastService.showToast({
-                        error: null,
-                        defaultMsg: 'Áp dụng mã giảm giá thành công!',
-                        title: 'Thành công'
-                    });
+
+                    if (this.discountAmount > 0) {
+                        this.couponApplied = true;
+                        this.toastService.showToast({
+                            error: null,
+                            defaultMsg: 'Áp dụng mã giảm giá thành công!',
+                            title: 'Thành công'
+                        });
+                    } else {
+                        // Trường hợp mã đúng nhưng không áp dụng được (do điều kiện chưa thỏa)
+                        this.couponApplied = false;
+                        this.finalAmount = this.totalAmount; // Reset về giá gốc
+                        this.discountAmount = 0;
+
+                        this.toastService.showToast({
+                            error: null, // Dùng config warning nếu có, hoặc hiển thị như lỗi nhẹ
+                            defaultMsg: 'Mã giảm giá hợp lệ nhưng chưa đủ điều kiện áp dụng (VD: chưa đạt giá trị tối thiểu).',
+                            title: 'Chưa đủ điều kiện'
+                        });
+                    }
                 },
                 error: (error: HttpErrorResponse) => {
+                    this.couponApplied = false;
                     this.toastService.showToast({
                         error: error,
                         defaultMsg: 'Mã giảm giá không hợp lệ',
@@ -275,7 +290,7 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
                     title: 'Thành công'
                 });
 
-                this.router.navigate(['/orders']);
+                this.router.navigate(['/my-orders']);
             },
             error: (error: HttpErrorResponse) => {
                 this.isSubmitting = false;

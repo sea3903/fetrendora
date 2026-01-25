@@ -1,0 +1,163 @@
+// Variables
+$primary: #1a1a1a;
+$primary-light: #333333;
+$accent: #4CAF50;
+$accent-dark: #43A047;
+$danger: #dc3545;
+$text: #333;
+$text-muted: #666;
+$border: #e0e0e0;
+$bg-light: #f8f9fa;
+$white: #fff;
+$shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+.coupon-admin-page {
+    padding: 0;
+}
+
+// Header
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid $border;
+
+    h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: $primary;
+    }
+}
+
+// Buttons
+.btn-primary {
+    background: $accent;
+    color: $white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+
+    &:hover {
+        background: $accent-dark;
+    }
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    margin-right: 4px;
+
+    &.edit {
+        background: rgba($accent, 0.1);
+        color: $accent;
+
+        &:hover {
+            background: $accent;
+            color: $white;
+        }
+    }
+
+    &.delete {
+        background: rgba($danger, 0.1);
+        color: $danger;
+
+        &:hover {
+            background: $danger;
+            color: $white;
+        }
+    }
+}
+
+// Table
+.table-container {
+    background: $white;
+    border-radius: 12px;
+    box-shadow: $shadow;
+    overflow: hidden;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead {
+        background: $bg-light;
+
+        th {
+            padding: 12px 14px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: $text-muted;
+            border-bottom: 1px solid $border;
+            text-align: left;
+        }
+    }
+
+    tbody {
+        tr {
+            &:hover {
+                background: rgba($accent, 0.03);
+            }
+
+            &:not(:last-child) td {
+                border-bottom: 1px solid $border;
+            }
+        }
+
+        td {
+            padding: 12px 14px;
+            vertical-align: middle;
+            color: $text;
+        }
+    }
+}
+
+// Status Badges
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+
+    &.badge-success {
+        background: rgba($accent, 0.1);
+        color: $accent;
+    }
+
+    &.badge-secondary {
+        background: rgba($text-muted, 0.1);
+        color: $text-muted;
+    }
+
+    &.badge-info {
+        background: rgba($primary, 0.1);
+        color: $primary;
+        font-family: monospace;
+        font-size: 1rem;
+    }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 32px;
+    color: $text-muted;
+    background: $bg-light;
+    border-radius: 8px;
+}

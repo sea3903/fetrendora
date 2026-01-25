@@ -43,7 +43,12 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
   productDetails: ProductDetail[] = [];
   selectedColorId?: number;
   selectedSizeId?: number;
+  selectedOriginId?: number;
   selectedVariant?: ProductDetail;
+
+  // Dynamic Selling Attributes
+  requiredAttributes: Set<string> = new Set();
+  hasSellingAttributesConfig: boolean = false; // true nếu sản phẩm có cấu hình selling_attributes
 
   // Yêu thích
   isFavorite: boolean = false;
@@ -105,7 +110,21 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
           });
         }
         this.product = response;
+
+        // Parse selling attributes
+        this.requiredAttributes.clear();
+        this.hasSellingAttributesConfig = false;
+        if (this.product?.selling_attributes && this.product.selling_attributes.trim() !== '') {
+          this.hasSellingAttributesConfig = true;
+          const attrs = this.product.selling_attributes.split(',').map(s => s.trim().toLowerCase());
+          attrs.forEach(a => this.requiredAttributes.add(a));
+        }
+
         this.showImage(0);
+        // Nếu product details đã load trước đó
+        if (this.productDetails.length > 0) {
+          this.checkInitialSelection();
+        }
       },
       error: (error: HttpErrorResponse) => {
         this.toastService.showToast({
@@ -121,13 +140,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
     this.productDetailService.getByProductId(this.productId).subscribe({
       next: (apiResponse: ApiResponse) => {
         this.productDetails = apiResponse.data || [];
-        // Tự động chọn variant đầu tiên nếu có
-        if (this.productDetails.length > 0) {
-          const firstVariant = this.productDetails[0];
-          this.selectedColorId = firstVariant.color_id;
-          this.selectedSizeId = firstVariant.size_id;
-          this.updateSelectedVariant();
-        }
+        this.checkInitialSelection();
       },
       error: () => {
         // Không hiển thị lỗi nếu không có variants
@@ -247,6 +260,22 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
     return Array.from(sizeMap.values());
   }
 
+  // Lấy danh sách xuất xứ duy nhất từ variants
+  getUniqueOrigins(): ProductDetail[] {
+    const originMap = new Map<number, ProductDetail>();
+    this.productDetails.forEach(variant => {
+      if (variant.origin_id && variant.origin_name && !originMap.has(variant.origin_id)) {
+        originMap.set(variant.origin_id, variant);
+      }
+    });
+    return Array.from(originMap.values());
+  }
+
+  selectOrigin(originId: number) {
+    this.selectedOriginId = originId;
+    this.updateSelectedVariant();
+  }
+
   selectColor(colorId: number) {
     this.selectedColorId = colorId;
     this.selectedSizeId = undefined;
@@ -258,19 +287,75 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
     this.updateSelectedVariant();
   }
 
-  updateSelectedVariant() {
-    if (!this.selectedColorId && !this.selectedSizeId) {
-      this.selectedVariant = undefined;
+  checkInitialSelection() {
+    if (!this.productDetails || this.productDetails.length === 0) return;
+
+    // Nếu không có config selling_attributes -> Giữ logic cũ (auto chọn cái đầu)
+    if (!this.hasSellingAttributesConfig) {
+      const firstVariant = this.productDetails[0];
+      this.selectedColorId = firstVariant.color_id;
+      this.selectedSizeId = firstVariant.size_id;
+      this.selectedOriginId = firstVariant.origin_id;
+      this.updateSelectedVariant();
       return;
     }
 
-    const variant = this.productDetails.find(v => {
-      const colorMatch = !this.selectedColorId || v.color_id === this.selectedColorId;
-      const sizeMatch = !this.selectedSizeId || v.size_id === this.selectedSizeId;
-      return colorMatch && sizeMatch;
-    });
+    // Nếu có config -> Reset selection, chỉ auto-select những cái NON-REQUIRED nếu có thể xác định ngay
+    this.selectedColorId = undefined;
+    this.selectedSizeId = undefined;
+    this.selectedOriginId = undefined;
+    this.selectedVariant = undefined;
 
-    this.selectedVariant = variant;
+    // Nếu chỉ có 1 variant duy nhất -> Chọn luôn bất kể config
+    if (this.productDetails.length === 1) {
+      const v = this.productDetails[0];
+      this.selectedColorId = v.color_id;
+      this.selectedSizeId = v.size_id;
+      this.selectedOriginId = v.origin_id;
+      this.updateSelectedVariant();
+    }
+  }
+
+  // Cập nhật logic chọn variant động
+  updateSelectedVariant() {
+    // 1. Tìm các variant khớp với những gì User ĐÃ chọn (chỉ xét các field required đã chọn)
+    let candidates = this.productDetails;
+
+    if (this.requiredAttributes.has('color') && this.selectedColorId) {
+      candidates = candidates.filter(v => v.color_id === this.selectedColorId);
+    }
+    if (this.requiredAttributes.has('size') && this.selectedSizeId) {
+      candidates = candidates.filter(v => v.size_id === this.selectedSizeId);
+    }
+    if (this.requiredAttributes.has('origin') && this.selectedOriginId) {
+      candidates = candidates.filter(v => v.origin_id === this.selectedOriginId);
+    }
+
+    // 2. Nếu đã chọn đủ các Required Attributes
+    const isColorSelected = !this.requiredAttributes.has('color') || !!this.selectedColorId;
+    const isSizeSelected = !this.requiredAttributes.has('size') || !!this.selectedSizeId;
+    const isOriginSelected = !this.requiredAttributes.has('origin') || !!this.selectedOriginId;
+
+    if (isColorSelected && isSizeSelected && isOriginSelected && candidates.length > 0) {
+      // Tìm best match (ưu tiên còn hàng)
+      const bestMatch = candidates.find(v => v.stock_quantity > 0) || candidates[0];
+      this.selectedVariant = bestMatch;
+
+      // Auto-fill các thuộc tính KHÔNG required (lấy từ bestMatch)
+      if (!this.requiredAttributes.has('color')) this.selectedColorId = bestMatch.color_id;
+      if (!this.requiredAttributes.has('size')) this.selectedSizeId = bestMatch.size_id;
+      if (!this.requiredAttributes.has('origin')) this.selectedOriginId = bestMatch.origin_id;
+    } else {
+      this.selectedVariant = undefined;
+      // Vẫn có thể auto-fill UI cho các option non-required dựa trên candidates gộp?
+      // Tạm thời chưa cần complex logic này để tránh rối UI
+    }
+  }
+
+  // Helper để kiểm tra có cần hiển thị section chọn không
+  shouldShowAttribute(attrName: string): boolean {
+    if (!this.hasSellingAttributesConfig) return true; // Hiện all nếu không config
+    return this.requiredAttributes.has(attrName);
   }
 
   isSizeAvailable(sizeId: number): boolean {
@@ -345,6 +430,16 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
 
   // === Cart ===
   addToCart(): void {
+    if (!this.isLoggedIn) {
+      this.toastService.showToast({
+        error: null,
+        defaultMsg: 'Vui lòng đăng nhập để mua hàng',
+        title: 'Yêu cầu đăng nhập'
+      });
+      this.router.navigate(['/login']);
+      return;
+    }
+
     if (!this.product) {
       this.toastService.showToast({
         error: null,
@@ -355,9 +450,23 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
     }
 
     if (this.productDetails.length > 0 && !this.selectedVariant) {
+      let msg = 'Vui lòng chọn đầy đủ thuộc tính sản phẩm';
+
+      // Gợi ý cụ thể hơn nếu có config
+      if (this.hasSellingAttributesConfig) {
+        const missing = [];
+        if (this.requiredAttributes.has('color') && !this.selectedColorId) missing.push('Màu sắc');
+        if (this.requiredAttributes.has('size') && !this.selectedSizeId) missing.push('Kích thước');
+        if (this.requiredAttributes.has('origin') && !this.selectedOriginId) missing.push('Xuất xứ');
+
+        if (missing.length > 0) {
+          msg = `Vui lòng chọn: ${missing.join(', ')}`;
+        }
+      }
+
       this.toastService.showToast({
         error: null,
-        defaultMsg: 'Vui lòng chọn màu sắc và kích thước',
+        defaultMsg: msg,
         title: 'Thông báo'
       });
       return;
@@ -382,10 +491,20 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
   }
 
   buyNow(): void {
+    if (!this.isLoggedIn) {
+      this.toastService.showToast({
+        error: null,
+        defaultMsg: 'Vui lòng đăng nhập để mua hàng',
+        title: 'Yêu cầu đăng nhập'
+      });
+      this.router.navigate(['/login']);
+      return;
+    }
+
     if (this.isPressedAddToCart == false) {
       this.addToCart();
     }
-    this.router.navigate(['/orders']);
+    this.router.navigate(['/orders']); // Lưu ý: route đúng có thể là /cart hoặc /checkout tùy logic
   }
 
   // === Comments/Reviews ===
@@ -453,5 +572,12 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
       month: 'long',
       day: 'numeric'
     });
+  }
+
+  // Format description: chuyển \n thành <br> và xử lý HTML cơ bản
+  formatDescription(text: string | undefined): string {
+    if (!text) return '';
+    // Chuyển \n thành <br>
+    return text.replace(/\n/g, '<br>');
   }
 }

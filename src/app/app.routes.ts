@@ -18,6 +18,7 @@ import { ForgotPasswordComponent } from './components/forgot-password/forgot-pas
 import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 import { PaymentCallbackComponent } from './payment-callback/payment-callback.component';
 import { CheckoutComponent } from './components/checkout/checkout.component';
+import { MyOrdersComponent } from './components/my-orders/my-orders.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -34,9 +35,13 @@ export const routes: Routes = [
   { path: 'cart', component: OrderComponent, canActivate: [AuthGuardFn] },
   // Thanh toán
   { path: 'checkout', component: CheckoutComponent, canActivate: [AuthGuardFn] },
-  // Đơn hàng của tôi
+  // Lịch sử đơn hàng (MỚI)
+  { path: 'my-orders', component: MyOrdersComponent, canActivate: [AuthGuardFn] },
+
+  // Route orders cũ trỏ về detail - giữ nguyên để không break link khác
   { path: 'orders', component: OrderDetailComponent, canActivate: [AuthGuardFn] },
   { path: 'orders/:id', component: OrderDetailComponent },
+
   { path: 'user-profile', component: UserProfileComponent, canActivate: [AuthGuardFn] },
 
   { path: 'change-password', component: ChangePasswordComponent, canActivate: [AuthGuardFn] },
