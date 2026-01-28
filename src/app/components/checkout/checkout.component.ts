@@ -195,9 +195,10 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
     }
 
     applyCoupon(): void {
-        if (!this.couponCode || this.couponApplied) return;
+        const code = this.couponCode.trim();
+        if (!code || this.couponApplied) return;
 
-        this.couponService.calculateCouponValue(this.couponCode, this.totalAmount)
+        this.couponService.calculateCouponValue(code, this.totalAmount)
             .subscribe({
                 next: (apiResponse: ApiResponse) => {
                     this.finalAmount = apiResponse.data;

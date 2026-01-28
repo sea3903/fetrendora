@@ -1,0 +1,81 @@
+<app-header></app-header>
+
+<div class="coupon-gallery-page">
+    <div class="container">
+        <div class="page-header">
+            <button class="btn-back" (click)="goBack()">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </button>
+            <h1>🎉 Kho ưu đãi & Mã giảm giá</h1>
+            <p>Săn ngay mã giảm giá hot nhất để mua sắm thả ga!</p>
+        </div>
+
+        <div *ngIf="loading" class="loading-state">
+            <div class="spinner"></div>
+            <p>Đang tải ưu đãi...</p>
+        </div>
+
+        <div *ngIf="!loading && activeCoupons.length === 0" class="empty-state">
+            <i class="fas fa-ticket-alt"></i>
+            <h3>Chưa có mã giảm giá nào hiện tại</h3>
+            <p>Hãy quay lại sau nhé!</p>
+        </div>
+
+        <div class="coupon-grid" *ngIf="!loading && activeCoupons.length > 0">
+            <div class="coupon-card" *ngFor="let coupon of activeCoupons" [ngClass]="coupon.scope">
+                <div class="card-left">
+                    <div class="discount-badge">
+                        <span class="val" *ngIf="coupon.discount_type === 'PERCENT'">-{{coupon.discount_value}}%</span>
+                        <span class="val" *ngIf="coupon.discount_type === 'FIXED'">-{{coupon.discount_value |
+                            number}}đ</span>
+                    </div>
+                    <div class="scope-icon">
+                        <i class="fas" [ngClass]="{
+                            'fa-store': coupon.scope === 'global',
+                            'fa-tshirt': coupon.scope === 'category', 
+                            'fa-box-open': coupon.scope === 'product'
+                        }"></i>
+                    </div>
+                </div>
+
+                <div class="card-right">
+                    <div class="header">
+                        <span class="scope-tag" [ngClass]="coupon.scope">
+                            {{ coupon.scope === 'global' ? 'Toàn Shop' : (coupon.scope === 'category' ? 'Danh mục' :
+                            'Sản phẩm') }}
+                        </span>
+                        <span class="expiry" *ngIf="coupon.endDateParsed">HSD: {{ coupon.endDateParsed | date:'dd/MM'
+                            }}</span>
+                    </div>
+
+                    <h3 class="title" [title]="coupon.name">{{ coupon.name }}</h3>
+                    <p class="desc" *ngIf="coupon.description">{{ coupon.description }}</p>
+
+                    <div class="detail-info" *ngIf="coupon.scope === 'category' || coupon.scope === 'product'">
+                        <small>Áp dụng cho: <strong>{{ coupon.categoryName || coupon.productName || '...'
+                                }}</strong></small>
+                    </div>
+
+                    <div class="condition" *ngIf="coupon.min_order_value && coupon.min_order_value > 0">
+                        <small class="text-muted"><i class="fas fa-info-circle"></i> Đơn tối thiểu: {{
+                            coupon.min_order_value | number }}đ</small>
+                    </div>
+
+                    <div class="action-area">
+                        <div class="code-box" (click)="copyCode(coupon.code)">
+                            <span class="code">{{ coupon.code }}</span>
+                            <i class="far fa-copy"></i>
+                        </div>
+                        <button class="btn-apply" (click)="copyCode(coupon.code)">Sao chép</button>
+                    </div>
+                </div>
+
+                <!-- Deco circles -->
+                <div class="circle top"></div>
+                <div class="circle bottom"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<app-footer></app-footer>

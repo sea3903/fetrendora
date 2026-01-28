@@ -1,3 +1,5 @@
+@use "sass:color";
+
 // Variables
 $primary: #1a1a1a;
 $accent: #4CAF50; // Green
@@ -58,7 +60,7 @@ $white: #fff;
     transition: background 0.2s;
 
     &:hover {
-        background: lighten($primary, 10%);
+        background: color.scale($primary, $lightness: 10%);
     }
 }
 
@@ -111,22 +113,22 @@ $white: #fff;
 
         &.status-pending {
             background: rgba($warning, 0.15);
-            color: darken($warning, 15%);
+            color: color.scale($warning, $lightness: -15%);
         }
 
         &.status-processing {
             background: rgba($info, 0.15);
-            color: darken($info, 15%);
+            color: color.scale($info, $lightness: -15%);
         }
 
         &.status-shipped {
             background: rgba($accent, 0.15);
-            color: darken($accent, 15%);
+            color: color.scale($accent, $lightness: -15%);
         }
 
         &.status-delivered {
             background: rgba($accent, 0.2);
-            color: darken($accent, 20%);
+            color: color.scale($accent, $lightness: -20%);
         }
 
         &.status-cancelled {

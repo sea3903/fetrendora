@@ -1,50 +1,337 @@
-<div class="coupon-admin-page">
+<div class="coupon-page">
+    <!-- Header -->
     <div class="page-header">
-        <div class="header-content">
-            <h2>Quản lý Mã giảm giá</h2>
+        <div class="header-left">
+            <h2>Quản lý mã giảm giá</h2>
         </div>
-        <button class="btn-primary" (click)="insertCoupon()">
-            <i class="fas fa-plus"></i> Thêm mới
-        </button>
+        <div class="header-right">
+            <button class="btn-primary" (click)="openCreateModal()">
+                <i class="fas fa-plus"></i> Thêm mới
+            </button>
+        </div>
     </div>
 
+    <!-- Search Bar -->
+    <div class="search-bar">
+        <div class="search-box">
+            <div class="search-input-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" [(ngModel)]="couponSearchKeyword" placeholder="Tìm theo mã hoặc tên..."
+                    (keyup.enter)="searchCoupons()">
+            </div>
+            <button class="btn-search" (click)="searchCoupons()">Tìm kiếm</button>
+        </div>
+    </div>
+
+    <!-- Table -->
     <div class="table-container">
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Mã Code</th>
-                    <th>Trạng thái</th>
-                    <th style="text-align: center;">Hành động</th>
+                    <th class="text-center" style="width: 50px;">STT</th>
+                    <th>Mã code</th>
+                    <th>Tên chương trình</th>
+                    <th>Phạm vi</th>
+                    <th>Loại giảm</th>
+                    <th>Thời gian</th>
+                    <th class="text-center">Thao tác</th>
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let coupon of coupons">
-                    <td>#{{ coupon.id }}</td>
+                <tr *ngFor="let coupon of paginatedCoupons; let i = index" [class.inactive-row]="!coupon.active">
+                    <td class="text-center">{{ currentPage * itemsPerPage + i + 1 }}</td>
+                    <td class="code-cell">
+                        <span class="code-highlight">{{ coupon.code }}</span>
+                        <div *ngIf="!coupon.active" class="status-tag-sm">Đã khóa</div>
+                    </td>
+                    <td>{{ coupon.name }}</td>
                     <td>
-                        <span class="badge badge-info">{{ coupon.code }}</span>
+                        <span class="scope-badge" [ngClass]="coupon.scope || 'global'">
+                            <ng-container [ngSwitch]="coupon.scope">
+                                <ng-container *ngSwitchCase="'product'">
+                                    <i class="fas fa-box"></i> Sản phẩm
+                                </ng-container>
+                                <ng-container *ngSwitchCase="'category'">
+                                    <i class="fas fa-folder"></i> Danh mục
+                                </ng-container>
+                                <ng-container *ngSwitchDefault>
+                                    <i class="fas fa-store"></i> Toàn shop
+                                </ng-container>
+                            </ng-container>
+                        </span>
+                        <div class="scope-detail" *ngIf="coupon.scope === 'category' && coupon.categoryName">
+                            {{ coupon.categoryName }}
+                        </div>
+                        <div class="scope-detail" *ngIf="coupon.scope === 'product' && coupon.productName">
+                            {{ coupon.productName }}
+                        </div>
                     </td>
                     <td>
-                        <span *ngIf="coupon.active" class="badge badge-success">Hoạt động</span>
-                        <span *ngIf="!coupon.active" class="badge badge-secondary">Tạm ngừng</span>
+                        <span class="badge" [ngClass]="(coupon.discount_type || '').toLowerCase()">
+                            {{ coupon.discount_type === 'PERCENT' ? 'Phần trăm' : 'Cố định' }}
+                        </span>
+                        <span class="value">
+                            -{{ coupon.discount_type === 'PERCENT' ? coupon.discount_value + '%' :
+                            (coupon.discount_value | number) + 'đ' }}
+                        </span>
                     </td>
-                    <td style="text-align: center;">
-                        <button class="btn-icon edit" (click)="updateCoupon(coupon.id!)" title="Chỉnh sửa">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-icon delete" (click)="deleteCoupon(coupon.id!)" title="Xóa">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
+                    <td>
+                        <div class="date-range">
+                            <div class="date-item">
+                                <span class="d-label">Bắt đầu:</span>
+                                <span class="d-value">{{ coupon.startDateParsed ? (coupon.startDateParsed |
+                                    date:'dd/MM/yyyy HH:mm') : 'N/A' }}</span>
+                            </div>
+                            <div class="date-item">
+                                <span class="d-label">Kết thúc:</span>
+                                <span class="d-value">{{ coupon.endDateParsed ? (coupon.endDateParsed | date:'dd/MM/yyyy
+                                    HH:mm') : 'N/A' }}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="text-center">
+                        <div class="action-btns">
+                            <button class="btn-icon toggle" (click)="toggleActivation(coupon)"
+                                [title]="coupon.active ? 'Tạm khóa' : 'Kích hoạt'">
+                                <i class="fas" [ngClass]="coupon.active ? 'fa-lock-open' : 'fa-lock'"></i>
+                            </button>
+                            <button class="btn-icon edit" (click)="openEditModal(coupon)" title="Sửa">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon delete" (click)="deleteCoupon(coupon.id!)" title="Xóa vĩnh viễn">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
-                <tr *ngIf="coupons.length === 0">
-                    <td colspan="4">
-                        <div class="empty-state">
-                            Chưa có mã giảm giá nào
-                        </div>
+                <tr *ngIf="paginatedCoupons.length === 0">
+                    <td colspan="7" class="empty-state">
+                        <i class="fas fa-ticket-alt"></i>
+                        <p>Không có mã giảm giá nào</p>
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container" *ngIf="totalPages > 1">
+        <button class="page-btn" [disabled]="currentPage === 0" (click)="onPageChange(0)">
+            <i class="fas fa-angle-double-left"></i>
+        </button>
+        <button class="page-btn" [disabled]="currentPage === 0" (click)="onPageChange(currentPage - 1)">
+            <i class="fas fa-angle-left"></i>
+        </button>
+
+        <button *ngFor="let page of visiblePages" class="page-btn" [class.active]="page === currentPage + 1"
+            (click)="onPageChange(page - 1)">
+            {{ page }}
+        </button>
+
+        <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(currentPage + 1)">
+            <i class="fas fa-angle-right"></i>
+        </button>
+        <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(totalPages - 1)">
+            <i class="fas fa-angle-double-right"></i>
+        </button>
+    </div>
+
+    <!-- Modal Form -->
+    <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>{{ modalMode === 'create' ? 'Thêm mới mã giảm giá' : 'Cập nhật mã giảm giá' }}</h3>
+                <button class="btn-close" (click)="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form [formGroup]="couponForm">
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Mã Code <span class="required">*</span></label>
+                            <input type="text" formControlName="code" placeholder="VD: SUMMER2024"
+                                [ngClass]="{'error': couponForm.get('code')?.invalid && couponForm.get('code')?.touched}">
+                            <div class="error-msg"
+                                *ngIf="couponForm.get('code')?.hasError('required') && couponForm.get('code')?.touched">
+                                Bắt buộc nhập
+                            </div>
+                            <div class="error-msg"
+                                *ngIf="couponForm.get('code')?.hasError('pattern') && couponForm.get('code')?.touched">
+                                Chỉ chứa chữ hoa và số
+                            </div>
+                        </div>
+                        <div class="form-group half">
+                            <label>Tên chương trình <span class="required">*</span></label>
+                            <input type="text" formControlName="name" placeholder="Tên hiển thị">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mô tả</label>
+                        <textarea formControlName="description" rows="2"></textarea>
+                    </div>
+
+                    <div class="section-title">Cấu hình giảm giá</div>
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Loại giảm</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" formControlName="discount_type" value="PERCENT">
+                                    <span class="radio-custom"></span> Phần trăm (%)
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" formControlName="discount_type" value="FIXED">
+                                    <span class="radio-custom"></span> Số tiền cố định
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group half">
+                            <label>Giá trị giảm <span class="required">*</span></label>
+                            <input type="number" formControlName="discount_value">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <!-- Chỉ hiện Max Discount cho Percent -->
+                        <div class="form-group half" *ngIf="couponForm.get('discount_type')?.value === 'PERCENT'">
+                            <label>Giảm tối đa (đ)</label>
+                            <input type="number" formControlName="max_discount_amount">
+                        </div>
+
+                        <!-- Luôn hiện Min Order Value -->
+                        <div class="form-group half"
+                            [ngClass]="{'full-width': couponForm.get('discount_type')?.value !== 'PERCENT'}">
+                            <label>Đơn tối thiểu (đ)</label>
+                            <input type="number" formControlName="min_order_value">
+                        </div>
+                    </div>
+
+                    <div class="section-title">Thời gian & Giới hạn</div>
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Bắt đầu <span class="required">*</span></label>
+                            <input type="datetime-local" formControlName="start_date">
+                        </div>
+                        <div class="form-group half">
+                            <label>Kết thúc <span class="required">*</span></label>
+                            <input type="datetime-local" formControlName="end_date">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Tổng lượt dùng</label>
+                            <input type="number" formControlName="usage_limit">
+                        </div>
+                        <div class="form-group half">
+                            <label>Lượt dùng/Người</label>
+                            <input type="number" formControlName="usage_limit_per_user">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" formControlName="active">
+                            <span class="checkmark"></span>
+                            <span>Kích hoạt mã ngay</span>
+                        </label>
+                    </div>
+
+                    <div class="section-title">Phạm vi áp dụng</div>
+
+                    <div class="scope-options">
+                        <label class="radio-label">
+                            <input type="radio" formControlName="scope" value="global">
+                            <span class="radio-custom"></span> Toàn shop
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" formControlName="scope" value="category">
+                            <span class="radio-custom"></span> Theo danh mục
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" formControlName="scope" value="product">
+                            <span class="radio-custom"></span> Theo sản phẩm
+                        </label>
+                    </div>
+
+                    <!-- Category Selector -->
+                    <div class="form-group" *ngIf="couponForm.get('scope')?.value === 'category'">
+                        <label>Chọn danh mục</label>
+                        <select formControlName="category_id">
+                            <option [ngValue]="null">-- Chọn danh mục --</option>
+                            <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+                        </select>
+                    </div>
+
+                    <!-- Product Selector -->
+                    <div class="form-group" *ngIf="couponForm.get('scope')?.value === 'product'">
+                        <label>Chọn sản phẩm</label>
+                        <div class="product-selector-trigger" (click)="openProductSelector()"
+                            [class.error]="couponForm.get('scope')?.value === 'product' && !selectedProduct && couponForm.get('product_id')?.touched">
+
+                            <div *ngIf="!selectedProduct" style="color: #666;">
+                                <i class="fas fa-search"></i> Nhấn để tìm sản phẩm...
+                            </div>
+
+                            <div *ngIf="selectedProduct" class="selected-product-preview">
+                                <img [src]="selectedProduct.url || 'assets/no-image.png'" alt="Product">
+                                <div class="info">
+                                    <span class="name">{{ selectedProduct.name }}</span>
+                                    <span class="price">{{ selectedProduct.price | number }}đ</span>
+                                </div>
+                                <div class="remove-product"
+                                    (click)="$event.stopPropagation(); selectedProduct = null; couponForm.patchValue({product_id: null})">
+                                    <i class="fas fa-times"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary" (click)="closeModal()">Hủy bỏ</button>
+                <button class="btn-primary" (click)="saveCoupon()" [disabled]="couponForm.invalid">
+                    <i class="fas fa-save"></i> Lưu lại
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Selector Modal (Nested) -->
+    <div class="modal-overlay product-selector-modal" *ngIf="showProductSelector" (click)="closeProductSelector()">
+        <div class="selector-modal" (click)="$event.stopPropagation()">
+            <div class="selector-header">
+                <h4>Chọn sản phẩm áp dụng</h4>
+                <button class="btn-close" (click)="closeProductSelector()"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="search-bar-sm">
+                <input type="text" [(ngModel)]="productSearchKeyword" (keyup.enter)="searchProducts()"
+                    placeholder="Tên sản phẩm...">
+                <button (click)="searchProducts()"><i class="fas fa-search"></i></button>
+            </div>
+
+            <div class="product-list-select">
+                <div class="product-item" *ngFor="let p of products" (click)="selectProduct(p)">
+                    <img [src]="p.url || 'assets/no-image.png'" alt="img">
+                    <div class="p-info">
+                        <div class="p-name">{{ p.name }}</div>
+                        <div class="p-price">{{ p.price | number }}đ</div>
+                    </div>
+                </div>
+                <div class="empty-state" *ngIf="products.length === 0">
+                    Không tìm thấy sản phẩm
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>

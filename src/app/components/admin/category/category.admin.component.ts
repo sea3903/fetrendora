@@ -8,6 +8,13 @@ import { ApiResponse } from '../../../responses/api.response';
 import { ToastService } from '../../../services/toast.service';
 import { HttpErrorResponse } from '@angular/common/http';
 
+// Tree node with expand state and children
+interface CategoryTreeNode extends Category {
+  children: CategoryTreeNode[];
+  expanded: boolean;
+  level: number;
+}
+
 @Component({
   selector: 'app-category-admin',
   templateUrl: './category.admin.component.html',
@@ -17,14 +24,15 @@ import { HttpErrorResponse } from '@angular/common/http';
 })
 export class CategoryAdminComponent implements OnInit {
   categories: Category[] = [];
-  filteredCategories: Category[] = [];
+  categoryTree: CategoryTreeNode[] = [];
+  flattenedTree: CategoryTreeNode[] = [];
   parentCategories: Category[] = [];
   loading = false;
   keyword = '';
 
   // Phân trang
   currentPage = 0;
-  itemsPerPage = 10;
+  itemsPerPage = 20;
   totalPages = 0;
   visiblePages: number[] = [];
 
@@ -57,7 +65,7 @@ export class CategoryAdminComponent implements OnInit {
       next: (response: ApiResponse) => {
         this.categories = response.data || [];
         this.parentCategories = this.categories.filter(c => !c.parentId);
-        this.applyFilter();
+        this.buildCategoryTree();
         this.loading = false;
       },
       error: (error: HttpErrorResponse) => {
@@ -71,31 +79,126 @@ export class CategoryAdminComponent implements OnInit {
     });
   }
 
-  applyFilter(): void {
-    let filtered = [...this.categories];
+  // =============== TREE BUILDING ===============
+  buildCategoryTree(): void {
+    // Convert flat list to tree structure
+    const nodeMap = new Map<number, CategoryTreeNode>();
+    const rootNodes: CategoryTreeNode[] = [];
 
-    if (this.keyword.trim()) {
-      const kw = this.keyword.toLowerCase().trim();
-      filtered = filtered.filter(c => c.name.toLowerCase().includes(kw));
+    // Create nodes
+    for (const cat of this.categories) {
+      const node: CategoryTreeNode = {
+        ...cat,
+        children: [],
+        expanded: true, // Default expanded
+        level: 0
+      };
+      nodeMap.set(cat.id, node);
     }
 
-    // Sắp xếp: danh mục cha trước, con sau
-    filtered.sort((a, b) => {
-      if (!a.parentId && b.parentId) return -1;
-      if (a.parentId && !b.parentId) return 1;
-      return a.name.localeCompare(b.name);
-    });
+    // Build hierarchy
+    for (const cat of this.categories) {
+      const node = nodeMap.get(cat.id)!;
+      if (cat.parentId && nodeMap.has(cat.parentId)) {
+        const parent = nodeMap.get(cat.parentId)!;
+        parent.children.push(node);
+        node.level = parent.level + 1;
+      } else {
+        rootNodes.push(node);
+      }
+    }
 
-    // Phân trang
-    this.totalPages = Math.ceil(filtered.length / this.itemsPerPage);
+    // Sort children alphabetically
+    const sortChildren = (nodes: CategoryTreeNode[]) => {
+      nodes.sort((a, b) => a.name.localeCompare(b.name));
+      for (const node of nodes) {
+        if (node.children.length > 0) {
+          sortChildren(node.children);
+        }
+      }
+    };
+    sortChildren(rootNodes);
+
+    this.categoryTree = rootNodes;
+    this.flattenTree();
+  }
+
+  flattenTree(): void {
+    const result: CategoryTreeNode[] = [];
+
+    const traverse = (nodes: CategoryTreeNode[], level: number) => {
+      for (const node of nodes) {
+        node.level = level;
+
+        // Apply keyword filter
+        if (this.keyword.trim()) {
+          const kw = this.keyword.toLowerCase();
+          const matches = node.name.toLowerCase().includes(kw);
+          const childMatches = this.hasMatchingChild(node, kw);
+          if (!matches && !childMatches) continue;
+        }
+
+        result.push(node);
+
+        if (node.expanded && node.children.length > 0) {
+          traverse(node.children, level + 1);
+        }
+      }
+    };
+
+    traverse(this.categoryTree, 0);
+
+    // Pagination
+    this.totalPages = Math.ceil(result.length / this.itemsPerPage);
     if (this.currentPage >= this.totalPages) {
       this.currentPage = Math.max(0, this.totalPages - 1);
     }
     const start = this.currentPage * this.itemsPerPage;
-    this.filteredCategories = filtered.slice(start, start + this.itemsPerPage);
+    this.flattenedTree = result.slice(start, start + this.itemsPerPage);
     this.updateVisiblePages();
   }
 
+  hasMatchingChild(node: CategoryTreeNode, keyword: string): boolean {
+    for (const child of node.children) {
+      if (child.name.toLowerCase().includes(keyword)) return true;
+      if (this.hasMatchingChild(child, keyword)) return true;
+    }
+    return false;
+  }
+
+  // =============== EXPAND/COLLAPSE ===============
+  toggleExpand(node: CategoryTreeNode): void {
+    node.expanded = !node.expanded;
+    this.flattenTree();
+  }
+
+  expandAll(): void {
+    const setExpanded = (nodes: CategoryTreeNode[], expanded: boolean) => {
+      for (const node of nodes) {
+        node.expanded = expanded;
+        if (node.children.length > 0) {
+          setExpanded(node.children, expanded);
+        }
+      }
+    };
+    setExpanded(this.categoryTree, true);
+    this.flattenTree();
+  }
+
+  collapseAll(): void {
+    const setExpanded = (nodes: CategoryTreeNode[], expanded: boolean) => {
+      for (const node of nodes) {
+        node.expanded = expanded;
+        if (node.children.length > 0) {
+          setExpanded(node.children, expanded);
+        }
+      }
+    };
+    setExpanded(this.categoryTree, false);
+    this.flattenTree();
+  }
+
+  // =============== PAGINATION ===============
   updateVisiblePages(): void {
     const pages: number[] = [];
     const maxVisible = 5;
@@ -114,24 +217,28 @@ export class CategoryAdminComponent implements OnInit {
 
   onPageChange(page: number): void {
     this.currentPage = page;
-    this.applyFilter();
+    this.flattenTree();
   }
 
   search(): void {
     this.currentPage = 0;
-    this.applyFilter();
+    this.flattenTree();
   }
 
-  // Modal
-  openCreateModal(): void {
+  // =============== MODAL ===============
+  openCreateModal(parentNode?: CategoryTreeNode): void {
     this.modalMode = 'create';
     this.editingCategory = null;
-    this.categoryForm = { name: '', parentId: null, slug: '' };
+    this.categoryForm = {
+      name: '',
+      parentId: parentNode ? parentNode.id : null,
+      slug: ''
+    };
     this.nameError = '';
     this.showModal = true;
   }
 
-  openEditModal(category: Category): void {
+  openEditModal(category: CategoryTreeNode): void {
     this.modalMode = 'edit';
     this.editingCategory = category;
     this.categoryForm = {
@@ -148,7 +255,7 @@ export class CategoryAdminComponent implements OnInit {
     this.editingCategory = null;
   }
 
-  // Validation
+  // =============== VALIDATION ===============
   validateName(): boolean {
     if (!this.categoryForm.name || !this.categoryForm.name.trim()) {
       this.nameError = 'Tên danh mục không được để trống';
@@ -166,7 +273,7 @@ export class CategoryAdminComponent implements OnInit {
     return true;
   }
 
-  // Save
+  // =============== SAVE ===============
   saveCategory(): void {
     if (!this.validateName()) return;
 
@@ -220,9 +327,14 @@ export class CategoryAdminComponent implements OnInit {
     }
   }
 
-  // Delete
-  deleteCategory(category: Category): void {
-    if (!confirm(`Bạn có chắc muốn xóa danh mục "${category.name}"?`)) return;
+  // =============== DELETE ===============
+  deleteCategory(category: CategoryTreeNode): void {
+    const hasChildren = category.children && category.children.length > 0;
+    const message = hasChildren
+      ? `Danh mục "${category.name}" có ${category.children.length} danh mục con. Bạn có chắc muốn xóa?`
+      : `Bạn có chắc muốn xóa danh mục "${category.name}"?`;
+
+    if (!confirm(message)) return;
 
     this.categoryService.deleteCategory(category.id).subscribe({
       next: () => {
@@ -240,5 +352,10 @@ export class CategoryAdminComponent implements OnInit {
         });
       }
     });
+  }
+
+  // =============== HELPERS ===============
+  getIndentStyle(level: number): object {
+    return { 'padding-left': `${level * 24 + 12}px` };
   }
 }

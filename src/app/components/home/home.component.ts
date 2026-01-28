@@ -1,8 +1,10 @@
-import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID, inject, OnDestroy } from '@angular/core';
 import { Product } from '../../models/product';
 import { Category } from '../../models/category';
 import { environment } from '../../../environments/environment';
 import { ApiResponse } from '../../responses/api.response';
+import { Coupon } from '../../models/coupon';
+import { CouponService } from '../../services/coupon.service';
 
 import { HeaderComponent } from '../header/header.component';
 import { FooterComponent } from '../footer/footer.component';
@@ -23,10 +25,10 @@ import { TokenService } from '../../services/token.service';
     FormsModule
   ]
 })
-export class HomeComponent extends BaseComponent implements OnInit {
+export class HomeComponent extends BaseComponent implements OnInit, OnDestroy {
   products: Product[] = [];
-  categories: Category[] = []; // Dữ liệu động từ categoryService
-  selectedCategoryId: number = 0; // Giá trị category được chọn
+  categories: Category[] = [];
+  selectedCategoryId: number = 0;
   currentPage: number = 0;
   itemsPerPage: number = 12;
   pages: number[] = [];
@@ -44,8 +46,12 @@ export class HomeComponent extends BaseComponent implements OnInit {
   keyword: string = "";
   localStorage?: Storage | undefined;
   apiBaseUrl = environment.apiBaseUrl;
-  favoriteProductIds: Set<number> = new Set(); // Danh sách ID sản phẩm đã yêu thích
+  favoriteProductIds: Set<number> = new Set();
   isLoggedIn: boolean = false;
+
+  // Flash Sale Logic
+  activeCoupons: Coupon[] = [];
+  override couponService = inject(CouponService);
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
     super();
@@ -59,6 +65,7 @@ export class HomeComponent extends BaseComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.loadActiveCoupons(); // Load coupons
     this.activatedRoute.queryParams.subscribe(params => {
       this.currentPage = Number(params['page']) || 0;
       this.keyword = params['keyword'] || '';
@@ -75,6 +82,30 @@ export class HomeComponent extends BaseComponent implements OnInit {
     }
   }
 
+  // --- Flash Sale Logic ---
+  private loadActiveCoupons() {
+    this.couponService.getCoupons().subscribe({
+      next: (response: ApiResponse) => {
+        this.activeCoupons = response.data.filter((c: Coupon) => c.active);
+      },
+      error: (err) => console.error('Failed to load coupons', err)
+    });
+  }
+
+  isFlashSale(product: Product): boolean {
+    if (!this.activeCoupons.length) return false;
+    // Check Product Specific
+    const productCoupon = this.activeCoupons.find(c => c.product_id === product.id);
+    if (productCoupon) return true;
+
+    // Check Category Specific
+    const categoryCoupon = this.activeCoupons.find(c => c.category_id === product.category_id);
+    if (categoryCoupon) return true;
+
+    return false;
+  }
+
+  // --- UI Logic ---
   startBannerSlide() {
     this.bannerInterval = setInterval(() => {
       this.nextBanner();
@@ -91,13 +122,11 @@ export class HomeComponent extends BaseComponent implements OnInit {
 
   goToBanner(index: number) {
     this.currentBannerIndex = index;
-    // Reset timer on manual interaction
     if (this.bannerInterval) {
       clearInterval(this.bannerInterval);
       this.startBannerSlide();
     }
   }
-
 
   getCategories() {
     this.categoryService.getCategories().subscribe({
@@ -153,15 +182,12 @@ export class HomeComponent extends BaseComponent implements OnInit {
     this.router.navigate(['/home'], { queryParams: { page: this.currentPage } });
   }
 
-  // Hàm xử lý sự kiện khi sản phẩm được bấm vào
   onProductClick(productId: number) {
-    // Điều hướng đến trang detail-product với productId là tham số
     this.router.navigate(['/products', productId]);
   }
 
-  // Toggle yêu thích sản phẩm
   toggleFavorite(event: Event, productId: number) {
-    event.stopPropagation(); // Ngăn chặn click vào sản phẩm
+    event.stopPropagation();
     if (!this.isLoggedIn) {
       this.toastService.showToast({
         error: null,
@@ -173,7 +199,6 @@ export class HomeComponent extends BaseComponent implements OnInit {
 
     const isFavorite = this.favoriteProductIds.has(productId);
     if (isFavorite) {
-      // Bỏ yêu thích
       this.productService.unlikeProduct(productId).subscribe({
         next: () => {
           this.favoriteProductIds.delete(productId);
@@ -192,7 +217,6 @@ export class HomeComponent extends BaseComponent implements OnInit {
         }
       });
     } else {
-      // Thêm yêu thích
       this.productService.likeProduct(productId).subscribe({
         next: () => {
           this.favoriteProductIds.add(productId);
@@ -213,12 +237,10 @@ export class HomeComponent extends BaseComponent implements OnInit {
     }
   }
 
-  // Kiểm tra sản phẩm có trong yêu thích không
   isFavorite(productId: number): boolean {
     return this.favoriteProductIds.has(productId);
   }
 
-  // Load danh sách sản phẩm yêu thích
   loadFavoriteProducts() {
     this.productService.getFavoriteProducts().subscribe({
       next: (apiResponse: ApiResponse) => {
@@ -226,7 +248,6 @@ export class HomeComponent extends BaseComponent implements OnInit {
         this.favoriteProductIds = new Set(favoriteProducts.map(p => p.id));
       },
       error: () => {
-        // Không hiển thị lỗi nếu chưa có yêu thích nào
       }
     });
   }

@@ -1,4 +1,4 @@
-// Variables
+// --- Variables (Matched to Color Admin) ---
 $primary: #1a1a1a;
 $primary-light: #333333;
 $accent: #4CAF50;
@@ -11,153 +11,894 @@ $bg-light: #f8f9fa;
 $white: #fff;
 $shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
+// --- Mixins ---
+@mixin flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// --- Main Layout ---
 .coupon-admin-page {
     padding: 0;
 }
 
-// Header
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid $border;
+.coupon-page {
+    padding: 0; // Remove extra padding if parent handles it
+    font-family: 'Inter', sans-serif;
+    background-color: transparent; // Let parent generic-page handle bg
+    min-height: auto;
 
-    h2 {
-        margin: 0;
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: $primary;
-    }
-}
+    // --- Header (Matched) ---
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid $border;
 
-// Buttons
-.btn-primary {
-    background: $accent;
-    color: $white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s;
-
-    &:hover {
-        background: $accent-dark;
-    }
-}
-
-.btn-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    margin-right: 4px;
-
-    &.edit {
-        background: rgba($accent, 0.1);
-        color: $accent;
-
-        &:hover {
-            background: $accent;
-            color: $white;
-        }
-    }
-
-    &.delete {
-        background: rgba($danger, 0.1);
-        color: $danger;
-
-        &:hover {
-            background: $danger;
-            color: $white;
-        }
-    }
-}
-
-// Table
-.table-container {
-    background: $white;
-    border-radius: 12px;
-    box-shadow: $shadow;
-    overflow: hidden;
-}
-
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-
-    thead {
-        background: $bg-light;
-
-        th {
-            padding: 12px 14px;
-            font-weight: 600;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            color: $text-muted;
-            border-bottom: 1px solid $border;
-            text-align: left;
-        }
-    }
-
-    tbody {
-        tr {
-            &:hover {
-                background: rgba($accent, 0.03);
-            }
-
-            &:not(:last-child) td {
-                border-bottom: 1px solid $border;
+        .header-left {
+            h2 {
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: $primary;
+                margin: 0;
             }
         }
 
-        td {
-            padding: 12px 14px;
-            vertical-align: middle;
+        .header-right {
+
+            // Search bar moved below header in Color Admin layout, but we can stick to structure or follow HTML changes
+            // If HTML places button here, style it:
+            .btn-primary {
+                background: $accent;
+                color: $white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-weight: 500;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                transition: all 0.2s;
+
+                &:hover {
+                    background: $accent-dark;
+                }
+            }
+        }
+    }
+
+    // --- Search Bar (Matched to Color Admin) ---
+    .search-bar {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+
+        .search-box {
+            // Wrapper
+            display: flex;
+            gap: 12px;
+            flex: 1;
+
+            .search-input-wrapper {
+                flex: 1;
+                max-width: 400px;
+                position: relative;
+
+                i {
+                    position: absolute;
+                    left: 14px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: $text-muted;
+                }
+
+                input {
+                    width: 100%;
+                    padding: 12px 12px 12px 42px;
+                    border: 1px solid $border;
+                    border-radius: 8px;
+                    font-size: 0.95rem;
+                    outline: none;
+
+                    &:focus {
+                        border-color: $accent;
+                    }
+                }
+            }
+
+            .btn-search {
+                background: $primary;
+                color: $white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-weight: 500;
+                cursor: pointer;
+
+                &:hover {
+                    background: $primary-light;
+                }
+            }
+        }
+    }
+
+    // --- Table (Matched) ---
+    .table-container {
+        background: $white;
+        border-radius: 12px;
+        box-shadow: $shadow;
+        overflow: hidden;
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+
+            thead {
+                background-color: $bg-light;
+                position: sticky;
+                top: 0;
+                z-index: 10;
+
+                th {
+                    padding: 12px 14px;
+                    text-align: left; // Color Admin uses specific aligns, we can default left
+                    font-size: 0.8rem;
+                    font-weight: 600;
+                    color: $text-muted;
+                    border-bottom: 1px solid $border;
+                    white-space: nowrap;
+                    text-transform: uppercase;
+
+                    &.text-center {
+                        text-align: center;
+                    }
+                }
+            }
+
+            tbody {
+                tr {
+                    border-bottom: 1px solid $border;
+                    background: $white;
+
+                    &:hover {
+                        background-color: rgba($accent, 0.03);
+                    }
+
+                    // Inactive Row Style
+                    &.inactive-row {
+                        background-color: #fafafa;
+
+                        td {
+                            color: #999;
+
+                            &.code-cell {
+                                color: #aaa;
+                            }
+                        }
+
+                        // Ensure lock icon is visible even in inactive row
+                        .btn-icon.toggle {
+                            opacity: 1;
+                        }
+
+                        &:hover {
+                            background-color: #f5f5f5;
+                        }
+                    }
+
+                    &:last-child {
+                        border-bottom: none;
+                    }
+
+                    td {
+                        padding: 12px 14px;
+                        font-size: 0.9rem;
+                        color: $text;
+                        vertical-align: middle;
+
+                        &.text-center {
+                            text-align: center;
+                        }
+
+                        &.code-cell {
+                            font-family: monospace;
+                            color: $text-muted;
+                            font-weight: 600;
+                            display: flex;
+                            flex-direction: column;
+                            gap: 4px;
+
+                            .code-highlight {
+                                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                color: white;
+                                padding: 4px 10px;
+                                border-radius: 6px;
+                                font-size: 12px;
+                                font-weight: 700;
+                                letter-spacing: 1px;
+                                display: inline-block;
+                                width: fit-content;
+                                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+                            }
+
+                            .status-tag-sm {
+                                font-size: 10px;
+                                background: #eee;
+                                color: #999;
+                                padding: 2px 6px;
+                                border-radius: 4px;
+                                width: fit-content;
+                            }
+                        }
+
+                        .scope-detail {
+                            font-size: 11px;
+                            color: #888;
+                            margin-top: 4px;
+                            font-style: italic;
+                        }
+
+                        .badge {
+                            padding: 4px 8px;
+                            border-radius: 4px;
+                            font-size: 11px;
+                            font-weight: 600;
+                            display: inline-block;
+                            margin-bottom: 4px;
+
+                            &.percent {
+                                background-color: rgba($primary, 0.1);
+                                color: $primary;
+                            }
+
+                            &.fixed {
+                                background-color: rgba($accent, 0.1);
+                                color: $accent;
+                            }
+                        }
+
+                        .scope-badge {
+                            padding: 4px 8px;
+                            border-radius: 4px;
+                            font-size: 11px;
+                            font-weight: 500;
+                            background: #f0f0f0;
+                            color: #666;
+                            display: inline-block; // Prevent collapsing
+
+                            &.global {
+                                background: rgba($primary, 0.05);
+                                color: $primary;
+                            }
+
+                            &.category {
+                                background: rgba($accent, 0.05);
+                                color: $accent-dark;
+                            }
+
+                            &.product {
+                                background: rgba(255, 152, 0, 0.1); // Orange for product
+                                color: #f57c00;
+                            }
+                        }
+
+                        .value {
+                            display: block;
+                            font-weight: 600;
+                            color: $danger;
+                        }
+
+                        .date-range {
+                            font-size: 0.85rem;
+                            line-height: 1.6;
+                            display: flex;
+                            flex-direction: column;
+                            gap: 4px;
+                            min-width: 160px;
+
+                            .date-item {
+                                display: flex;
+                                align-items: center;
+                                gap: 6px;
+                            }
+
+                            .d-label {
+                                font-size: 10px;
+                                color: #999;
+                                text-transform: uppercase;
+                                min-width: 55px;
+                            }
+
+                            .d-value {
+                                font-weight: 500;
+                                color: #333;
+                            }
+                        }
+
+                        // Actions
+                        .action-btns {
+                            display: flex;
+                            gap: 8px;
+                            justify-content: center;
+                        }
+
+                        .btn-icon {
+                            width: 32px;
+                            height: 32px;
+                            border-radius: 8px;
+                            border: none;
+                            cursor: pointer;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            transition: all 0.2s;
+                            background: transparent;
+
+                            i {
+                                font-size: 14px;
+                            }
+
+                            &.toggle {
+                                // Default (Active) state shows LOCK (to lock it)
+                                color: #f57c00;
+                                background: rgba(255, 152, 0, 0.1);
+
+                                &:hover {
+                                    background: #f57c00;
+                                    color: white;
+                                }
+                            }
+
+                            // When row is inactive, we might want different styling for the unlock button?
+                            // Logic is handled in HTML class binding fa-lock-open vs fa-lock
+                            // But maybe we want green for unlock?
+
+                            &.edit {
+                                color: $accent;
+                                background: rgba($accent, 0.1);
+
+                                &:hover {
+                                    background: $accent;
+                                    color: white;
+                                }
+                            }
+
+                            &.delete {
+                                color: $danger;
+                                background: rgba($danger, 0.1);
+
+                                &:hover {
+                                    background: $danger;
+                                    color: white;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                .empty-state {
+                    text-align: center;
+                    padding: 48px !important;
+                    color: $text-muted;
+
+                    i {
+                        font-size: 3rem;
+                        margin-bottom: 12px;
+                        opacity: 0.3;
+                    }
+
+                    p {
+                        margin: 0;
+                    }
+                }
+            }
+        }
+    }
+
+    // --- Pagination (Matched) ---
+    .pagination-container {
+        display: flex;
+        justify-content: center; // Centered like Color Admin
+        gap: 8px;
+        margin-top: 24px;
+
+        .page-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid $border;
+            background: $white;
+            border-radius: 8px;
+            cursor: pointer;
             color: $text;
+            transition: all 0.2s;
+
+            &:hover:not(:disabled) {
+                border-color: $accent;
+                color: $accent;
+            }
+
+            &.active {
+                background-color: $accent;
+                color: $white;
+                border-color: $accent;
+            }
+
+            &:disabled {
+                opacity: 0.4;
+                cursor: not-allowed;
+            }
+
+            i {
+                font-size: 12px;
+            }
         }
     }
 }
 
-// Status Badges
-.badge {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 500;
+// --- Modal (Matched Style) ---
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    @include flex-center;
+    animation: fadeIn 0.2s;
 
-    &.badge-success {
-        background: rgba($accent, 0.1);
-        color: $accent;
-    }
+    .modal-content {
+        background: $white;
+        width: 650px;
+        max-width: 95%;
+        max-height: 90vh;
+        border-radius: 16px; // Color Admin uses 16px
+        display: flex;
+        flex-direction: column;
+        animation: slideUp 0.3s;
 
-    &.badge-secondary {
-        background: rgba($text-muted, 0.1);
-        color: $text-muted;
-    }
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid $border;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
 
-    &.badge-info {
-        background: rgba($primary, 0.1);
-        color: $primary;
-        font-family: monospace;
-        font-size: 1rem;
+            h3 {
+                margin: 0;
+                font-size: 1.25rem;
+                font-weight: 600;
+                color: $primary;
+            }
+
+            .btn-close {
+                background: transparent;
+                border: none;
+                font-size: 1.25rem;
+                color: $text-muted;
+                cursor: pointer;
+                padding: 8px;
+                border-radius: 8px;
+
+                &:hover {
+                    background: $bg-light;
+                    color: $text;
+                }
+            }
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+
+            form {
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .form-row {
+                display: flex;
+                gap: 16px;
+
+                .form-group {
+                    &.half {
+                        flex: 1;
+                    }
+
+                    &.full {
+                        width: 100%;
+                    }
+                }
+            }
+
+            .section-title {
+                font-size: 0.9rem;
+                font-weight: 600;
+                color: $primary;
+                margin-top: 8px;
+                text-transform: uppercase;
+                border-bottom: 1px solid $border;
+                padding-bottom: 8px;
+            }
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+
+                label {
+                    font-size: 0.95rem;
+                    font-weight: 500;
+                    color: $text;
+
+                    .required {
+                        color: $danger;
+                    }
+                }
+
+                input[type="text"],
+                input[type="number"],
+                input[type="datetime-local"],
+                textarea,
+                select {
+                    padding: 12px 14px;
+                    border: 1px solid $border;
+                    border-radius: 8px;
+                    font-size: 0.95rem;
+                    width: 100%;
+                    outline: none;
+
+                    &:focus {
+                        border-color: $accent;
+                    }
+
+                    &.error {
+                        border-color: $danger;
+                    }
+                }
+
+                .input-wrapper {
+                    position: relative;
+
+                    input {
+                        padding-right: 30px;
+                    }
+
+                    .input-icon {
+                        position: absolute;
+                        right: 14px;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        color: $text-muted;
+                        pointer-events: none;
+                    }
+                }
+
+                textarea {
+                    resize: vertical;
+                }
+
+                .error-msg {
+                    color: $danger;
+                    font-size: 0.8rem;
+                    margin-top: 4px;
+                }
+            }
+
+            // --- Custom Radio & Checkbox ---
+            .radio-group {
+                display: flex;
+                gap: 24px;
+                align-items: center;
+                height: 48px;
+            }
+
+            .radio-label {
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+                font-size: 0.95rem;
+                user-select: none;
+
+                input {
+                    display: none;
+                    appearance: none;
+                }
+
+                .radio-custom {
+                    width: 20px;
+                    height: 20px;
+                    border: 2px solid $border;
+                    border-radius: 50%;
+                    margin-right: 10px;
+                    position: relative;
+                    transition: all 0.2s;
+
+                    &::after {
+                        content: '';
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%) scale(0);
+                        width: 10px;
+                        height: 10px;
+                        background-color: $accent;
+                        border-radius: 50%;
+                        transition: transform 0.2s;
+                    }
+                }
+
+                input:checked+.radio-custom {
+                    border-color: $accent;
+
+                    &::after {
+                        transform: translate(-50%, -50%) scale(1);
+                    }
+                }
+            }
+
+            .checkbox-label {
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+
+                input {
+                    display: none;
+                }
+
+                span {
+                    margin-left: 10px;
+                    font-weight: 500;
+                }
+            }
+
+            .scope-options {
+                display: flex;
+                gap: 24px;
+                padding: 10px 0;
+            }
+
+            // --- Product Selector Preview ---
+            .product-selector-trigger {
+                border: 1px dashed $border;
+                border-radius: 8px;
+                padding: 12px;
+                cursor: pointer;
+                min-height: 48px;
+                display: flex;
+                align-items: center;
+                transition: all 0.2s;
+
+                &:hover {
+                    border-color: $accent;
+                    background-color: rgba($accent, 0.05);
+                }
+
+                &.error {
+                    border-color: $danger;
+                }
+
+                .selected-product-preview {
+                    display: flex;
+                    align-items: center;
+                    width: 100%;
+
+                    img {
+                        width: 40px;
+                        height: 40px;
+                        object-fit: cover;
+                        border-radius: 8px;
+                        margin-right: 12px;
+                        border: 1px solid $border;
+                    }
+
+                    .info {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+
+                        .name {
+                            font-weight: 500;
+                            font-size: 0.9rem;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            max-width: 250px;
+                        }
+
+                        .price {
+                            font-size: 0.85rem;
+                            color: $danger;
+                            font-weight: 600;
+                        }
+                    }
+
+                    .remove-product {
+                        color: $text-muted;
+                        padding: 8px;
+
+                        &:hover {
+                            color: $danger;
+                        }
+                    }
+                }
+            }
+        }
+
+        .modal-actions {
+            padding: 20px 24px;
+            border-top: 1px solid $border;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: auto;
+
+            button {
+                padding: 10px 20px;
+                border-radius: 8px;
+                font-weight: 500;
+                cursor: pointer;
+                border: none;
+                transition: background 0.2s;
+
+                &.btn-secondary {
+                    background-color: transparent;
+                    color: $text;
+                    border: 1px solid $border;
+
+                    &:hover {
+                        background-color: $bg-light;
+                    }
+                }
+
+                &.btn-primary {
+                    background-color: $accent;
+                    color: $white;
+
+                    &:hover :not(:disabled) {
+                        background-color: $accent-dark;
+                    }
+
+                    &:disabled {
+                        opacity: 0.6;
+                        cursor: not-allowed;
+                    }
+
+                    i {
+                        margin-right: 5px;
+                    }
+                }
+            }
+        }
     }
 }
 
-.empty-state {
-    text-align: center;
-    padding: 32px;
-    color: $text-muted;
-    background: $bg-light;
-    border-radius: 8px;
+// --- Product Selector Modal Specifics ---
+.product-selector-modal {
+    z-index: 2050;
+
+    .search-bar-sm {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+
+        input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid $border;
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 0 16px;
+            background: $primary;
+            color: $white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    }
+
+    .product-list-select {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 400px;
+        overflow-y: auto;
+
+        .product-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid $border;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+
+            &:hover {
+                background-color: rgba($accent, 0.05);
+                border-color: $accent;
+            }
+
+            img {
+                width: 40px;
+                height: 40px;
+                object-fit: cover;
+                border-radius: 6px;
+                margin-right: 12px;
+            }
+
+            .p-info {
+                .p-name {
+                    font-weight: 500;
+                    font-size: 0.95rem;
+                }
+
+                .p-price {
+                    font-size: 0.85rem;
+                    color: $danger;
+                    font-weight: 600;
+                }
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: $text-muted;
+        }
+    }
+
+    .selector-modal {
+        background: $white;
+        border-radius: 12px;
+        padding: 20px;
+        width: 100%;
+        max-width: 500px;
+        display: flex;
+        flex-direction: column;
+
+        .selector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+
+            h4 {
+                margin: 0;
+                font-size: 1.1rem;
+            }
+        }
+    }
+}
+
+// Animations
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }

@@ -1,0 +1,93 @@
+<!-- Floating Chat Button -->
+<button class="chat-toggle-btn" (click)="toggleChat()" [class.hidden]="isOpen">
+    <i class="fas fa-comments"></i>
+    <span class="tooltip">Tư vấn sản phẩm</span>
+</button>
+
+<!-- Chat Window -->
+<div class="chat-window" [class.open]="isOpen">
+    <!-- Header -->
+    <div class="chat-header">
+        <div class="header-info">
+            <div class="avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="title">
+                <h4>Trợ lý Shop App</h4>
+                <span class="status">
+                    <span class="dot"></span> Online
+                </span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn-icon" (click)="clearHistory()" title="Xóa lịch sử">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+            <button class="btn-icon close" (click)="closeChat()" title="Đóng">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages" #messagesContainer>
+        <div *ngFor="let msg of messages" class="message" [ngClass]="msg.role">
+
+            <!-- Avatar -->
+            <div class="msg-avatar">
+                <i *ngIf="msg.role === 'assistant'" class="fas fa-robot"></i>
+                <i *ngIf="msg.role === 'user'" class="fas fa-user"></i>
+            </div>
+
+            <!-- Content -->
+            <div class="msg-content">
+                <div class="msg-bubble">
+                    <p [innerHTML]="msg.content"></p>
+                </div>
+
+                <!-- Product Suggestions -->
+                <div class="suggestions" *ngIf="msg.suggestions && msg.suggestions.length > 0">
+                    <div class="suggestion-card" *ngFor="let product of msg.suggestions" (click)="goToProduct(product)">
+                        <img [src]="getProductImageUrl(product.thumbnail)" [alt]="product.name"
+                            (error)="$any($event.target).src='assets/no-image.png'">
+                        <div class="product-info">
+                            <span class="name">{{ product.name }}</span>
+                            <span class="price">{{ formatPrice(product.price) }}</span>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+
+                <span class="msg-time">{{ formatTime(msg.timestamp) }}</span>
+            </div>
+        </div>
+
+        <!-- Loading indicator -->
+        <div class="message assistant loading" *ngIf="isLoading">
+            <div class="msg-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="msg-content">
+                <div class="msg-bubble typing">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input -->
+    <div class="chat-input">
+        <div class="input-wrapper">
+            <input type="text" #messageInput [(ngModel)]="userMessage" (keydown)="onKeyDown($event)"
+                placeholder="Nhập tin nhắn..." [disabled]="isLoading">
+            <button class="send-btn" (click)="sendMessage()" [disabled]="!userMessage.trim() || isLoading">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+        <div class="input-hint">
+            Nhấn Enter để gửi
+        </div>
+    </div>
+</div>

@@ -23,6 +23,7 @@ import { MyOrdersComponent } from './components/my-orders/my-orders.component';
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'home', component: HomeComponent },
+  { path: 'coupons', loadComponent: () => import('./components/common/coupon-gallery/coupon-gallery.component').then(m => m.CouponGalleryComponent) },
   { path: 'login', component: LoginComponent },
   { path: 'auth/google/callback', component: AuthCallbackComponent },
   { path: 'auth/facebook/callback', component: AuthCallbackComponent },

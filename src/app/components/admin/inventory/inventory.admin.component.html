@@ -1,0 +1,453 @@
+<div class="inventory-admin-page">
+  <!-- Header -->
+  <div class="page-header">
+    <h2>Quản lý kho</h2>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs-bar">
+    <button class="tab-btn" [class.active]="activeTab === 'stock'" (click)="switchTab('stock')">
+      <i class="fas fa-warehouse"></i> Tồn kho
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'report'" (click)="switchTab('report')">
+      <i class="fas fa-chart-bar"></i> Báo cáo tháng
+    </button>
+  </div>
+
+  <!-- ============ TAB: TỒN KHO ============ -->
+  <div class="tab-content" *ngIf="activeTab === 'stock'">
+    <!-- Search & Filter -->
+    <div class="search-bar">
+      <div class="search-input-wrapper">
+        <i class="fas fa-search"></i>
+        <input type="text" [(ngModel)]="searchKeyword" placeholder="Tìm theo tên sản phẩm, SKU..."
+          (keyup.enter)="onSearch()">
+      </div>
+      <select class="filter-select" [(ngModel)]="selectedStockStatus" (change)="onFilterChange()">
+        <option value="">Tất cả trạng thái</option>
+        <option value="NORMAL">Còn hàng</option>
+        <option value="LOW">Sắp hết</option>
+        <option value="OUT_OF_STOCK">Hết hàng</option>
+      </select>
+      <select class="filter-select" [(ngModel)]="selectedCategoryId" (change)="onFilterChange()">
+        <option [ngValue]="null">Tất cả danh mục</option>
+        <option *ngFor="let cat of categories" [ngValue]="cat.id">{{ cat.name }}</option>
+      </select>
+      <button class="btn-search" (click)="onSearch()">Tìm kiếm</button>
+      <button class="btn-reset" (click)="resetFilters()">
+        <i class="fas fa-redo"></i>
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-container" *ngIf="isLoading">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Stock Table - Parent-Child Layout -->
+    <div class="table-container" *ngIf="!isLoading">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="col-expand"></th>
+            <th class="col-thumbnail">Ảnh</th>
+            <th class="col-name">Tên sản phẩm</th>
+            <th class="col-category">Danh mục</th>
+            <th class="col-variants">Biến thể</th>
+            <th class="col-total">Tổng tồn</th>
+            <th class="col-status">Trạng thái</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let group of productGroups; let i = index">
+            <!-- Parent Row: Product -->
+            <tr class="product-row" [class.expanded]="group.expanded" (click)="toggleExpand(group)">
+              <td class="col-expand">
+                <button class="btn-expand" [class.rotated]="group.expanded">
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+              </td>
+              <td class="col-thumbnail">
+                <img [src]="getImageUrl(group.thumbnail)" [alt]="group.productName" class="product-image"
+                  onerror="this.src='assets/images/no-image.png'">
+              </td>
+              <td class="col-name">
+                <span class="product-name">{{ group.productName }}</span>
+                <span class="brand-name" *ngIf="group.brandName">{{ group.brandName }}</span>
+              </td>
+              <td class="col-category">{{ group.categoryName || '-' }}</td>
+              <td class="col-variants">{{ group.totalVariants }} biến thể</td>
+              <td class="col-total">
+                <strong>{{ group.totalStock }}</strong>
+              </td>
+              <td class="col-status">
+                <span class="badge-status danger" *ngIf="group.hasOutOfStock">
+                  <i class="fas fa-times-circle"></i> Có hết hàng
+                </span>
+                <span class="badge-status warning" *ngIf="group.hasLowStock && !group.hasOutOfStock">
+                  <i class="fas fa-exclamation-triangle"></i> Sắp hết
+                </span>
+                <span class="badge-status success" *ngIf="!group.hasLowStock && !group.hasOutOfStock">
+                  <i class="fas fa-check-circle"></i> Đủ hàng
+                </span>
+              </td>
+            </tr>
+
+            <!-- Child Rows: Variants -->
+            <ng-container *ngIf="group.expanded">
+              <tr class="variant-row" *ngFor="let item of group.variants">
+                <td></td>
+                <td class="col-thumbnail">
+                  <div class="color-swatch" *ngIf="item.color_code" [style.background]="item.color_code"></div>
+                </td>
+                <td class="col-name" colspan="3">
+                  <div class="variant-info">
+                    <span class="variant-connector">└</span>
+                    <div class="variant-details">
+                      <span class="variant-name">{{ getVariantDisplay(item) }}</span>
+                      <span class="sku">SKU: {{ item.sku || '-' }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="col-total">
+                  <span class="stock-qty" [class]="getStockStatusClass(item.stock_status!)">
+                    {{ item.stock_quantity }}
+                  </span>
+                </td>
+                <td class="col-actions">
+                  <div class="action-btns">
+                    <button class="btn-icon success" (click)="openImportModal(item); $event.stopPropagation()"
+                      title="Nhập kho">
+                      <i class="fas fa-plus"></i>
+                    </button>
+                    <button class="btn-icon edit" (click)="openAdjustModal(item); $event.stopPropagation()"
+                      title="Điều chỉnh">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-icon history" (click)="openHistoryModal(item); $event.stopPropagation()"
+                      title="Lịch sử">
+                      <i class="fas fa-history"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+          </ng-container>
+
+          <!-- Empty State -->
+          <tr *ngIf="productGroups.length === 0">
+            <td colspan="7" class="empty-state">
+              <i class="fas fa-box-open"></i>
+              <p>Không có sản phẩm nào</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container" *ngIf="totalPages > 1">
+      <button class="page-btn" [disabled]="currentPage === 0" (click)="onPageChange(0)">
+        <i class="fas fa-angle-double-left"></i>
+      </button>
+      <button class="page-btn" [disabled]="currentPage === 0" (click)="onPageChange(currentPage - 1)">
+        <i class="fas fa-angle-left"></i>
+      </button>
+      <button *ngFor="let page of getVisiblePages()" class="page-btn" [class.active]="page === currentPage"
+        (click)="onPageChange(page)">
+        {{ page + 1 }}
+      </button>
+      <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(currentPage + 1)">
+        <i class="fas fa-angle-right"></i>
+      </button>
+      <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(totalPages - 1)">
+        <i class="fas fa-angle-double-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============ TAB: BÁO CÁO THÁNG ============ -->
+  <div class="tab-content" *ngIf="activeTab === 'report'">
+    <!-- Period Selector -->
+    <div class="report-controls">
+      <div class="period-selector">
+        <label>Kỳ báo cáo:</label>
+        <select [(ngModel)]="reportMonth" (change)="onReportPeriodChange()">
+          <option *ngFor="let m of [1,2,3,4,5,6,7,8,9,10,11,12]" [value]="m">Tháng {{ m }}</option>
+        </select>
+        <input type="number" [(ngModel)]="reportYear" min="2020" max="2030" (change)="onReportPeriodChange()">
+      </div>
+      <button class="btn-primary" (click)="exportExcel()" [disabled]="!monthlyReport">
+        <i class="fas fa-file-excel"></i> Xuất Excel
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-container" *ngIf="isLoadingReport">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Report Content -->
+    <div class="report-content" *ngIf="!isLoadingReport && monthlyReport">
+      <!-- Summary Cards -->
+      <div class="summary-cards">
+        <div class="summary-card">
+          <div class="card-icon"><i class="fas fa-boxes"></i></div>
+          <div class="card-info">
+            <span class="card-value">{{ monthlyReport.summary.total_variants }}</span>
+            <span class="card-label">Tổng biến thể</span>
+          </div>
+        </div>
+        <div class="summary-card primary">
+          <div class="card-icon"><i class="fas fa-coins"></i></div>
+          <div class="card-info">
+            <span class="card-value">{{ monthlyReport.summary.total_stock_value | number:'1.0-0' }}đ</span>
+            <span class="card-label">Giá trị tồn kho</span>
+          </div>
+        </div>
+        <div class="summary-card warning">
+          <div class="card-icon"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="card-info">
+            <span class="card-value">{{ monthlyReport.summary.low_stock_count }}</span>
+            <span class="card-label">Sắp hết hàng</span>
+          </div>
+        </div>
+        <div class="summary-card danger">
+          <div class="card-icon"><i class="fas fa-times-circle"></i></div>
+          <div class="card-info">
+            <span class="card-value">{{ monthlyReport.summary.out_of_stock_count }}</span>
+            <span class="card-label">Hết hàng</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Movement Stats -->
+      <div class="movement-stats">
+        <h4>Biến động trong tháng</h4>
+        <div class="movement-grid">
+          <div class="movement-item import">
+            <i class="fas fa-arrow-down"></i>
+            <span class="movement-value">+{{ monthlyReport.movements.total_import }}</span>
+            <span class="movement-label">Nhập kho</span>
+          </div>
+          <div class="movement-item export">
+            <i class="fas fa-arrow-up"></i>
+            <span class="movement-value">-{{ monthlyReport.movements.total_export }}</span>
+            <span class="movement-label">Xuất kho</span>
+          </div>
+          <div class="movement-item adjust">
+            <i class="fas fa-balance-scale"></i>
+            <span class="movement-value">{{ monthlyReport.movements.total_adjustment }}</span>
+            <span class="movement-label">Điều chỉnh</span>
+          </div>
+          <div class="movement-item return">
+            <i class="fas fa-undo"></i>
+            <span class="movement-value">+{{ monthlyReport.movements.total_return }}</span>
+            <span class="movement-label">Hoàn trả</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Table -->
+      <div class="table-container">
+        <table class="data-table report-table">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Sản phẩm</th>
+              <th>Màu/Size/Xuất xứ</th>
+              <th class="text-right">Đầu kỳ</th>
+              <th class="text-right text-success">Nhập</th>
+              <th class="text-right text-danger">Xuất</th>
+              <th class="text-right">Đ.chỉnh</th>
+              <th class="text-right text-info">Hoàn</th>
+              <th class="text-right">Cuối kỳ</th>
+              <th>Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let d of monthlyReport.details">
+              <td class="sku-cell">{{ d.sku }}</td>
+              <td>{{ d.product_name }}</td>
+              <td>
+                <span *ngIf="d.color_name">{{ d.color_name }}</span>
+                <span *ngIf="d.size_name"> / {{ d.size_name }}</span>
+                <span *ngIf="d.origin_name"> / {{ d.origin_name }}</span>
+                <span *ngIf="!d.color_name && !d.size_name && !d.origin_name">-</span>
+              </td>
+              <td class="text-right">{{ d.opening_stock }}</td>
+              <td class="text-right text-success">+{{ d.total_import }}</td>
+              <td class="text-right text-danger">-{{ d.total_export }}</td>
+              <td class="text-right">{{ d.total_adjustment }}</td>
+              <td class="text-right text-info">+{{ d.total_return }}</td>
+              <td class="text-right"><strong>{{ d.closing_stock }}</strong></td>
+              <td>
+                <span class="badge-status" [ngClass]="{
+                  'danger': d.stock_status === 'OUT_OF_STOCK',
+                  'warning': d.stock_status === 'LOW',
+                  'success': d.stock_status === 'NORMAL'
+                }">
+                  {{ getStockStatusLabel(d.stock_status!) }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: NHẬP KHO ============ -->
+<div class="modal-overlay" *ngIf="showImportModal" (click)="closeImportModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Nhập kho</h3>
+      <button class="btn-close" (click)="closeImportModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="product-info" *ngIf="selectedItem">
+        <strong>{{ selectedItem.product_name }}</strong>
+        <span>{{ getVariantDisplay(selectedItem) }}</span>
+        <span class="current-stock">Tồn hiện tại: {{ selectedItem.stock_quantity }}</span>
+      </div>
+      <form [formGroup]="importForm" (ngSubmit)="saveImport()">
+        <div class="form-group">
+          <label>Số lượng nhập <span class="required">*</span></label>
+          <input type="number" formControlName="quantity" min="1" class="form-control">
+          <span class="error-text" *ngIf="importForm.get('quantity')?.touched && importForm.get('quantity')?.invalid">
+            Số lượng phải >= 1
+          </span>
+        </div>
+        <div class="form-group">
+          <label>Ghi chú</label>
+          <textarea formControlName="note" rows="3" class="form-control" placeholder="Nhập từ NCC..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="closeImportModal()">Hủy</button>
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-plus"></i> Nhập kho
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: ĐIỀU CHỈNH ============ -->
+<div class="modal-overlay" *ngIf="showAdjustModal" (click)="closeAdjustModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Điều chỉnh tồn kho</h3>
+      <button class="btn-close" (click)="closeAdjustModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="product-info" *ngIf="selectedItem">
+        <strong>{{ selectedItem.product_name }}</strong>
+        <span>{{ getVariantDisplay(selectedItem) }}</span>
+      </div>
+      <form [formGroup]="adjustForm" (ngSubmit)="saveAdjust()">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tồn hiện tại</label>
+            <input type="number" formControlName="current_quantity" class="form-control" readonly>
+          </div>
+          <div class="form-group">
+            <label>Tồn mới <span class="required">*</span></label>
+            <input type="number" formControlName="new_quantity" min="0" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Lý do điều chỉnh <span class="required">*</span></label>
+          <textarea formControlName="reason" rows="3" class="form-control"
+            placeholder="Kiểm kê tháng X, hư hỏng, thất thoát..."></textarea>
+          <span class="hint">Tối thiểu 10 ký tự, tối đa 500 ký tự</span>
+          <span class="error-text" *ngIf="adjustForm.get('reason')?.touched && adjustForm.get('reason')?.invalid">
+            Vui lòng nhập lý do (10-500 ký tự)
+          </span>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" (click)="closeAdjustModal()">Hủy</button>
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-check"></i> Lưu điều chỉnh
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: LỊCH SỬ GIAO DỊCH ============ -->
+<div class="modal-overlay" *ngIf="showHistoryModal" (click)="closeHistoryModal()">
+  <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Lịch sử giao dịch</h3>
+      <button class="btn-close" (click)="closeHistoryModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="product-info" *ngIf="selectedItem">
+        <strong>{{ selectedItem.product_name }}</strong>
+        <span>{{ getVariantDisplay(selectedItem) }}</span>
+      </div>
+
+      <!-- Loading -->
+      <div class="loading-container" *ngIf="isLoadingHistory">
+        <div class="spinner"></div>
+      </div>
+
+      <!-- History Table -->
+      <table class="data-table history-table" *ngIf="!isLoadingHistory">
+        <thead>
+          <tr>
+            <th>Thời gian</th>
+            <th>Loại</th>
+            <th class="text-right">SL</th>
+            <th class="text-right">Trước</th>
+            <th class="text-right">Sau</th>
+            <th>Ghi chú</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let tx of transactionHistory">
+            <td>{{ tx.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>
+              <span class="type-badge" [ngClass]="getTransactionTypeClass(tx.transaction_type!)">
+                {{ tx.transaction_type }}
+              </span>
+            </td>
+            <td class="text-right" [class.text-success]="tx.quantity! > 0" [class.text-danger]="tx.quantity! < 0">
+              {{ tx.quantity! > 0 ? '+' : '' }}{{ tx.quantity }}
+            </td>
+            <td class="text-right">{{ tx.stock_before }}</td>
+            <td class="text-right"><strong>{{ tx.stock_after }}</strong></td>
+            <td class="note-cell">{{ tx.note || '-' }}</td>
+          </tr>
+          <tr *ngIf="transactionHistory.length === 0">
+            <td colspan="6" class="empty-state">
+              <i class="fas fa-history"></i>
+              <p>Chưa có giao dịch nào</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- History Pagination -->
+      <div class="pagination-container" *ngIf="!isLoadingHistory && historyTotalPages > 1">
+        <button class="page-btn" [disabled]="historyPage === 0" (click)="onHistoryPageChange(historyPage - 1)">
+          <i class="fas fa-angle-left"></i>
+        </button>
+        <span class="page-info">{{ historyPage + 1 }} / {{ historyTotalPages }}</span>
+        <button class="page-btn" [disabled]="historyPage >= historyTotalPages - 1"
+          (click)="onHistoryPageChange(historyPage + 1)">
+          <i class="fas fa-angle-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

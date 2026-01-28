@@ -1,3 +1,5 @@
+@use "sass:color";
+
 // Variables
 $primary: #1a1a1a;
 $danger: #dc3545; // Red
@@ -139,7 +141,7 @@ $border: #e0e0e0;
     }
 
     &:hover:not(:disabled) {
-      background: darken($danger, 10%);
+      background: color.scale($danger, $lightness: -10%);
     }
   }
 

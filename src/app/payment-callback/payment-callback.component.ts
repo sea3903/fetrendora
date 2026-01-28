@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { BaseComponent } from '../components/base/base.component';
 import { ApiResponse } from '../responses/api.response';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -12,6 +13,10 @@ export class PaymentCallbackComponent extends BaseComponent implements OnInit { 
   loading: boolean = true;
   paymentSuccess: boolean = false;
 
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+    super();
+  }
+
   ngOnInit(): void {
     this.activatedRoute.queryParams.subscribe(params => {
       const vnp_ResponseCode = params['vnp_ResponseCode'];
@@ -20,8 +25,10 @@ export class PaymentCallbackComponent extends BaseComponent implements OnInit { 
       if (vnp_ResponseCode && vnp_TxnRef) {
         const orderId: number = Number(vnp_TxnRef);
 
-        // Xóa query params khỏi URL ngay lập tức để người dùng không thấy
-        window.history.replaceState({}, document.title, window.location.pathname);
+        // Xóa query params khỏi URL (chỉ chạy trên browser)
+        if (isPlatformBrowser(this.platformId)) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
 
         if (vnp_ResponseCode === '00') {
           this.handlePaymentSuccess(orderId);

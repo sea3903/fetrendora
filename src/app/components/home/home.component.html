@@ -55,6 +55,13 @@
           <img [src]="product.url || 'assets/images/product-placeholder.png'" [alt]="product.name" class="product-image"
             (error)="$any($event.target).src = 'assets/images/product-placeholder.png'">
 
+          <!-- Flash Sale Badge -->
+          @if(isFlashSale(product)) {
+          <div class="flash-sale-badge">
+            <i class="fas fa-bolt"></i>
+          </div>
+          }
+
           <!-- Icon yêu thích -->
           <button class="favorite-btn" (click)="toggleFavorite($event, product.id)"
             [class.active]="isFavorite(product.id)">

@@ -17,7 +17,8 @@ import { ColorAdminComponent } from "./color/color.admin.component";
 import { OriginAdminComponent } from "./origin/origin.admin.component";
 import { SizeAdminComponent } from "./size/size.admin.component";
 import { CouponComponent } from "./coupon/coupon.component";
-import { DetailCouponComponent } from "./coupon/detail-coupon/detail-coupon.component";
+// Inventory Management
+import { InventoryAdminComponent } from "./inventory/inventory.admin.component";
 
 export const adminRoutes: Routes = [
     {
@@ -91,13 +92,13 @@ export const adminRoutes: Routes = [
                 path: 'coupons',
                 component: CouponComponent
             },
+
+            // ═══════════════════════════════════════════════════════════════
+            // INVENTORY MANAGEMENT
+            // ═══════════════════════════════════════════════════════════════
             {
-                path: 'coupons/insert',
-                component: DetailCouponComponent
-            },
-            {
-                path: 'coupons/update/:id',
-                component: DetailCouponComponent
+                path: 'inventory',
+                component: InventoryAdminComponent
             }
         ]
     }

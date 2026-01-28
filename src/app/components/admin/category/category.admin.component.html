@@ -9,13 +9,21 @@
     </button>
   </div>
 
-  <!-- Tìm kiếm -->
+  <!-- Search & Actions -->
   <div class="search-bar">
     <div class="search-input-wrapper">
       <i class="fas fa-search"></i>
       <input type="text" [(ngModel)]="keyword" placeholder="Tìm theo tên danh mục..." (keyup.enter)="search()">
     </div>
     <button class="btn-search" (click)="search()">Tìm kiếm</button>
+    <div class="tree-actions">
+      <button class="btn-outline" (click)="expandAll()" title="Mở rộng tất cả">
+        <i class="fas fa-expand-alt"></i>
+      </button>
+      <button class="btn-outline" (click)="collapseAll()" title="Thu gọn tất cả">
+        <i class="fas fa-compress-alt"></i>
+      </button>
+    </div>
   </div>
 
   <!-- Loading -->
@@ -23,41 +31,60 @@
     <div class="spinner"></div>
   </div>
 
-  <!-- Bảng dữ liệu -->
+  <!-- Tree Table -->
   <div class="table-container" *ngIf="!loading">
     <table class="data-table">
       <thead>
         <tr>
-          <th class="col-stt">STT</th>
           <th class="col-name">Tên danh mục</th>
-          <th class="col-parent">Danh mục cha</th>
           <th class="col-slug">Slug</th>
+          <th class="col-children">Danh mục con</th>
           <th class="col-actions">Thao tác</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let category of filteredCategories; let i = index">
-          <td class="col-stt">{{ currentPage * itemsPerPage + i + 1 }}</td>
+        <tr *ngFor="let node of flattenedTree" class="category-row" [class.has-children]="node.children.length > 0"
+          [class.is-child]="node.level > 0">
           <td class="col-name">
-            <span *ngIf="category.parentId" class="indent">└─</span>
-            {{ category.name }}
+            <div class="name-wrapper" [style.padding-left.px]="node.level * 24">
+              <!-- Expand/Collapse button -->
+              <button class="btn-expand" *ngIf="node.children.length > 0"
+                (click)="toggleExpand(node); $event.stopPropagation()">
+                <i class="fas" [class.fa-chevron-down]="node.expanded" [class.fa-chevron-right]="!node.expanded"></i>
+              </button>
+              <span class="expand-placeholder" *ngIf="node.children.length === 0"></span>
+
+              <!-- Category name -->
+              <span class="category-name" [class.is-parent]="node.level === 0">
+                {{ node.name }}
+              </span>
+            </div>
           </td>
-          <td class="col-parent">{{ category.parentName || '-' }}</td>
-          <td class="col-slug">{{ category.slug || '-' }}</td>
+          <td class="col-slug">
+            <code *ngIf="node.slug">{{ node.slug }}</code>
+            <span *ngIf="!node.slug" class="text-muted">-</span>
+          </td>
+          <td class="col-children">
+            <span class="badge-count" *ngIf="node.children.length > 0">{{ node.children.length }}</span>
+            <span *ngIf="node.children.length === 0" class="text-muted">0</span>
+          </td>
           <td class="col-actions">
             <div class="action-btns">
-              <button class="btn-icon edit" (click)="openEditModal(category)" title="Sửa">
+              <button class="btn-icon add" (click)="openCreateModal(node)" title="Thêm danh mục con">
+                <i class="fas fa-plus"></i>
+              </button>
+              <button class="btn-icon edit" (click)="openEditModal(node)" title="Sửa">
                 <i class="fas fa-edit"></i>
               </button>
-              <button class="btn-icon delete" (click)="deleteCategory(category)" title="Xóa">
+              <button class="btn-icon delete" (click)="deleteCategory(node)" title="Xóa">
                 <i class="fas fa-trash"></i>
               </button>
             </div>
           </td>
         </tr>
-        <tr *ngIf="filteredCategories.length === 0">
-          <td colspan="5" class="empty-state">
-            <i class="fas fa-inbox"></i>
+        <tr *ngIf="flattenedTree.length === 0">
+          <td colspan="4" class="empty-state">
+            <i class="fas fa-folder-open"></i>
             <p>Không có danh mục nào</p>
           </td>
         </tr>
@@ -65,7 +92,7 @@
     </table>
   </div>
 
-  <!-- Phân trang -->
+  <!-- Pagination -->
   <div class="pagination-container" *ngIf="totalPages > 1">
     <button class="page-btn" [disabled]="currentPage === 0" (click)="onPageChange(0)">
       <i class="fas fa-angle-double-left"></i>
@@ -101,14 +128,14 @@
         <div class="form-group">
           <label>Tên danh mục <span class="required">*</span></label>
           <input type="text" [(ngModel)]="categoryForm.name" name="name" (blur)="validateName()"
-            (input)="validateName()" [class.error]="nameError" placeholder="Nhập tên danh mục">
+            (input)="validateName()" [class.error]="nameError" placeholder="Nhập tên danh mục" class="form-control">
           <span class="error-text" *ngIf="nameError">{{ nameError }}</span>
         </div>
 
         <!-- Danh mục cha -->
         <div class="form-group">
           <label>Danh mục cha</label>
-          <select [(ngModel)]="categoryForm.parentId" name="parentId" class="form-select">
+          <select [(ngModel)]="categoryForm.parentId" name="parentId" class="form-control">
             <option [ngValue]="null">-- Không có (Danh mục gốc) --</option>
             <option *ngFor="let cat of parentCategories" [ngValue]="cat.id"
               [disabled]="modalMode === 'edit' && cat.id === editingCategory?.id">
@@ -121,7 +148,8 @@
         <!-- Slug -->
         <div class="form-group">
           <label>Slug (URL)</label>
-          <input type="text" [(ngModel)]="categoryForm.slug" name="slug" placeholder="Tự động tạo nếu để trống">
+          <input type="text" [(ngModel)]="categoryForm.slug" name="slug" placeholder="Tự động tạo nếu để trống"
+            class="form-control">
           <span class="hint">Ví dụ: ao-thun, quan-jean</span>
         </div>
 
