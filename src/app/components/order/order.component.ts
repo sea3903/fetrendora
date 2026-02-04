@@ -80,26 +80,25 @@ export class OrderComponent extends BaseComponent implements OnInit, OnDestroy {
         const products: Product[] = apiResponse.data || [];
 
         this.cartItems = cartItems.map(cartItem => {
-          const product = products.find(p => p.id === cartItem.productId);
-          if (product) {
-            product.thumbnail = `${environment.apiBaseUrl}/products/images/${product.thumbnail}`;
-          }
+          const productFound = products.find(p => p.id === cartItem.productId);
+          if (!productFound) return null;
+
+          // QUAN TRỌNG: Tạo bản sao product để tránh nhấp nháy khi cùng productId có nhiều variant
+          const product = { ...productFound };
+          product.thumbnail = `${environment.apiBaseUrl}/products/images/${product.thumbnail}`;
 
           return {
-            product: product!,
+            product: product,
             quantity: cartItem.quantity,
             selected: cartItem.selected,
-            productDetailId: cartItem.productDetailId, // Map productDetailId
+            productDetailId: cartItem.productDetailId,
             variant: {
               colorName: cartItem.colorName,
               sizeName: cartItem.sizeName,
               originName: cartItem.originName
             }
           };
-        }).filter(item => item.product);
-
-        // Debug log
-        console.log('Cart Items with variants:', this.cartItems);
+        }).filter(item => item !== null) as CartItemWithProduct[];
 
         this.calculateTotal();
         this.updateSelectionState();

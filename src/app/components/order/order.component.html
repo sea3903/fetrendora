@@ -25,7 +25,7 @@
 
         <!-- Cart Items -->
         <div class="cart-items-list">
-          @for(item of cartItems; track item.product.id; let i = $index) {
+          @for(item of cartItems; track (item.productDetailId ?? item.product.id); let i = $index) {
           <div class="cart-item">
             <!-- Checkbox -->
             <input type="checkbox" class="item-checkbox" [checked]="item.selected" (change)="toggleItemSelection(i)">

@@ -43,11 +43,16 @@ export class CouponService {
 
   constructor(private http: HttpClient) { }
 
-  calculateCouponValue(couponCode: string, totalAmount: number): Observable<ApiResponse> {
+  calculateCouponValue(couponCode: string, totalAmount: number, userId?: number): Observable<ApiResponse> {
     const url = `${this.apiBaseUrl}/coupons/calculate`;
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('couponCode', couponCode)
       .set('totalAmount', totalAmount.toString());
+
+    // Gửi userId nếu có để backend check giới hạn sử dụng per user
+    if (userId) {
+      params = params.set('userId', userId.toString());
+    }
 
     return this.http.get<ApiResponse>(url, { params });
   }

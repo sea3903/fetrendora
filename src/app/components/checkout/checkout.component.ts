@@ -96,16 +96,19 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
                 const products: Product[] = apiResponse.data || [];
 
                 this.checkoutItems = selectedItems.map(cartItem => {
-                    const product = products.find(p => p.id === cartItem.productId);
-                    if (product) {
-                        product.thumbnail = `${environment.apiBaseUrl}/products/images/${product.thumbnail}`;
-                    }
+                    const productFound = products.find(p => p.id === cartItem.productId);
+                    if (!productFound) return null;
+
+                    // Tạo bản sao product để tránh nhấp nháy ảnh
+                    const product = { ...productFound };
+                    product.thumbnail = `${environment.apiBaseUrl}/products/images/${product.thumbnail}`;
+
                     return {
-                        product: product!,
+                        product: product,
                         quantity: cartItem.quantity,
                         productDetailId: cartItem.productDetailId
                     };
-                }).filter(item => item.product);
+                }).filter(item => item !== null) as CheckoutItem[];
 
                 this.calculateTotal();
             },
@@ -198,7 +201,10 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
         const code = this.couponCode.trim();
         if (!code || this.couponApplied) return;
 
-        this.couponService.calculateCouponValue(code, this.totalAmount)
+        // Lấy userId để backend check giới hạn sử dụng per user
+        const userId = this.tokenService.getUserId();
+
+        this.couponService.calculateCouponValue(code, this.totalAmount, userId)
             .subscribe({
                 next: (apiResponse: ApiResponse) => {
                     this.finalAmount = apiResponse.data;
@@ -214,21 +220,23 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
                     } else {
                         // Trường hợp mã đúng nhưng không áp dụng được (do điều kiện chưa thỏa)
                         this.couponApplied = false;
-                        this.finalAmount = this.totalAmount; // Reset về giá gốc
+                        this.finalAmount = this.totalAmount;
                         this.discountAmount = 0;
 
                         this.toastService.showToast({
-                            error: null, // Dùng config warning nếu có, hoặc hiển thị như lỗi nhẹ
-                            defaultMsg: 'Mã giảm giá hợp lệ nhưng chưa đủ điều kiện áp dụng (VD: chưa đạt giá trị tối thiểu).',
+                            error: null,
+                            defaultMsg: 'Mã giảm giá hợp lệ nhưng chưa đủ điều kiện áp dụng.',
                             title: 'Chưa đủ điều kiện'
                         });
                     }
                 },
                 error: (error: HttpErrorResponse) => {
                     this.couponApplied = false;
+                    // Hiển thị message lỗi từ backend (bao gồm lỗi đã dùng hết lượt)
+                    const errorMsg = error.error?.message || 'Mã giảm giá không hợp lệ';
                     this.toastService.showToast({
                         error: error,
-                        defaultMsg: 'Mã giảm giá không hợp lệ',
+                        defaultMsg: errorMsg,
                         title: 'Lỗi'
                     });
                 }
