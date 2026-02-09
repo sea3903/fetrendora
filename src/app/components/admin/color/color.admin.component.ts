@@ -139,10 +139,26 @@ export class ColorAdminComponent implements OnInit {
 
     // Validate tên màu
     validateName(): boolean {
-        if (!this.colorForm.name || this.colorForm.name.trim() === '') {
+        const name = (this.colorForm.name || '').trim();
+        if (!name) {
             this.nameError = 'Vui lòng nhập tên màu';
             return false;
         }
+
+        // Kiểm tra trùng tên (Sử dụng Normalization để loại bỏ dấu: Trắng == Trang)
+        const normalize = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        const inputName = normalize(name);
+
+        const isDuplicate = this.colors.some(c =>
+            normalize(c.name.trim()) === inputName &&
+            (this.modalMode === 'create' || c.id !== this.selectedColor?.id)
+        );
+
+        if (isDuplicate) {
+            this.nameError = 'Tên màu đã tồn tại';
+            return false;
+        }
+
         this.nameError = '';
         return true;
     }

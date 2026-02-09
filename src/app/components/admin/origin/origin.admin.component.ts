@@ -158,10 +158,26 @@ export class OriginAdminComponent implements OnInit {
 
     // Validate
     validateName(): boolean {
-        if (!this.originForm.name || this.originForm.name.trim() === '') {
+        const name = (this.originForm.name || '').trim();
+        if (!name) {
             this.nameError = 'Vui lòng nhập tên xuất xứ';
             return false;
         }
+
+        // Kiểm tra trùng tên (Sử dụng Normalization: Mỹ == My)
+        const normalize = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        const inputName = normalize(name);
+
+        const isDuplicate = this.origins.some(o =>
+            normalize(o.name.trim()) === inputName &&
+            (this.modalMode === 'create' || o.id !== this.selectedOrigin?.id)
+        );
+
+        if (isDuplicate) {
+            this.nameError = 'Tên xuất xứ đã tồn tại';
+            return false;
+        }
+
         this.nameError = '';
         return true;
     }

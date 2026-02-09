@@ -77,7 +77,8 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
       this.productId = +idParam;
     }
 
-    this.isLoggedIn = this.tokenService.getToken() != null;
+    const token = this.tokenService.getToken();
+    this.isLoggedIn = !!token && token.length > 0;
     if (this.isLoggedIn) {
       const savedUser = this.userService.getUserResponseFromLocalStorage();
       if (savedUser) {

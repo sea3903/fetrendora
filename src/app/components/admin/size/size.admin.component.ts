@@ -139,10 +139,26 @@ export class SizeAdminComponent implements OnInit {
 
     // Validate
     validateName(): boolean {
-        if (!this.sizeForm.name || this.sizeForm.name.trim() === '') {
+        const name = (this.sizeForm.name || '').trim();
+        if (!name) {
             this.nameError = 'Vui lòng nhập tên size';
             return false;
         }
+
+        // Kiểm tra trùng tên (Sử dụng Normalization: Trắng == Trang)
+        const normalize = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        const inputName = normalize(name);
+
+        const isDuplicate = this.sizes.some(s =>
+            normalize(s.name.trim()) === inputName &&
+            (this.modalMode === 'create' || s.id !== this.selectedSize?.id)
+        );
+
+        if (isDuplicate) {
+            this.nameError = 'Tên size đã tồn tại';
+            return false;
+        }
+
         this.nameError = '';
         return true;
     }

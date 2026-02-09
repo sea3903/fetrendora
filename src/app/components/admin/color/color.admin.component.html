@@ -104,8 +104,9 @@
                 <!-- Tên màu -->
                 <div class="form-group">
                     <label>Tên màu <span class="required">*</span></label>
-                    <input type="text" [(ngModel)]="colorForm.name" name="name" (blur)="validateName()"
-                        (input)="validateName()" [class.error]="nameError" placeholder="Nhập tên màu">
+                    <input type="text" [ngModel]="colorForm.name"
+                        (ngModelChange)="colorForm.name=$event; validateName()" name="name" (blur)="validateName()"
+                        [class.error]="nameError" placeholder="Nhập tên màu">
                     <span class="error-text" *ngIf="nameError">{{ nameError }}</span>
                 </div>
 

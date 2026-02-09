@@ -111,8 +111,9 @@
                 <!-- Tên xuất xứ -->
                 <div class="form-group">
                     <label>Tên xuất xứ <span class="required">*</span></label>
-                    <input type="text" [(ngModel)]="originForm.name" name="name" (blur)="validateName()"
-                        (input)="validateName()" [class.error]="nameError" placeholder="Nhập tên quốc gia/vùng">
+                    <input type="text" [ngModel]="originForm.name"
+                        (ngModelChange)="originForm.name=$event; validateName()" name="name" (blur)="validateName()"
+                        [class.error]="nameError" placeholder="Nhập tên quốc gia/vùng">
                     <span class="error-text" *ngIf="nameError">{{ nameError }}</span>
                 </div>
 

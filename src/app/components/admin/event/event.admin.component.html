@@ -1,0 +1,306 @@
+<div class="event-page">
+    <!-- Phần đầu trang -->
+    <div class="page-header">
+        <div class="header-left">
+            <h2>Quản lý sự kiện</h2>
+        </div>
+        <div class="header-right">
+            <button class="btn-primary" (click)="openCreateModal()">
+                <i class="fas fa-plus"></i> Thêm mới
+            </button>
+        </div>
+    </div>
+
+    <!-- Thanh tìm kiếm -->
+    <div class="search-bar">
+        <div class="search-box">
+            <div class="search-input-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" [(ngModel)]="searchKeyword" placeholder="Tìm theo tên sự kiện..."
+                    (keyup.enter)="onSearch()">
+            </div>
+            <button class="btn-search" (click)="onSearch()">Tìm kiếm</button>
+        </div>
+    </div>
+
+    <!-- Đang tải -->
+    <div class="loading-overlay" *ngIf="isLoading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Bảng dữ liệu -->
+    <div class="table-container" *ngIf="!isLoading">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="col-stt">STT</th>
+                    <th class="col-image">Ảnh</th>
+                    <th class="col-title">Tên sự kiện</th>
+                    <th class="col-voucher">Voucher</th>
+                    <th class="col-date">Thời gian</th>
+                    <th class="col-status">Trạng thái</th>
+                    <th class="col-actions">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let event of paginatedEvents; let i = index" [class.inactive-row]="!event.is_active">
+                    <td class="col-stt">{{ currentPage * itemsPerPage + i + 1 }}</td>
+                    <td class="col-image">
+                        <div class="banner-preview">
+                            <img *ngIf="event.thumbnail_url || (event.images && event.images.length > 0)"
+                                [src]="getDisplayImage(event)" [alt]="event.title"
+                                (error)="$any($event.target).src = 'assets/images/placeholder.svg'">
+                            <div *ngIf="!event.thumbnail_url && (!event.images || event.images.length === 0)"
+                                class="no-image">
+                                <i class="fas fa-image"></i>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="col-title">
+                        <div class="event-info">
+                            <span class="event-name">{{ event.title }}</span>
+                            <span *ngIf="event.description" class="event-desc">{{ event.description | slice:0:60
+                                }}...</span>
+                            <span *ngIf="event.video_url" class="badge video">
+                                <i class="fab fa-youtube"></i> Video
+                            </span>
+                        </div>
+                    </td>
+                    <td class="col-voucher">
+                        <span class="voucher-count">{{ event.coupons?.length || 0 }}</span>
+                    </td>
+                    <td class="col-date">
+                        <div class="date-range">
+                            <div class="date-item">
+                                <span class="date-label">Bắt đầu:</span>
+                                <span class="date-value">{{ parseDate(event.start_date) | date:'dd/MM/yyyy HH:mm'
+                                    }}</span>
+                            </div>
+                            <div class="date-item">
+                                <span class="date-label">Kết thúc:</span>
+                                <span class="date-value">{{ parseDate(event.end_date) | date:'dd/MM/yyyy HH:mm'
+                                    }}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="col-status">
+                        <span class="status-badge" [class.active]="event.is_active" [class.inactive]="!event.is_active">
+                            <i class="fas" [ngClass]="event.is_active ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                            {{ event.is_active ? 'Đang hoạt động' : 'Đã khóa' }}
+                        </span>
+                    </td>
+                    <td class="col-actions">
+                        <div class="action-btns">
+                            <button class="btn-icon toggle" (click)="toggleActive(event)"
+                                [title]="event.is_active ? 'Tạm khóa' : 'Kích hoạt'">
+                                <i class="fas" [ngClass]="event.is_active ? 'fa-lock' : 'fa-lock-open'"></i>
+                            </button>
+                            <button class="btn-icon edit" (click)="openEditModal(event)" title="Sửa">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon delete" (click)="deleteEvent(event.id)" title="Xóa">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr *ngIf="paginatedEvents.length === 0">
+                    <td colspan="7" class="empty-state">
+                        <i class="fas fa-calendar-times"></i>
+                        <p>Không có sự kiện nào</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Phân trang -->
+    <div class="pagination-container" *ngIf="totalPages > 1">
+        <button class="page-btn" [disabled]="currentPage === 0" (click)="goToPage(0)">
+            <i class="fas fa-angle-double-left"></i>
+        </button>
+        <button class="page-btn" [disabled]="currentPage === 0" (click)="goToPage(currentPage - 1)">
+            <i class="fas fa-angle-left"></i>
+        </button>
+        <button *ngFor="let page of visiblePages" class="page-btn" [class.active]="page === currentPage"
+            (click)="goToPage(page)">
+            {{ page + 1 }}
+        </button>
+        <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="goToPage(currentPage + 1)">
+            <i class="fas fa-angle-right"></i>
+        </button>
+        <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="goToPage(totalPages - 1)">
+            <i class="fas fa-angle-double-right"></i>
+        </button>
+    </div>
+
+    <!-- Modal Form -->
+    <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h3>{{ modalMode === 'create' ? 'Thêm sự kiện mới' : 'Cập nhật sự kiện' }}</h3>
+                <button class="btn-close" (click)="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form>
+                    <!-- Thông tin cơ bản -->
+                    <div class="form-row">
+                        <div class="form-group full">
+                            <label>Tên sự kiện <span class="required">*</span></label>
+                            <input type="text" [(ngModel)]="formData.title" name="title"
+                                placeholder="VD: Khuyến mãi mùa hè 2024" [class.error]="formErrors.title">
+                            <div class="error-msg" *ngIf="formErrors.title">{{ formErrors.title }}</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mô tả</label>
+                        <textarea [(ngModel)]="formData.description" name="description" rows="2"
+                            placeholder="Mô tả ngắn về sự kiện"></textarea>
+                    </div>
+
+                    <!-- Hình ảnh Banner -->
+                    <div class="section-title">
+                        <i class="fas fa-images"></i> Hình ảnh Banner
+                        <span class="section-hint">(Tối thiểu 1, tối đa 5 ảnh)</span>
+                    </div>
+
+                    <div class="image-upload-section">
+                        <div class="image-grid">
+                            <div class="image-item" *ngFor="let img of eventImages; let i = index"
+                                [class.is-thumbnail]="isThumbnailImage(img)">
+                                <img [src]="getPreviewImageUrl(img)" [alt]="'Ảnh ' + (i+1)"
+                                    (error)="$any($event.target).src = 'assets/images/placeholder.svg'">
+                                <button type="button" class="btn-remove" (click)="removeImage(i)">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <!-- Badge loại ảnh -->
+                                <span class="image-badge" [class.upload]="img.image_type === 'upload'">
+                                    {{ img.image_type === 'upload' ? 'Upload' : 'URL' }}
+                                </span>
+                                <!-- Badge thumbnail -->
+                                <span class="thumbnail-badge" *ngIf="isThumbnailImage(img)">
+                                    <i class="fas fa-star"></i> Ảnh đại diện
+                                </span>
+                                <!-- Nút đặt làm thumbnail -->
+                                <button type="button" class="btn-set-thumbnail" *ngIf="!isThumbnailImage(img)"
+                                    (click)="setAsThumbnail(img)" title="Đặt làm ảnh đại diện">
+                                    <i class="fas fa-star"></i>
+                                </button>
+                            </div>
+
+                            <!-- Upload Box -->
+                            <label class="image-upload-box" *ngIf="eventImages.length < 5">
+                                <input type="file" accept="image/*" multiple (change)="onFilesSelected($event)" hidden>
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Tải ảnh lên</span>
+                            </label>
+                        </div>
+
+                        <!-- URL Input -->
+                        <div class="url-input-row" *ngIf="eventImages.length < 5">
+                            <input type="text" [(ngModel)]="newImageUrl" name="newImageUrl"
+                                placeholder="Hoặc nhập URL ảnh từ internet...">
+                            <button type="button" class="btn-add-url" (click)="addImageUrl()">
+                                <i class="fas fa-plus"></i> Thêm URL
+                            </button>
+                        </div>
+
+                        <div class="error-msg" *ngIf="formErrors.images">{{ formErrors.images }}</div>
+                    </div>
+
+                    <!-- Video YouTube -->
+                    <div class="section-title">
+                        <i class="fab fa-youtube"></i> Video YouTube
+                        <span class="section-hint">(Không bắt buộc)</span>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="text" [(ngModel)]="formData.video_url" name="video_url"
+                            placeholder="VD: https://www.youtube.com/watch?v=..." [class.error]="formErrors.video_url">
+                        <div class="error-msg" *ngIf="formErrors.video_url">{{ formErrors.video_url }}</div>
+                    </div>
+
+                    <!-- Video Preview -->
+                    <div class="video-preview" *ngIf="getYouTubeEmbedUrl(formData.video_url) as embedUrl">
+                        <iframe [src]="embedUrl" frameborder="0" allowfullscreen></iframe>
+                    </div>
+
+                    <!-- Voucher liên kết -->
+                    <div class="section-title">
+                        <i class="fas fa-ticket-alt"></i> Voucher liên kết
+                    </div>
+
+                    <div class="coupon-list" *ngIf="allCoupons.length > 0">
+                        <label class="coupon-item" *ngFor="let coupon of allCoupons"
+                            [class.selected]="isCouponSelected(coupon.id!)">
+                            <input type="checkbox" [checked]="isCouponSelected(coupon.id!)"
+                                (change)="toggleCoupon(coupon.id!)">
+                            <div class="coupon-info">
+                                <span class="coupon-code">{{ coupon.code }}</span>
+                                <span class="coupon-name">{{ coupon.name }}</span>
+                                <span class="coupon-value">
+                                    {{ coupon.discount_type === 'PERCENT' ? coupon.discount_value + '%' :
+                                    (coupon.discount_value | number) + 'đ' }}
+                                </span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="no-data-text" *ngIf="allCoupons.length === 0">Chưa có voucher nào trong hệ thống</div>
+
+                    <!-- Thời gian -->
+                    <div class="section-title">
+                        <i class="fas fa-clock"></i> Thời gian diễn ra
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label>Ngày bắt đầu <span class="required">*</span></label>
+                            <input type="datetime-local" [(ngModel)]="formData.start_date" name="start_date"
+                                [class.error]="formErrors.start_date">
+                            <div class="error-msg" *ngIf="formErrors.start_date">{{ formErrors.start_date }}</div>
+                        </div>
+                        <div class="form-group half">
+                            <label>Ngày kết thúc <span class="required">*</span></label>
+                            <input type="datetime-local" [(ngModel)]="formData.end_date" name="end_date"
+                                [class.error]="formErrors.end_date">
+                            <div class="error-msg" *ngIf="formErrors.end_date">{{ formErrors.end_date }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Cấu hình hiển thị -->
+                    <div class="section-title">
+                        <i class="fas fa-cog"></i> Cấu hình
+                    </div>
+
+                    <div class="form-row toggle-row">
+                        <div class="toggle-group">
+                            <label class="toggle-label">
+                                <input type="checkbox" [(ngModel)]="formData.show_coupons" name="show_coupons">
+                                <span class="toggle-switch"></span>
+                                Hiển thị voucher trên trang chủ
+                            </label>
+                        </div>
+                        <div class="toggle-group">
+                            <label class="toggle-label">
+                                <input type="checkbox" [(ngModel)]="formData.is_active" name="is_active">
+                                <span class="toggle-switch"></span>
+                                Kích hoạt sự kiện
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" (click)="closeModal()">Hủy bỏ</button>
+                <button type="button" class="btn-primary" (click)="saveEvent()">
+                    <i class="fas fa-save"></i> {{ modalMode === 'create' ? 'Tạo sự kiện' : 'Lưu thay đổi' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -93,7 +93,7 @@
                         <div class="action-btns">
                             <button class="btn-icon toggle" (click)="toggleActivation(coupon)"
                                 [title]="coupon.active ? 'Tạm khóa' : 'Kích hoạt'">
-                                <i class="fas" [ngClass]="coupon.active ? 'fa-lock-open' : 'fa-lock'"></i>
+                                <i class="fas" [ngClass]="coupon.active ? 'fa-lock' : 'fa-lock-open'"></i>
                             </button>
                             <button class="btn-icon edit" (click)="openEditModal(coupon)" title="Sửa">
                                 <i class="fas fa-edit"></i>

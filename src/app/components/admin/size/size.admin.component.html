@@ -95,8 +95,9 @@
                 <!-- Tên size -->
                 <div class="form-group">
                     <label>Tên size <span class="required">*</span></label>
-                    <input type="text" [(ngModel)]="sizeForm.name" name="name" (blur)="validateName()"
-                        (input)="validateName()" [class.error]="nameError" placeholder="Nhập tên size (S, M, L, XL...)">
+                    <input type="text" [ngModel]="sizeForm.name" (ngModelChange)="sizeForm.name=$event; validateName()"
+                        name="name" (blur)="validateName()" [class.error]="nameError"
+                        placeholder="Nhập tên size (S, M, L, XL...)">
                     <span class="error-text" *ngIf="nameError">{{ nameError }}</span>
                 </div>
 

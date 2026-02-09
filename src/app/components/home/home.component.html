@@ -2,120 +2,330 @@
 
 <div class="home-page">
 
-  <!-- Hero Banner Slider -->
-  <div class="hero-banner">
-    <div class="banner-slides" [style.transform]="'translateX(-' + currentBannerIndex * 100 + '%)'">
-      @for(banner of banners; track banner) {
-      <div class="banner-slide">
-        <img [src]="banner" alt="Trendora Collection">
-        <div class="banner-content">
-          <!-- Optional content overlay -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 1: HERO BANNER (Ảnh từ sự kiện hoặc banner mặc định) -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <section class="hero-banner">
+    @if(currentEvent && currentEvent.images && currentEvent.images.length > 0) {
+    <div class="banner-slider">
+      <div class="banner-slides" [style.transform]="'translateX(-' + currentBannerIndex * 100 + '%)'">
+        @for(image of currentEvent.images; track image.id) {
+        <div class="banner-slide">
+          <img [src]="getEventImageUrl(image.image_url)" [alt]="currentEvent.title"
+            (error)="$any($event.target).src = 'assets/images/banner-placeholder.jpg'">
         </div>
+        }
+      </div>
+
+      @if(currentEvent.images.length > 1) {
+      <button class="banner-control prev" (click)="prevBanner()">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <button class="banner-control next" (click)="nextBanner()">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+      <div class="banner-indicators">
+        @for(image of currentEvent.images; track image.id; let i = $index) {
+        <span class="indicator" [class.active]="i === currentBannerIndex" (click)="goToBanner(i)"></span>
+        }
       </div>
       }
-    </div>
 
-    <button class="banner-control prev" (click)="prevBanner()">
-      <i class="fas fa-chevron-left"></i>
-    </button>
-    <button class="banner-control next" (click)="nextBanner()">
-      <i class="fas fa-chevron-right"></i>
-    </button>
-
-    <div class="banner-indicators">
-      @for(banner of banners; track banner; let i = $index) {
-      <span class="indicator" [class.active]="i === currentBannerIndex" (click)="goToBanner(i)">
-      </span>
-      }
-    </div>
-  </div>
-
-  <div class="container">
-    <!-- Search và Filter -->
-    <div class="search-section">
-      <div class="search-box">
-        <input type="text" class="search-input" placeholder="Tìm sản phẩm" [(ngModel)]="keyword"
-          (keyup.enter)="searchProducts()">
-        <select class="category-select" [(ngModel)]="selectedCategoryId">
-          <option [value]="0">Tất cả danh mục</option>
-          @for(category of categories; track category.id) {
-          <option [value]="category.id">{{ category.name }}</option>
-          }
-        </select>
-        <button class="btn-search" (click)="searchProducts()">Tìm kiếm</button>
-      </div>
-    </div>
-
-    <!-- Danh sách sản phẩm -->
-    <div class="products-grid">
-      @for(product of products; track product.id) {
-      <div class="product-card" (click)="onProductClick(product.id)">
-        <!-- Ảnh sản phẩm -->
-        <div class="product-image-wrapper">
-          <img [src]="product.url || 'assets/images/product-placeholder.png'" [alt]="product.name" class="product-image"
-            (error)="$any($event.target).src = 'assets/images/product-placeholder.png'">
-
-          <!-- Flash Sale Badge -->
-          @if(isFlashSale(product)) {
-          <div class="flash-sale-badge">
-            <i class="fas fa-bolt"></i>
+      <!-- Countdown Timer  -->
+      @if(currentEvent && eventStatus !== 'ended') {
+      <div class="event-countdown-overlay">
+        <div class="countdown-box">
+          <div class="countdown-title">
+            {{ eventStatus === 'upcoming' ? 'SẮP DIỄN RA' : 'ƯU ĐÃI KẾT THÚC SAU' }}
           </div>
-          }
-
-          <!-- Icon yêu thích -->
-          <button class="favorite-btn" (click)="toggleFavorite($event, product.id)"
-            [class.active]="isFavorite(product.id)">
-            <i class="fas" [class.fa-heart]="isFavorite(product.id)" [class.fa-heart-o]="!isFavorite(product.id)"></i>
-          </button>
-        </div>
-
-        <!-- Thông tin sản phẩm -->
-        <div class="product-info">
-          <!-- Tên brand (đậm, đen) -->
-          @if(product.brand_name) {
-          <div class="product-brand">{{ product.brand_name }}</div>
-          }
-
-          <!-- Tên sản phẩm -->
-          <h3 class="product-name">{{ product.name }}</h3>
-
-          <!-- Giá -->
-          <div class="product-price">
-            {{ product.price | currency:'VND':'symbol':'1.0-0':'vi' }}
+          <div class="timer-display">
+            <div class="time-unit">
+              <span class="time-value">{{ days | number:'2.0-0' }}</span>
+              <span class="time-label">Ngày</span>
+            </div>
+            <div class="time-separator">:</div>
+            <div class="time-unit">
+              <span class="time-value">{{ hours | number:'2.0-0' }}</span>
+              <span class="time-label">Giờ</span>
+            </div>
+            <div class="time-separator">:</div>
+            <div class="time-unit">
+              <span class="time-value">{{ minutes | number:'2.0-0' }}</span>
+              <span class="time-label">Phút</span>
+            </div>
+            <div class="time-separator">:</div>
+            <div class="time-unit">
+              <span class="time-value">{{ seconds | number:'2.0-0' }}</span>
+              <span class="time-label">Giây</span>
+            </div>
           </div>
         </div>
       </div>
       }
+
     </div>
-
-    <!-- Pagination -->
-    @if(totalPages > 1) {
-    <div class="pagination-wrapper">
-      <nav class="pagination">
-        @if(currentPage > 0) {
-        <button class="page-btn" (click)="onPageChange(0)">Đầu</button>
-        }
-        @if(currentPage > 0) {
-        <button class="page-btn" (click)="onPageChange(currentPage - 1)">
-          <i class="fas fa-chevron-left"></i>
-        </button>
-        }
-
-        @for(page of visiblePages; track page) {
-        <button class="page-btn" [class.active]="page - 1 === currentPage" (click)="onPageChange(page - 1)">
-          {{ page }}
-        </button>
-        }
-
-        @if(currentPage < totalPages - 1) { <button class="page-btn" (click)="onPageChange(currentPage + 1)">
-          <i class="fas fa-chevron-right"></i>
-          </button>
-          <button class="page-btn" (click)="onPageChange(totalPages - 1)">Cuối</button>
-          }
-      </nav>
+    } @else {
+    <!-- Default Banner khi không có sự kiện - dùng CSS gradient làm fallback -->
+    <div class="default-banner">
+      <div class="default-banner-content">
+        <h1>TRENDORA</h1>
+        <span class="tagline">THỜI TRANG</span>
+        <p>Phong cách thời trang đẳng cấp</p>
+      </div>
     </div>
     }
-  </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 2: VIDEO YOUTUBE - Full Width -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  @if(currentEvent?.video_url && eventVideoUrl) {
+  <section class="video-section">
+    <div class="video-container">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="title-icon"><i class="fab fa-youtube"></i></span>
+          <span>Video Giới Thiệu</span>
+        </h2>
+      </div>
+      <div class="video-wrapper">
+        <iframe [src]="eventVideoUrl" frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen></iframe>
+      </div>
+    </div>
+  </section>
+  }
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 3: VOUCHER ƯU ĐÃI -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  @if(currentEvent?.show_coupons && activeCoupons.length > 0) {
+  <section class="voucher-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="title-icon hot"><i class="fas fa-ticket-alt"></i></span>
+          <span>Mã Giảm Giá Hot</span>
+        </h2>
+      </div>
+      <div class="voucher-grid">
+        @for(coupon of activeCoupons; track coupon.id) {
+        <div class="voucher-card">
+          <div class="voucher-discount">
+            @if(coupon.discount_type === 'PERCENT') {
+            <span class="discount-value">{{ coupon.discount_value }}</span>
+            <span class="discount-unit">%</span>
+            } @else {
+            <span class="discount-value">{{ coupon.discount_value | number }}</span>
+            <span class="discount-unit">đ</span>
+            }
+            <span class="discount-label">GIẢM</span>
+          </div>
+          <div class="voucher-info">
+            <div class="voucher-code">{{ coupon.code }}</div>
+            <div class="voucher-name">{{ coupon.name }}</div>
+            @if(coupon.min_order_value) {
+            <div class="voucher-condition">
+              <i class="fas fa-info-circle"></i>
+              Đơn tối thiểu {{ coupon.min_order_value | number }}đ
+            </div>
+            }
+          </div>
+          <button class="btn-copy" (click)="copyVoucherCode(coupon.code)">
+            <i class="fas fa-copy"></i>
+          </button>
+        </div>
+        }
+      </div>
+    </div>
+  </section>
+  }
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 4: SẢN PHẨM MỚI (Tối đa 8 sản phẩm) -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  @if(newProducts.length > 0) {
+  <section class="new-products-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="title-icon"><i class="fas fa-box-open"></i></span>
+          <span>Hàng Mới Về</span>
+        </h2>
+
+      </div>
+      <div class="products-carousel">
+        @for(product of newProducts; track product.id) {
+        <div class="product-card" (click)="onProductClick(product.id)">
+          <div class="product-image-box">
+            <img [src]="product.url || 'assets/images/product-placeholder.png'" [alt]="product.name"
+              (error)="$any($event.target).src = 'assets/images/product-placeholder.png'">
+            <span class="badge-new">MỚI</span>
+            <button class="btn-favorite" *ngIf="isLoggedIn" (click)="toggleFavorite($event, product.id)"
+              [class.active]="isFavorite(product.id)">
+              <i class="fas fa-heart"></i>
+            </button>
+          </div>
+          <div class="product-details">
+            @if(product.brand_name) {
+            <span class="product-brand">{{ product.brand_name }}</span>
+            }
+            <h3 class="product-name">{{ product.name }}</h3>
+            <div class="product-price">
+              {{ product.price | currency:'VND':'symbol':'1.0-0':'vi' }}
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+  </section>
+  }
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 5: THƯƠNG HIỆU -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  @if(brands.length > 0) {
+  <section class="brands-section">
+    <div class="container">
+      <div class="section-header centered">
+        <h2 class="section-title">
+          <span class="title-icon"><i class="fas fa-gem"></i></span>
+          <span>Thương Hiệu Đối Tác</span>
+        </h2>
+      </div>
+      <div class="brands-row">
+        @for(brand of brands; track brand.id) {
+        <div class="brand-logo" [routerLink]="['/products']" [queryParams]="{brandId: brand.id}">
+          @if(brand.logoUrl) {
+          <img [src]="getBrandImageUrl(brand.logoUrl)" [alt]="brand.name"
+            (error)="$any($event.target).style.display='none'">
+          } @else {
+          <span class="brand-text">{{ brand.name }}</span>
+          }
+        </div>
+        }
+      </div>
+    </div>
+  </section>
+  }
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 6: TẤT CẢ SẢN PHẨM (Với phân trang) -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <section class="all-products-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="title-icon"><i class="fas fa-th-large"></i></span>
+          <span>Tất Cả Sản Phẩm</span>
+        </h2>
+        <span class="total-count">{{ totalProducts }} sản phẩm</span>
+      </div>
+
+      <div class="products-grid">
+        @for(product of products; track product.id) {
+        <div class="product-card" (click)="onProductClick(product.id)">
+          <div class="product-image-box">
+            <img [src]="product.url || 'assets/images/product-placeholder.png'" [alt]="product.name"
+              (error)="$any($event.target).src = 'assets/images/product-placeholder.png'">
+            @if(isFlashSale(product)) {
+            <span class="badge-sale"><i class="fas fa-bolt"></i> GIẢM</span>
+            }
+            <button class="btn-favorite" *ngIf="isLoggedIn" (click)="toggleFavorite($event, product.id)"
+              [class.active]="isFavorite(product.id)">
+              <i class="fas fa-heart"></i>
+            </button>
+          </div>
+          <div class="product-details">
+            @if(product.brand_name) {
+            <span class="product-brand">{{ product.brand_name }}</span>
+            }
+            <h3 class="product-name">{{ product.name }}</h3>
+            <div class="product-price">
+              {{ product.price | currency:'VND':'symbol':'1.0-0':'vi' }}
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if(totalPages > 1) {
+      <div class="pagination-wrapper">
+        <div class="pagination">
+          <button class="page-btn" [disabled]="currentPage === 0" (click)="changePage(0)">
+            <i class="fas fa-angle-double-left"></i>
+          </button>
+          <button class="page-btn" [disabled]="currentPage === 0" (click)="changePage(currentPage - 1)">
+            <i class="fas fa-angle-left"></i>
+          </button>
+
+          @for(page of visiblePages; track page) {
+          <button class="page-btn" [class.active]="page === currentPage" (click)="changePage(page)">
+            {{ page + 1 }}
+          </button>
+          }
+
+          <button class="page-btn" [disabled]="currentPage === totalPages - 1" (click)="changePage(currentPage + 1)">
+            <i class="fas fa-angle-right"></i>
+          </button>
+          <button class="page-btn" [disabled]="currentPage === totalPages - 1" (click)="changePage(totalPages - 1)">
+            <i class="fas fa-angle-double-right"></i>
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <!-- SECTION 7: CAM KẾT DỊCH VỤ -->
+  <!-- ════════════════════════════════════════════════════════════════════════ -->
+  <section class="services-section">
+    <div class="container">
+      <div class="services-grid">
+        <div class="service-item">
+          <div class="service-icon">
+            <i class="fas fa-shipping-fast"></i>
+          </div>
+          <div class="service-text">
+            <strong>Miễn phí vận chuyển</strong>
+            <span>Đơn hàng từ 500K</span>
+          </div>
+        </div>
+        <div class="service-item">
+          <div class="service-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <div class="service-text">
+            <strong>Cam kết chính hãng</strong>
+            <span>100% Chính Hãng</span>
+          </div>
+        </div>
+        <div class="service-item">
+          <div class="service-icon">
+            <i class="fas fa-sync-alt"></i>
+          </div>
+          <div class="service-text">
+            <strong>Đổi trả dễ dàng</strong>
+            <span>Trong 30 ngày</span>
+          </div>
+        </div>
+        <div class="service-item">
+          <div class="service-icon">
+            <i class="fas fa-headset"></i>
+          </div>
+          <div class="service-text">
+            <strong>Hỗ trợ 24/7</strong>
+            <span>Tổng đài: 1900.xxxx</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
 </div>
 
 <app-footer></app-footer>

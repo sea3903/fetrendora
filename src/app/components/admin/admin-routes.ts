@@ -19,6 +19,8 @@ import { SizeAdminComponent } from "./size/size.admin.component";
 import { CouponComponent } from "./coupon/coupon.component";
 // Inventory Management
 import { InventoryAdminComponent } from "./inventory/inventory.admin.component";
+// Event Management
+import { EventAdminComponent } from "./event/event.admin.component";
 
 export const adminRoutes: Routes = [
     {
@@ -99,6 +101,14 @@ export const adminRoutes: Routes = [
             {
                 path: 'inventory',
                 component: InventoryAdminComponent
+            },
+
+            // ═══════════════════════════════════════════════════════════════
+            // EVENT MANAGEMENT
+            // ═══════════════════════════════════════════════════════════════
+            {
+                path: 'events',
+                component: EventAdminComponent
             }
         ]
     }
