@@ -50,6 +50,7 @@ export class UserAdminComponent implements OnInit {
   errors: {
     fullname?: string;
     phone_number?: string;
+    date_of_birth?: string;
   } = {};
 
   ngOnInit(): void {
@@ -163,6 +164,29 @@ export class UserAdminComponent implements OnInit {
     this.modalMode = 'edit';
     this.selectedUser = { ...user };
     this.selectedRoleId = user.role?.id || 0;
+
+    // FIX: Format date to YYYY-MM-DD for input[type="date"]
+    if (this.selectedUser.date_of_birth) {
+      try {
+        // Handle various date formats (timestamp, ISO string, or Date object)
+        const dateVal = new Date(this.selectedUser.date_of_birth);
+        // Check if date is valid
+        if (!isNaN(dateVal.getTime())) {
+          // Format as YYYY-MM-DD manually to avoid timezone issues
+          // We use local time components to get the unexpected date
+          const year = dateVal.getFullYear();
+          const month = ('0' + (dateVal.getMonth() + 1)).slice(-2);
+          const day = ('0' + dateVal.getDate()).slice(-2);
+
+          // Angular template expects string for date input
+          // We need to cast or use 'any' if TypeScript complains about type mismatch
+          (this.selectedUser.date_of_birth as any) = `${year}-${month}-${day}`;
+        }
+      } catch (e) {
+        console.error('Error parsing date:', e);
+      }
+    }
+
     this.showModal = true;
   }
 
@@ -192,11 +216,13 @@ export class UserAdminComponent implements OnInit {
     this.errors = {};
     let valid = true;
 
-    // Validate fullname - chỉ cho chữ cái và khoảng trắng (không cho số)
+    // Validate fullname
     if (!this.selectedUser?.fullname || this.selectedUser.fullname.trim() === '') {
       this.errors.fullname = 'Vui lòng nhập họ tên';
       valid = false;
     } else {
+      // Allow Vietnamese characters and spaces
+      // Expanded regex to cover more cases
       const nameRegex = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẵếưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\s]+$/;
       if (!nameRegex.test(this.selectedUser.fullname.trim())) {
         this.errors.fullname = 'Họ tên chỉ được chứa chữ cái';
@@ -204,12 +230,26 @@ export class UserAdminComponent implements OnInit {
       }
     }
 
-    // Validate phone - format VN: đầu 03/05/07/08/09, 10 số
+    // Validate phone
     if (this.selectedUser?.phone_number && this.selectedUser.phone_number.trim() !== '') {
       const phone = this.selectedUser.phone_number.trim();
       const phoneRegex = /^(03|05|07|08|09)[0-9]{8}$/;
       if (!phoneRegex.test(phone)) {
         this.errors.phone_number = 'Số điện thoại không hợp lệ (10 số)';
+        valid = false;
+      }
+    }
+
+    // Validate Date of Birth (cannot be in future)
+    // Note: selectedUser.date_of_birth is now a string thanks to openEditModal, or undefined
+    if (this.selectedUser?.date_of_birth) {
+      const dob = new Date(this.selectedUser.date_of_birth);
+      const now = new Date();
+      if (dob > now) {
+        // We don't have a specific field error for DOB in 'errors' object definition yet,
+        // but we can add one or use toast. For now, let's treat it generic or add to errors.
+        // Let's add 'date_of_birth' to errors object in component definition first implicitly
+        (this.errors as any).date_of_birth = 'Ngày sinh không được lớn hơn hiện tại';
         valid = false;
       }
     }

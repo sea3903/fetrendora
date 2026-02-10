@@ -46,7 +46,9 @@
 
                 <div class="form-group">
                     <label>Ngày sinh</label>
-                    <input type="date" [(ngModel)]="dateOfBirth" name="dateOfBirth">
+                    <input type="date" [(ngModel)]="dateOfBirth" name="dateOfBirth" (change)="validateDateOfBirth()"
+                        [class.error]="dateOfBirthError">
+                    <span class="error-text" *ngIf="dateOfBirthError">{{ dateOfBirthError }}</span>
                 </div>
 
                 <div class="form-group full-width">

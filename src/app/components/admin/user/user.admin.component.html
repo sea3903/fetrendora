@@ -20,7 +20,7 @@
   <div class="search-bar">
     <div class="search-input-wrapper">
       <i class="fas fa-search"></i>
-      <input type="text" [(ngModel)]="keyword" placeholder="Tìm theo email, tên, số điện thoại..."
+      <input type="text" [(ngModel)]="keyword" placeholder="Tìm theo email, tên, số điện thoại, địa chỉ (nếu có)..."
         (keyup.enter)="search()">
     </div>
     <button class="btn-search" (click)="search()">Tìm kiếm</button>
@@ -149,7 +149,9 @@
           </div>
           <div class="form-group">
             <label>Ngày sinh</label>
-            <input type="date" [(ngModel)]="selectedUser!.date_of_birth" name="date_of_birth">
+            <input type="date" [(ngModel)]="selectedUser!.date_of_birth" name="date_of_birth"
+              [class.error]="errors.date_of_birth">
+            <span class="error-text" *ngIf="errors.date_of_birth">{{ errors.date_of_birth }}</span>
           </div>
         </div>
         <div class="form-group">

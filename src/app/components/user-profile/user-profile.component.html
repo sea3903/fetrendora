@@ -59,7 +59,9 @@
                     <!-- Ngày sinh -->
                     <div class="form-group">
                         <label>{{ 'PROFILE.DOB' | translate }}</label>
-                        <input type="date" name="dateOfBirth" [(ngModel)]="dateOfBirth">
+                        <input type="date" name="dateOfBirth" [(ngModel)]="dateOfBirth" (change)="validateDateOfBirth()"
+                            [class.error]="dateOfBirthError">
+                        <span class="error-text" *ngIf="dateOfBirthError">{{ dateOfBirthError }}</span>
                     </div>
 
                     <!-- Địa chỉ -->

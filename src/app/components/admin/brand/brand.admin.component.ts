@@ -139,8 +139,18 @@ export class BrandAdminComponent implements OnInit {
             description: brand.description || ''
         };
         this.selectedFile = null;
-        // logoUrl đã được xử lý đầy đủ trong loadBrands
-        this.previewUrl = brand.logoUrl || '';
+        
+        // Fix display logo in edit modal
+        if (brand.logoUrl) {
+            if (brand.logoUrl.startsWith('http')) {
+                this.previewUrl = brand.logoUrl;
+            } else {
+                this.previewUrl = `${environment.apiBaseUrl}/products/images/${brand.logoUrl}`;
+            }
+        } else {
+            this.previewUrl = '';
+        }
+        
         this.nameError = '';
         this.showModal = true;
     }

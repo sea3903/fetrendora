@@ -45,6 +45,7 @@ export class AdminProfileComponent implements OnInit {
     // Validation errors
     fullNameError: string = '';
     phoneError: string = '';
+    dateOfBirthError: string = '';
 
     private userService = inject(UserService);
     private tokenService = inject(TokenService);
@@ -148,8 +149,23 @@ export class AdminProfileComponent implements OnInit {
         return true;
     }
 
+    validateDateOfBirth(): boolean {
+        if (!this.dateOfBirth) {
+            this.dateOfBirthError = '';
+            return true;
+        }
+        const dobDate = new Date(this.dateOfBirth);
+        const today = new Date();
+        if (dobDate > today) {
+            this.dateOfBirthError = 'Ngày sinh không được lớn hơn hiện tại';
+            return false;
+        }
+        this.dateOfBirthError = '';
+        return true;
+    }
+
     isFormValid(): boolean {
-        return this.fullNameError === '' && this.phoneError === '' && this.fullName.trim() !== '';
+        return this.fullNameError === '' && this.phoneError === '' && this.dateOfBirthError === '' && this.fullName.trim() !== '';
     }
 
     // Avatar
@@ -173,8 +189,9 @@ export class AdminProfileComponent implements OnInit {
     saveProfile() {
         const isNameValid = this.validateFullName();
         const isPhoneValid = this.validatePhone();
+        const isDobValid = this.validateDateOfBirth();
 
-        if (!isNameValid || !isPhoneValid) {
+        if (!isNameValid || !isPhoneValid || !isDobValid) {
             return;
         }
 

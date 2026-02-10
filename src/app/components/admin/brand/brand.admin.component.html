@@ -101,13 +101,14 @@
             <form (ngSubmit)="saveBrand()">
                 <!-- Logo Upload -->
                 <div class="logo-upload-section">
-                    <div class="logo-preview">
-                        <img [src]="previewUrl || defaultLogo" alt="Logo preview" loading="lazy">
-                        <label class="upload-overlay">
-                            <input type="file" accept="image/*" (change)="onFileSelected($event)" hidden>
+                    <div class="logo-preview" (click)="fileInput.click()">
+                        <img [src]="previewUrl || defaultLogo" alt="Logo preview" loading="lazy"
+                            style="cursor: pointer;" (error)="$any($event.target).src = defaultLogo">
+                        <div class="upload-overlay">
+                            <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" hidden>
                             <i class="fas fa-camera"></i>
                             <span>Tải logo lên</span>
-                        </label>
+                        </div>
                     </div>
                 </div>
 
