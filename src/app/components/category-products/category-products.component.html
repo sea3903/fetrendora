@@ -1,0 +1,263 @@
+<!-- Dùng lại header tổng -->
+<app-header></app-header>
+
+<div class="category-page">
+
+    <!-- BREADCRUMB -->
+    <!-- <div class="breadcrumb-bar">
+        <div class="container">
+            <a class="breadcrumb-link" routerLink="/">Trang chủ</a>
+            <span class="breadcrumb-sep">/</span>
+            @if(parentCategory) {
+            <a class="breadcrumb-link" [routerLink]="['/category', parentCategory.id]">{{ parentCategory.name }}</a>
+            <span class="breadcrumb-sep">/</span>
+            }
+            <span class="breadcrumb-current">{{ currentCategory?.name }}</span>
+        </div>
+    </div> -->
+
+    <!-- TIÊU ĐỀ DANH MỤC + DANH MỤC ANH EM -->
+    <section class="category-header">
+        <div class="container">
+            <h1 class="category-title">{{ currentCategory?.name }}</h1>
+            @if(siblingCategories.length > 0) {
+            <div class="sibling-chips">
+                @for(sibling of siblingCategories; track sibling.id) {
+                <a class="sibling-chip" [routerLink]="['/category', sibling.id]">{{ sibling.name }}</a>
+                }
+            </div>
+            }
+        </div>
+    </section>
+
+    <!-- NÚT MỞ BỘ LỌC TRÊN MOBILE -->
+    <div class="container">
+        <button class="btn-mobile-filter" (click)="showMobileFilter = true">
+            <i class="fas fa-sliders-h"></i> Bộ lọc
+            @if(activeFilterCount > 0) {
+            <span class="filter-badge">{{ activeFilterCount }}</span>
+            }
+        </button>
+    </div>
+
+    <!-- LAYUOT CHÍNH: SIDEBAR + SẢN PHẨM -->
+    <div class="container content-layout">
+
+        <!-- OVERLAY MOBILE -->
+        <div class="filter-overlay" [class.show]="showMobileFilter" (click)="showMobileFilter = false"></div>
+
+        <!-- SIDEBAR BỘ LỌC -->
+        <aside class="filter-sidebar" [class.show-mobile]="showMobileFilter">
+            <div class="filter-header">
+                <h3><i class="fas fa-filter"></i> Bộ Lọc</h3>
+                <button class="btn-close-filter" (click)="showMobileFilter = false">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Nút xóa tất cả -->
+            @if(activeFilterCount > 0) {
+            <button class="btn-clear-filters" (click)="clearAllFilters()">
+                <i class="fas fa-trash-alt"></i> Xóa tất cả bộ lọc ({{ activeFilterCount }})
+            </button>
+            }
+
+            <!-- LỌC THƯƠNG HIỆU -->
+            @if(brands.length > 0) {
+            <div class="filter-section">
+                <div class="filter-title" (click)="toggleFilterSection('brand')">
+                    <span>Thương hiệu</span>
+                    <i class="fas" [class.fa-chevron-down]="expandedFilters['brand']"
+                        [class.fa-chevron-right]="!expandedFilters['brand']"></i>
+                </div>
+                <div class="filter-body" [class.collapsed]="!expandedFilters['brand']">
+                    @for(brand of brands; track brand.id) {
+                    <div class="filter-checkbox" [class.active]="selectedBrandId === brand.id"
+                        (click)="toggleBrand(brand.id)">
+                        <div class="checkbox-mark">
+                            @if(selectedBrandId === brand.id) {
+                            <i class="fas fa-check"></i>
+                            }
+                        </div>
+                        <span class="checkbox-label">{{ brand.name }}</span>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+
+            <!-- LỌC MÀU SẮC -->
+            @if(colors.length > 0) {
+            <div class="filter-section">
+                <div class="filter-title" (click)="toggleFilterSection('color')">
+                    <span>Màu sắc</span>
+                    <i class="fas" [class.fa-chevron-down]="expandedFilters['color']"
+                        [class.fa-chevron-right]="!expandedFilters['color']"></i>
+                </div>
+                <div class="filter-body color-body" [class.collapsed]="!expandedFilters['color']">
+                    @for(color of colors; track color.id) {
+                    <div class="color-swatch" [class.active]="selectedColorIds.includes(color.id)"
+                        [style.background-color]="color.code || '#ccc'" [title]="color.name"
+                        (click)="toggleColor(color.id)">
+                        @if(selectedColorIds.includes(color.id)) {
+                        <i class="fas fa-check"></i>
+                        }
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+
+            <!-- LỌC KÍCH THƯỚC -->
+            @if(sizes.length > 0) {
+            <div class="filter-section">
+                <div class="filter-title" (click)="toggleFilterSection('size')">
+                    <span>Kích thước</span>
+                    <i class="fas" [class.fa-chevron-down]="expandedFilters['size']"
+                        [class.fa-chevron-right]="!expandedFilters['size']"></i>
+                </div>
+                <div class="filter-body size-body" [class.collapsed]="!expandedFilters['size']">
+                    @for(size of sizes; track size.id) {
+                    <div class="size-chip" [class.active]="selectedSizeIds.includes(size.id)"
+                        (click)="toggleSize(size.id)">
+                        {{ size.name }}
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+
+            <!-- LỌC XUẤT XỨ -->
+            @if(origins.length > 0) {
+            <div class="filter-section">
+                <div class="filter-title" (click)="toggleFilterSection('origin')">
+                    <span>Xuất xứ</span>
+                    <i class="fas" [class.fa-chevron-down]="expandedFilters['origin']"
+                        [class.fa-chevron-right]="!expandedFilters['origin']"></i>
+                </div>
+                <div class="filter-body" [class.collapsed]="!expandedFilters['origin']">
+                    @for(origin of origins; track origin.id) {
+                    <div class="filter-checkbox" [class.active]="selectedOriginIds.includes(origin.id)"
+                        (click)="toggleOrigin(origin.id)">
+                        <div class="checkbox-mark">
+                            @if(selectedOriginIds.includes(origin.id)) {
+                            <i class="fas fa-check"></i>
+                            }
+                        </div>
+                        <span class="checkbox-label">{{ origin.name }}</span>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+
+            <!-- LỌC GIÁ -->
+            <div class="filter-section">
+                <div class="filter-title" (click)="toggleFilterSection('price')">
+                    <span>Khoảng giá</span>
+                    <i class="fas" [class.fa-chevron-down]="expandedFilters['price']"
+                        [class.fa-chevron-right]="!expandedFilters['price']"></i>
+                </div>
+                <div class="filter-body price-body" [class.collapsed]="!expandedFilters['price']">
+                    <div class="price-inputs">
+                        <input type="number" class="price-input" placeholder="Từ" [(ngModel)]="minPrice">
+                        <span class="price-sep">—</span>
+                        <input type="number" class="price-input" placeholder="Đến" [(ngModel)]="maxPrice">
+                    </div>
+                    <button class="btn-apply-price" (click)="applyPriceFilter()">Áp dụng</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- NỘI DUNG SẢN PHẨM -->
+        <main class="products-main">
+            <section class="all-products-section">
+
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span class="title-icon"><i class="fas fa-th-large"></i></span>
+                        <span>Sản Phẩm</span>
+                    </h2>
+                    <span class="total-count">{{ totalProducts }} sản phẩm</span>
+                </div>
+
+                <!-- LOADING -->
+                @if(isLoading) {
+                <div class="loading-container">
+                    <div class="spinner"></div>
+                    <p>Đang tải sản phẩm...</p>
+                </div>
+                }
+
+                <!-- TRẠNG THÁI RỖNG -->
+                @if(!isLoading && products.length === 0) {
+                <div class="empty-state">
+                    <i class="fas fa-box-open"></i>
+                    <h3>Không tìm thấy sản phẩm</h3>
+                    <p>Thử thay đổi bộ lọc để xem thêm sản phẩm</p>
+                    @if(activeFilterCount > 0) {
+                    <button class="btn-reset" (click)="clearAllFilters()">Xóa bộ lọc</button>
+                    }
+                </div>
+                }
+
+                <!-- GRID SẢN PHẨM - GIỐNG HOME -->
+                @if(!isLoading && products.length > 0) {
+                <div class="products-grid">
+                    @for(product of products; track product.id) {
+                    <div class="product-card" (click)="onProductClick(product.id)">
+                        <div class="product-image-box">
+                            <img [src]="product.url || 'assets/images/product-placeholder.png'" [alt]="product.name"
+                                (error)="$any($event.target).src = 'assets/images/product-placeholder.png'">
+                        </div>
+                        <div class="product-details">
+                            @if(product.brand_name) {
+                            <span class="product-brand">{{ product.brand_name }}</span>
+                            }
+                            <h3 class="product-name">{{ product.name }}</h3>
+                            <div class="product-price">
+                                {{ product.price | currency:'VND':'symbol':'1.0-0':'vi' }}
+                            </div>
+                        </div>
+                    </div>
+                    }
+                </div>
+
+                <!-- PAGINATION - GIỐNG HOME -->
+                @if(totalPages > 1) {
+                <div class="pagination-wrapper">
+                    <div class="pagination">
+                        <button class="page-btn" [disabled]="currentPage === 0" (click)="changePage(0)">
+                            <i class="fas fa-angle-double-left"></i>
+                        </button>
+                        <button class="page-btn" [disabled]="currentPage === 0" (click)="changePage(currentPage - 1)">
+                            <i class="fas fa-angle-left"></i>
+                        </button>
+
+                        @for(page of visiblePages; track page) {
+                        <button class="page-btn" [class.active]="page === currentPage" (click)="changePage(page)">
+                            {{ page + 1 }}
+                        </button>
+                        }
+
+                        <button class="page-btn" [disabled]="currentPage === totalPages - 1"
+                            (click)="changePage(currentPage + 1)">
+                            <i class="fas fa-angle-right"></i>
+                        </button>
+                        <button class="page-btn" [disabled]="currentPage === totalPages - 1"
+                            (click)="changePage(totalPages - 1)">
+                            <i class="fas fa-angle-double-right"></i>
+                        </button>
+                    </div>
+                </div>
+                }
+                }
+
+            </section>
+        </main>
+    </div>
+
+</div>
+
+<!-- Dùng lại footer tổng -->
+<app-footer></app-footer>

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { Product } from '../../models/product';
 import { ProductDetail } from '../../models/product-detail';
 import { Comment } from '../../models/comment';
@@ -13,7 +13,7 @@ import { BaseComponent } from '../base/base.component';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { ProductDetailService } from '../../services/product-detail.service';
-import { CommentService, CommentDTO } from '../../services/comment.service';
+import { CommentService } from '../../services/comment.service';
 import { UserResponse } from '../../responses/user/user.response';
 
 @Component({
@@ -32,6 +32,7 @@ import { UserResponse } from '../../responses/user/user.response';
 export class DetailProductComponent extends BaseComponent implements OnInit {
   productDetailService = inject(ProductDetailService);
   commentService = inject(CommentService);
+  private cdr = inject(ChangeDetectorRef);
 
   product?: Product;
   productId: number = 0;
@@ -58,14 +59,15 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
   // Tabs
   activeTab: 'details' | 'warranty' | 'reviews' = 'details';
 
-  // Comments/Reviews
+  // Comments/Reviews (read-only)
   comments: Comment[] = [];
   loadingComments: boolean = false;
-  newCommentContent: string = '';
-  submittingComment: boolean = false;
+  averageRating: number = 0; // Trung bình sao
+  totalRatings: number = 0; // Tổng số đánh giá
 
   // Environment để dùng trong template
   environment = environment;
+  Math = Math; // Để dùng Math.round() trong template
 
   // Lightbox
   lightboxOpen: boolean = false;
@@ -89,6 +91,8 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
     if (!isNaN(this.productId)) {
       this.loadProduct();
       this.loadProductDetails();
+      // Load đánh giá ngay từ đầu để hiển thị tổng quan
+      this.loadComments();
       if (this.isLoggedIn) {
         this.checkFavoriteStatus();
       }
@@ -149,19 +153,34 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
     });
   }
 
-  loadComments() {
-    if (this.comments.length > 0) return; // Đã load rồi
+  loadComments(forceReload: boolean = false) {
+    if (this.comments.length > 0 && !forceReload) return; // Đã load rồi
 
     this.loadingComments = true;
-    this.commentService.getCommentsByProductId(this.productId).subscribe({
+    this.commentService.getCommentsByProduct(this.productId).subscribe({
       next: (apiResponse: ApiResponse) => {
         this.comments = apiResponse.data || [];
         this.loadingComments = false;
+        this.calculateAverageRating();
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loadingComments = false;
+        this.cdr.detectChanges();
       }
     });
+  }
+
+  // Tính trung bình sao từ danh sách comments
+  calculateAverageRating() {
+    const ratedComments = this.comments.filter(c => c.rating && c.rating > 0);
+    this.totalRatings = ratedComments.length;
+    if (this.totalRatings > 0) {
+      const sum = ratedComments.reduce((acc, c) => acc + (c.rating || 0), 0);
+      this.averageRating = Math.round((sum / this.totalRatings) * 10) / 10;
+    } else {
+      this.averageRating = 0;
+    }
   }
 
   checkFavoriteStatus() {
@@ -508,55 +527,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
     this.router.navigate(['/orders']); // Lưu ý: route đúng có thể là /cart hoặc /checkout tùy logic
   }
 
-  // === Comments/Reviews ===
-  submitComment(): void {
-    if (!this.isLoggedIn || !this.currentUser) {
-      this.toastService.showToast({
-        error: null,
-        defaultMsg: 'Vui lòng đăng nhập để đánh giá',
-        title: 'Thông báo'
-      });
-      return;
-    }
 
-    if (!this.newCommentContent.trim()) {
-      this.toastService.showToast({
-        error: null,
-        defaultMsg: 'Vui lòng nhập nội dung đánh giá',
-        title: 'Thông báo'
-      });
-      return;
-    }
-
-    this.submittingComment = true;
-    const commentDTO: CommentDTO = {
-      product_id: this.productId,
-      user_id: this.currentUser.id,
-      content: this.newCommentContent.trim()
-    };
-
-    this.commentService.addComment(commentDTO).subscribe({
-      next: () => {
-        this.submittingComment = false;
-        this.newCommentContent = '';
-        this.comments = []; // Reset để reload
-        this.loadComments();
-        this.toastService.showToast({
-          error: null,
-          defaultMsg: 'Đánh giá đã được gửi',
-          title: 'Thành công'
-        });
-      },
-      error: (error: HttpErrorResponse) => {
-        this.submittingComment = false;
-        this.toastService.showToast({
-          error: error,
-          defaultMsg: 'Lỗi khi gửi đánh giá',
-          title: 'Lỗi'
-        });
-      }
-    });
-  }
 
   // === Helpers ===
   getAvatarUrl(user: any): string {

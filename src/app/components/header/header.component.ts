@@ -154,9 +154,12 @@ export class HeaderComponent extends BaseComponent implements OnInit, OnDestroy 
 
   // Điều hướng đến danh mục
   navigateToCategory(category: Category) {
-    this.router.navigate(['/home'], {
-      queryParams: { categoryId: category.id }
-    });
+    // Nếu danh mục có con → không navigate, chỉ toggle dropdown
+    if (category.children && category.children.length > 0) {
+      return;
+    }
+    // Danh mục không có con (lá hoặc đơn) → vào trang sản phẩm danh mục
+    this.router.navigate(['/category', category.id]);
     this.activeParentId = undefined;
   }
 

@@ -48,13 +48,21 @@ header {
     height: 100%;
     display: flex;
     align-items: center;
+    // Padding-bottom tạo vùng hover liền mạch giữa link và dropdown
+    padding-bottom: 0;
+
+    &:hover .dropdown-menu,
+    .dropdown-menu:hover {
+        display: block;
+    }
 }
 
 .category-link {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 13px;
+    gap: 5px;
+    font-family: $font-family;
+    font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -63,6 +71,7 @@ header {
     transition: opacity 0.2s;
     white-space: nowrap;
     padding: 8px 0;
+    text-decoration: none;
 
     i {
         font-size: 10px;
@@ -72,6 +81,51 @@ header {
 
     &:hover {
         opacity: 0.7;
+    }
+
+    // Danh mục có con thì cursor mặc định (không navigate)
+    &.has-children {
+        cursor: default;
+    }
+}
+
+// Dropdown danh mục con
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: -12px;
+    min-width: 200px;
+    background: $color-white;
+    border: 1px solid $color-gray-200;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    z-index: 1000;
+    padding: 8px 0;
+    // Tạo vùng kết nối với category-item (tránh mất dropdown khi di chuột)
+    padding-top: 12px;
+    margin-top: -4px;
+
+    &.show {
+        display: block;
+    }
+}
+
+.dropdown-item {
+    display: block;
+    padding: 10px 20px;
+    font-family: $font-family;
+    font-size: 13px;
+    font-weight: 400;
+    color: $color-gray-600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+
+    &:hover {
+        background: $color-gray-100;
+        color: $color-black;
+        font-weight: 500;
     }
 }
 
@@ -193,6 +247,17 @@ header {
     opacity: 0;
     transform: translateY(-10px);
     transition: opacity 0.2s ease, transform 0.2s ease;
+
+    // Pseudo-element tạo luồng liền mạch để không bị mất hover khi di chuột qua gap 10px
+    &::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: 0;
+        right: 0;
+        height: 10px;
+        background: transparent;
+    }
 
     // Hiển thị khi có class .show
     &.show {

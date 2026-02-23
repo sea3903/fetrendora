@@ -258,41 +258,78 @@
         <!-- Tab: Đánh giá -->
         @if(activeTab === 'reviews') {
         <div class="tab-panel reviews-panel">
-          <!-- Form thêm đánh giá -->
-          @if(isLoggedIn) {
-          <div class="review-form">
-            <textarea [(ngModel)]="newCommentContent" placeholder="Viết đánh giá của bạn..." rows="3"></textarea>
-            <button class="btn-submit" (click)="submitComment()"
-              [disabled]="submittingComment || !newCommentContent.trim()">
-              @if(submittingComment) {
-              <span class="spinner-small"></span>
+
+          <!-- Tổng quan đánh giá (Giao diện gọn) -->
+          @if(totalRatings > 0) {
+          <div class="rating-summary-compact">
+            <div class="score-box">
+              <span class="avg">{{ averageRating }}</span>
+              <span class="max">/5</span>
+            </div>
+            <div class="stars-row">
+              @for(star of [1,2,3,4,5]; track star) {
+              <i class="fas fa-star" [class.filled]="star <= Math.round(averageRating)"></i>
               }
-              Gửi đánh giá
-            </button>
+            </div>
+            <div class="total-count">Dựa trên {{ totalRatings }} đánh giá</div>
           </div>
-          } @else {
-          <p class="login-prompt">
-            <a routerLink="/login">Đăng nhập</a> để viết đánh giá
-          </p>
           }
 
-          <!-- Danh sách -->
+          <!-- Hướng dẫn đánh giá -->
+          <div class="review-notice info"
+            style="display:flex; align-items:center; gap:12px; padding:16px; background:#f0f9ff; border-radius:8px; margin-bottom:20px; border: 1px solid #bae6fd;">
+            <i class="fas fa-info-circle" style="font-size:18px; color:#0284c7;"></i>
+            <div>
+              @if(isLoggedIn) {
+              <span>Để đánh giá sản phẩm, vui lòng vào
+                <a routerLink="/my-orders" style="color:#0284c7; font-weight:600; text-decoration:underline;">Đơn hàng
+                  của tôi</a>
+                (đơn đã giao) hoặc xem
+                <a routerLink="/my-reviews" style="color:#0284c7; font-weight:600; text-decoration:underline;">Đánh giá
+                  của tôi</a>.
+              </span>
+              } @else {
+              <span>
+                <a routerLink="/login" style="color:#0284c7; font-weight:600; text-decoration:underline;">Đăng nhập</a>
+                để đánh giá sản phẩm.
+              </span>
+              }
+            </div>
+          </div>
+
+          <!-- Danh sách đánh giá -->
           @if(loadingComments) {
-          <div class="loading">Đang tải...</div>
+          <div class="loading-state">
+            <div class="spinner"></div> Đang tải...
+          </div>
           } @else if(comments.length === 0) {
-          <p class="no-reviews">Chưa có đánh giá nào.</p>
+          <div class="empty-reviews">
+            <i class="far fa-star"></i>
+            <p>Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này!</p>
+          </div>
           } @else {
-          <div class="reviews-list">
+          <div class="reviews-list-premium">
             @for(comment of comments; track comment.id) {
-            <div class="review-item">
+            <div class="review-card">
               <div class="review-header">
-                <img [src]="getAvatarUrl(comment.user)" class="reviewer-avatar">
-                <div>
-                  <div class="reviewer-name">{{ comment.user.fullname || 'Ẩn danh' }}</div>
-                  <div class="review-date">{{ formatDate(comment.created_at) }}</div>
+                <img [src]="getAvatarUrl(comment.user)" class="user-avatar-small"
+                  onerror="this.src='assets/images/user-placeholder.png'">
+                <div class="user-meta">
+                  <span class="user-name">{{ comment.user.fullname || 'Khách hàng ẩn danh' }}</span>
+                  <div class="rating-row">
+                    <div class="stars-static">
+                      @for(star of [1,2,3,4,5]; track star) {
+                      <i class="fas fa-star" [class.filled]="star <= (comment.rating || 0)"></i>
+                      }
+                    </div>
+                    <span class="review-date">{{ formatDate(comment.created_at) }}</span>
+                  </div>
                 </div>
               </div>
-              <div class="review-content">{{ comment.content }}</div>
+
+              <div class="review-body">
+                <div class="review-content">{{ comment.content }}</div>
+              </div>
             </div>
             }
           </div>

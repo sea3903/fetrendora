@@ -5,7 +5,8 @@
       <div class="nav-categories">
         @for(category of categoryTree; track category.id) {
         <div class="category-item" (mouseenter)="toggleCategory(category.id)" (mouseleave)="activeParentId = undefined">
-          <a class="category-link" (click)="navigateToCategory(category)">
+          <a class="category-link" [class.has-children]="category.children && category.children.length > 0"
+            (click)="navigateToCategory(category)">
             {{ category.name }}
             @if(category.children && category.children.length > 0) {
             <i class="fas fa-chevron-down"></i>
@@ -16,7 +17,8 @@
           <div class="dropdown-menu" [class.show]="activeParentId === category.id"
             *ngIf="category.children && category.children.length > 0">
             @for(child of category.children; track child.id) {
-            <a class="dropdown-item" (click)="navigateToCategory(child); $event.stopPropagation()">
+            <a class="dropdown-item" [routerLink]="['/category', child.id]"
+              (click)="activeParentId = undefined; $event.stopPropagation()">
               {{ child.name }}
             </a>
             }
@@ -61,6 +63,9 @@
             </a>
             <a class="dropdown-item" routerLink="/my-orders" (click)="closeDropdown()">
               <i class="fas fa-box"></i> Đơn hàng của tôi
+            </a>
+            <a class="dropdown-item" routerLink="/my-reviews" (click)="closeDropdown()">
+              <i class="fas fa-star"></i> Đánh giá của tôi
             </a>
             <a class="dropdown-item" routerLink="/change-password" (click)="closeDropdown()">
               <i class="fas fa-lock"></i> Đổi mật khẩu

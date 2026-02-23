@@ -21,6 +21,7 @@ import { CouponComponent } from "./coupon/coupon.component";
 import { InventoryAdminComponent } from "./inventory/inventory.admin.component";
 // Event Management
 import { EventAdminComponent } from "./event/event.admin.component";
+import { CommentAdminComponent } from "./comment/comment.admin.component";
 
 export const adminRoutes: Routes = [
     {
@@ -109,6 +110,10 @@ export const adminRoutes: Routes = [
             {
                 path: 'events',
                 component: EventAdminComponent
+            },
+            {
+                path: 'comments',
+                component: CommentAdminComponent
             }
         ]
     }

@@ -1,0 +1,156 @@
+<app-header></app-header>
+
+<div class="my-reviews-page">
+    <div class="container">
+        <!-- Tiêu đề trang (giống coupon-gallery) -->
+        <div class="page-header">
+            <h1>⭐ Đánh giá của tôi</h1>
+            <p *ngIf="totalElements > 0">Bạn đã viết <strong>{{ totalElements }}</strong> đánh giá sản phẩm.</p>
+            <p *ngIf="totalElements === 0 && !isLoading">Quản lý tất cả đánh giá sản phẩm của bạn tại đây.</p>
+        </div>
+
+        <!-- Đang tải -->
+        <div *ngIf="isLoading" class="loading-state">
+            <div class="spinner"></div>
+            <p>Đang tải đánh giá...</p>
+        </div>
+
+        <!-- Trống -->
+        <div *ngIf="!isLoading && reviews.length === 0" class="empty-state">
+            <i class="far fa-comment-alt"></i>
+            <h3>Chưa có đánh giá nào</h3>
+            <p>Hãy mua sắm và chia sẻ trải nghiệm của bạn!</p>
+            <a routerLink="/my-orders" class="btn-go-orders">Xem đơn hàng</a>
+        </div>
+
+        <!-- Danh sách đánh giá (grid giống coupon) -->
+        <div class="review-grid" *ngIf="!isLoading && reviews.length > 0">
+            <div class="review-card" *ngFor="let review of reviews">
+                <!-- Bên trái: Ảnh sản phẩm -->
+                <div class="card-left">
+                    <a [routerLink]="['/products', review.product_id]" class="image-link">
+                        <img [src]="getProductImageUrl(review.product_thumbnail)" [alt]="review.product_name"
+                            onerror="this.src='assets/images/product-placeholder.png'">
+                    </a>
+
+                </div>
+
+                <!-- Bên phải: Nội dung -->
+                <div class="card-right">
+                    <div class="card-top">
+                        <span class="date-tag">{{ formatDate(review.created_at) }}</span>
+                    </div>
+
+                    <h3 class="product-title">
+                        <a [routerLink]="['/products', review.product_id]" [title]="review.product_name">
+                            {{ review.product_name || 'Sản phẩm' }}
+                        </a>
+                    </h3>
+
+                    <div class="stars-row">
+                        <i class="fas fa-star" *ngFor="let star of [1,2,3,4,5]; let i = index"
+                            [class.active]="i < (review.rating || 0)"></i>
+                    </div>
+
+                    <p class="review-text">"{{ review.content }}"</p>
+
+                    <div class="action-area">
+                        <button class="btn-edit" (click)="openEditModal(review)">
+                            <i class="fas fa-pen"></i> Sửa
+                        </button>
+                        <button class="btn-remove" (click)="confirmDelete(review)">
+                            <i class="fas fa-trash-alt"></i> Xóa
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Trang trí vòng tròn (giống coupon) -->
+                <div class="circle top"></div>
+                <div class="circle bottom"></div>
+            </div>
+        </div>
+
+        <!-- Phân trang -->
+        <div class="pagination" *ngIf="!isLoading && totalPages > 1">
+            <button (click)="goToPage(0)" [disabled]="currentPage === 0">
+                <i class="fas fa-angle-double-left"></i>
+            </button>
+            <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0">
+                <i class="fas fa-angle-left"></i>
+            </button>
+            <button *ngFor="let page of visiblePages" (click)="goToPage(page - 1)"
+                [class.active]="page === currentPage + 1" class="page-num">
+                {{ page }}
+            </button>
+            <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage >= totalPages - 1">
+                <i class="fas fa-angle-right"></i>
+            </button>
+            <button (click)="goToPage(totalPages - 1)" [disabled]="currentPage >= totalPages - 1">
+                <i class="fas fa-angle-double-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<app-footer></app-footer>
+
+<!-- Modal chỉnh sửa -->
+<div *ngIf="showEditModal && editingReview" class="modal-overlay" (click)="closeEditModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+            <h3>Chỉnh sửa đánh giá</h3>
+            <button (click)="closeEditModal()" class="btn-close-modal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="modal-content">
+            <div class="edit-product-info">
+                <img [src]="getProductImageUrl(editingReview.product_thumbnail)"
+                    onerror="this.src='assets/images/product-placeholder.png'">
+                <div>
+                    <h4>{{ editingReview.product_name || 'Sản phẩm' }}</h4>
+                    <small>Đã mua hàng</small>
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label>Đánh giá</label>
+                <div class="stars-select">
+                    <i *ngFor="let star of [1,2,3,4,5]; let i = index" class="fas fa-star"
+                        [class.active]="i < (editingReview.rating || 0)" (click)="editingReview.rating = i + 1"></i>
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label>Nội dung</label>
+                <textarea [(ngModel)]="editingReview.content" rows="4"
+                    placeholder="Viết cảm nhận của bạn..."></textarea>
+            </div>
+        </div>
+
+        <div class="modal-foot">
+            <button (click)="closeEditModal()" class="btn-cancel">Huỷ</button>
+            <button (click)="saveEdit()" class="btn-save">Lưu thay đổi</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal xóa -->
+<div *ngIf="showDeleteConfirm && deletingReview" class="modal-overlay" (click)="cancelDelete()">
+    <div class="modal-box modal-sm" (click)="$event.stopPropagation()">
+        <div class="delete-body">
+            <div class="delete-icon">
+                <i class="fas fa-trash-alt"></i>
+            </div>
+            <h3>Xóa đánh giá?</h3>
+            <p>Bạn có chắc muốn xóa đánh giá cho
+                <strong>"{{ deletingReview.product_name || 'sản phẩm này' }}"</strong>?
+            </p>
+            <div class="delete-btns">
+                <button (click)="executeDelete()" class="btn-danger">Xóa ngay</button>
+                <button (click)="cancelDelete()" class="btn-cancel">Giữ lại</button>
+            </div>
+        </div>
+    </div>
+</div>

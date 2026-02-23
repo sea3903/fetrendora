@@ -32,12 +32,16 @@ export const routes: Routes = [
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
   { path: 'products/:id', component: DetailProductComponent },
+  // Sản phẩm theo danh mục
+  { path: 'category/:id', loadComponent: () => import('./components/category-products/category-products.component').then(m => m.CategoryProductsComponent) },
   // Giỏ hàng
   { path: 'cart', component: OrderComponent, canActivate: [AuthGuardFn] },
   // Thanh toán
   { path: 'checkout', component: CheckoutComponent, canActivate: [AuthGuardFn] },
   // Lịch sử đơn hàng (MỚI)
   { path: 'my-orders', component: MyOrdersComponent, canActivate: [AuthGuardFn] },
+  // Đánh giá của tôi
+  { path: 'my-reviews', loadComponent: () => import('./components/my-reviews/my-reviews.component').then(m => m.MyReviewsComponent), canActivate: [AuthGuardFn] },
 
   // Route orders cũ trỏ về detail - giữ nguyên để không break link khác
   { path: 'orders', component: OrderDetailComponent, canActivate: [AuthGuardFn] },

@@ -1,0 +1,364 @@
+<div class="comment-admin-page">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h2><i class="fas fa-comments"></i> Quản lý đánh giá</h2>
+            <span class="total-badge" *ngIf="totalElements > 0">{{ totalElements }} đánh giá</span>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════ -->
+    <!-- THỐNG KÊ -->
+    <!-- ════════════════════════════════════════════ -->
+    <div class="stats-section" *ngIf="stats && showStats">
+        <div class="stats-grid">
+            <div class="stat-card total">
+                <div class="stat-icon"><i class="fas fa-comments"></i></div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ stats.totalComments || 0 }}</div>
+                    <div class="stat-label">Tổng đánh giá</div>
+                </div>
+            </div>
+            <div class="stat-card avg">
+                <div class="stat-icon"><i class="fas fa-star"></i></div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ (stats.averageRating || 0) | number:'1.1-1' }}</div>
+                    <div class="stat-label">Trung bình sao</div>
+                </div>
+            </div>
+            <div class="stat-card five">
+                <div class="stat-icon"><i class="fas fa-thumbs-up"></i></div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ getStarCount(5) }}</div>
+                    <div class="stat-label">Đánh giá 5 sao</div>
+                </div>
+            </div>
+            <div class="stat-card one">
+                <div class="stat-icon"><i class="fas fa-thumbs-down"></i></div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ getStarCount(1) }}</div>
+                    <div class="stat-label">Đánh giá 1 sao</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phân bổ sao -->
+        <div class="rating-distribution">
+            <div class="dist-row" *ngFor="let star of [5,4,3,2,1]">
+                <span class="dist-label">{{ star }} <i class="fas fa-star"></i></span>
+                <div class="dist-bar">
+                    <div class="dist-fill" [style.width.%]="getStarPercentage(star)"></div>
+                </div>
+                <span class="dist-count">{{ getStarCount(star) }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════ -->
+    <!-- BỘ LỌC -->
+    <!-- ════════════════════════════════════════════ -->
+    <div class="filter-section">
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <div class="search-input-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" [(ngModel)]="keyword" placeholder="Tìm theo nội dung, tên người dùng..."
+                    (keyup.enter)="searchComments()">
+            </div>
+            <button class="btn-search" (click)="searchComments()">Tìm kiếm</button>
+        </div>
+
+        <!-- Hàng lọc nâng cao -->
+        <div class="advanced-filters">
+            <!-- Rating Filter -->
+            <div class="filter-group">
+                <label>Số sao:</label>
+                <select [(ngModel)]="filterRating" (change)="filterByRating(filterRating)">
+                    <option [ngValue]="null">Tất cả</option>
+                    <option [ngValue]="5">5 sao ⭐⭐⭐⭐⭐</option>
+                    <option [ngValue]="4">4 sao ⭐⭐⭐⭐</option>
+                    <option [ngValue]="3">3 sao ⭐⭐⭐</option>
+                    <option [ngValue]="2">2 sao ⭐⭐</option>
+                    <option [ngValue]="1">1 sao ⭐</option>
+                </select>
+            </div>
+
+            <!-- Date Range -->
+            <div class="filter-group">
+                <label>Từ ngày:</label>
+                <input type="date" [(ngModel)]="filterStartDate" (change)="searchComments()">
+            </div>
+            <div class="filter-group">
+                <label>Đến ngày:</label>
+                <input type="date" [(ngModel)]="filterEndDate" (change)="searchComments()">
+            </div>
+
+            <!-- Clear -->
+            <button class="btn-clear" *ngIf="hasActiveFilters()" (click)="clearFilters()">
+                <i class="fas fa-times"></i> Xóa lọc
+            </button>
+        </div>
+
+        <!-- Quick Filters -->
+        <div class="quick-filters">
+            <span class="quick-label">Nhanh:</span>
+            <button class="quick-btn" [class.active]="activeQuickFilter === 'today'"
+                (click)="applyQuickFilter('today')">Hôm nay</button>
+            <button class="quick-btn" [class.active]="activeQuickFilter === 'yesterday'"
+                (click)="applyQuickFilter('yesterday')">Hôm qua</button>
+            <button class="quick-btn" [class.active]="activeQuickFilter === 'last7days'"
+                (click)="applyQuickFilter('last7days')">7 ngày qua</button>
+            <button class="quick-btn" [class.active]="activeQuickFilter === 'thisMonth'"
+                (click)="applyQuickFilter('thisMonth')">Tháng này</button>
+            <button class="quick-btn" [class.active]="activeQuickFilter === 'lastMonth'"
+                (click)="applyQuickFilter('lastMonth')">Tháng trước</button>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════ -->
+    <!-- BẢNG DỮ LIỆU -->
+    <!-- ════════════════════════════════════════════ -->
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="col-id">ID</th>
+                    <th class="col-user">Người đánh giá</th>
+                    <th class="col-product">Sản phẩm</th>
+                    <th class="col-content">Nội dung</th>
+                    <th class="col-rating text-center">Đánh giá</th>
+                    <th class="col-date">Ngày tạo</th>
+                    <th class="col-actions text-center">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for(comment of comments; track comment.id) {
+                <tr>
+                    <td class="col-id main-text">#{{ comment.id }}</td>
+                    <td class="col-user">
+                        <div class="user-cell">
+                            <img [src]="getAvatarUrl(comment.user)" class="user-avatar" alt="avatar">
+                            <div class="user-info">
+                                <div class="user-name">{{ comment.user?.fullname || 'Ẩn danh' }}</div>
+                                <div class="user-email" *ngIf="comment.user?.email">{{ comment.user.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="col-product">
+                        <div class="product-name-cell" [title]="comment.product_name || ''">
+                            {{ comment.product_name || 'N/A' }}
+                        </div>
+                    </td>
+                    <td class="col-content">
+                        <div class="content-cell" [title]="comment.content">
+                            {{ truncateContent(comment.content) }}
+                        </div>
+                    </td>
+                    <td class="col-rating text-center">
+                        <div class="rating-stars-inline">
+                            <i *ngFor="let star of [1,2,3,4,5]" class="fas fa-star"
+                                [class.filled]="star <= (comment.rating || 0)"></i>
+                        </div>
+                    </td>
+                    <td class="col-date">
+                        {{ comment.created_at | date:'dd/MM/yyyy HH:mm' }}
+                    </td>
+                    <td class="col-actions text-center">
+                        <div class="action-btns">
+                            <button class="btn-icon view" (click)="viewDetail(comment)" title="Xem chi tiết">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn-icon edit" (click)="openEditModal(comment)" title="Chỉnh sửa">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="btn-icon delete" (click)="confirmDelete(comment)" title="Xóa">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                }
+                @if(comments.length === 0) {
+                <tr>
+                    <td colspan="7" class="empty-state">
+                        <i class="fas fa-comment-slash"></i>
+                        <p>Không tìm thấy đánh giá nào</p>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container" *ngIf="totalPages > 1">
+        <button class="page-btn" [disabled]="currentPage === 0" (click)="onPageChange(0)">
+            <i class="fas fa-angle-double-left"></i>
+        </button>
+        <button class="page-btn" [disabled]="currentPage === 0" (click)="onPageChange(currentPage - 1)">
+            <i class="fas fa-angle-left"></i>
+        </button>
+        <button *ngFor="let page of visiblePages" class="page-btn" [class.active]="page === currentPage + 1"
+            (click)="onPageChange(page - 1)">
+            {{ page }}
+        </button>
+        <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(currentPage + 1)">
+            <i class="fas fa-angle-right"></i>
+        </button>
+        <button class="page-btn" [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(totalPages - 1)">
+            <i class="fas fa-angle-double-right"></i>
+        </button>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- DETAIL MODAL -->
+<!-- ═══════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="showDetailModal" (click)="closeDetailModal()">
+    <div class="detail-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3><i class="fas fa-eye"></i> Chi tiết đánh giá #{{ detailComment?.id }}</h3>
+            <button class="btn-close" (click)="closeDetailModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" *ngIf="detailComment">
+            <div class="detail-grid">
+                <!-- Cột trái: Thông tin User & Sản phẩm -->
+                <div class="detail-left">
+                    <div class="info-group">
+                        <label>Người dùng</label>
+                        <div class="user-preview">
+                            <img [src]="getAvatarUrl(detailComment.user)" alt="avatar">
+                            <div class="user-text">
+                                <span class="name">{{ detailComment.user?.fullname || 'Ẩn danh' }}</span>
+                                <span class="email" *ngIf="detailComment.user?.email">{{ detailComment.user.email
+                                    }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-group">
+                        <label>Sản phẩm</label>
+                        <div class="product-preview">
+                            <img [src]="getThumbnailUrl(detailComment.product_thumbnail)" alt="product"
+                                onerror="this.src='assets/images/product-placeholder.png'">
+                            <span>{{ detailComment.product_name || 'N/A' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="info-group">
+                        <label>Thời gian</label>
+                        <div class="time-info">
+                            <div><i class="far fa-clock"></i> Tạo: {{ detailComment.created_at | date:'dd/MM/yyyy
+                                HH:mm' }}</div>
+                            <div *ngIf="detailComment.updated_at"><i class="fas fa-history"></i> Cập nhật: {{
+                                detailComment.updated_at | date:'dd/MM/yyyy HH:mm' }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột phải: Nội dung & Rating -->
+                <div class="detail-right">
+                    <div class="rating-display">
+                        <div class="stars">
+                            <i *ngFor="let star of [1,2,3,4,5]" class="fas fa-star"
+                                [class.filled]="star <= (detailComment.rating || 0)"></i>
+                        </div>
+                        <span class="rating-badge">{{ getRatingText(detailComment.rating || 0) }}</span>
+                    </div>
+
+                    <div class="content-display">
+                        <label>Nội dung đánh giá</label>
+                        <div class="content-box">
+                            {{ detailComment.content }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-close-detail" (click)="closeDetailModal()">Đóng</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- EDIT MODAL -->
+<!-- ═══════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="showEditModal" (click)="closeEditModal()">
+    <div class="edit-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3><i class="fas fa-pen"></i> Chỉnh sửa đánh giá #{{ editingComment?.id }}</h3>
+            <button class="btn-close" (click)="closeEditModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" *ngIf="editingComment">
+            <div class="edit-info-row">
+                <span class="edit-label">Người dùng:</span>
+                <span>{{ editingComment.user?.fullname || 'Ẩn danh' }}</span>
+            </div>
+            <div class="edit-info-row">
+                <span class="edit-label">Sản phẩm:</span>
+                <span>{{ editingComment.product_name || 'N/A' }}</span>
+            </div>
+
+            <!-- Star Rating -->
+            <div class="edit-star-row">
+                <span class="edit-label">Đánh giá:</span>
+                <div class="stars-select">
+                    <i *ngFor="let star of [1,2,3,4,5]" class="fas fa-star star-btn"
+                        [class.active]="star <= (editHoverRating || editRating)" (click)="setEditRating(star)"
+                        (mouseenter)="setEditHover(star)" (mouseleave)="resetEditHover()">
+                    </i>
+                </div>
+                <span class="rating-label" *ngIf="editRating > 0">{{ getRatingText(editRating) }}</span>
+            </div>
+
+            <!-- Content -->
+            <div class="edit-content-group">
+                <label class="edit-label">Nội dung:</label>
+                <textarea [(ngModel)]="editContent" rows="4" [maxlength]="500" class="edit-textarea"
+                    placeholder="Nội dung đánh giá..."></textarea>
+                <div class="edit-textarea-footer">
+                    <span class="char-count" [class.warning]="editContent.length < 10 && editContent.length > 0">
+                        {{ editContent.length }}/500
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn-cancel" (click)="closeEditModal()">Hủy</button>
+            <button class="btn-save" (click)="saveEdit()"
+                [disabled]="savingEdit || editContent.trim().length < 10 || editRating === 0">
+                <i class="fas fa-spinner fa-spin" *ngIf="savingEdit"></i>
+                <i class="fas fa-check" *ngIf="!savingEdit"></i>
+                {{ savingEdit ? 'Đang lưu...' : 'Lưu thay đổi' }}
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- DELETE CONFIRM -->
+<!-- ═══════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="showDeleteConfirm" (click)="cancelDelete()">
+    <div class="delete-dialog" (click)="$event.stopPropagation()">
+        <div class="delete-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3>Xóa đánh giá?</h3>
+        <p>Bạn có chắc muốn xóa đánh giá #{{ deletingComment?.id }} của
+            <strong>{{ deletingComment?.user?.fullname || 'Ẩn danh' }}</strong>?
+            Hành động này không thể hoàn tác.
+        </p>
+        <div class="delete-actions">
+            <button class="btn-cancel" (click)="cancelDelete()">Hủy bỏ</button>
+            <button class="btn-confirm-delete" (click)="executeDelete()">
+                <i class="fas fa-trash-alt"></i> Xóa
+            </button>
+        </div>
+    </div>
+</div>

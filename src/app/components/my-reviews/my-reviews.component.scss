@@ -1,0 +1,672 @@
+// ═══════════════════════════════════════════════════════════════
+// TRANG ĐÁNH GIÁ CỦA TÔI
+// Phong cách: Coupon Gallery (card nhỏ gọn, ticket style)
+// ═══════════════════════════════════════════════════════════════
+
+// Biến màu
+$primary: #1a1a1a;
+$star-color: #f59e0b;
+$page-bg: #f5f5f7;
+$card-bg: #ffffff;
+$font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+// ═══════════════════════════════════════
+// ANIMATION
+// ═══════════════════════════════════════
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+// ═══════════════════════════════════════
+// TRANG CHÍNH
+// ═══════════════════════════════════════
+.my-reviews-page {
+    min-height: 80vh;
+    padding: 40px 0;
+    background-color: $page-bg;
+    font-family: $font-main;
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+}
+
+// ═══════════════════════════════════════
+// HEADER TRANG (giống coupon-gallery)
+// ═══════════════════════════════════════
+.page-header {
+    text-align: center;
+    margin-bottom: 40px;
+
+    h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: $primary;
+        margin-bottom: 8px;
+        // Hiệu ứng gradient chữ giống coupon-gallery
+        background: linear-gradient(to right, #1a1a1a, #555);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    p {
+        color: #666;
+        font-size: 1rem;
+
+        strong {
+            color: $primary;
+            font-size: 1.1rem;
+        }
+    }
+}
+
+// ═══════════════════════════════════════
+// TRẠNG THÁI LOADING & TRỐNG
+// ═══════════════════════════════════════
+.loading-state,
+.empty-state {
+    text-align: center;
+    padding: 60px 0;
+    color: #999;
+
+    i {
+        font-size: 3rem;
+        margin-bottom: 16px;
+        opacity: 0.5;
+        display: block;
+    }
+
+    h3 {
+        color: #333;
+        margin-bottom: 8px;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    p {
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+}
+
+.spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid #e5e5e5;
+    border-top-color: $primary;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+}
+
+.btn-go-orders {
+    display: inline-block;
+    padding: 10px 24px;
+    background: $primary;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background 0.2s;
+
+    &:hover {
+        background: #333;
+        text-decoration: none;
+    }
+}
+
+// ═══════════════════════════════════════
+// GRID ĐÁNH GIÁ (giống coupon-grid)
+// ═══════════════════════════════════════
+.review-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 20px;
+    padding: 0;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+// ═══════════════════════════════════════
+// CARD ĐÁNH GIÁ (giống coupon-card)
+// ═══════════════════════════════════════
+.review-card {
+    background: $card-bg;
+    border-radius: 12px;
+    display: flex;
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+}
+
+// Bên trái: Ảnh sản phẩm (giống card-left của coupon)
+.card-left {
+    width: 130px;
+    flex-shrink: 0;
+    position: relative;
+    background: #f0f0f0;
+
+    .image-link {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+
+    &:hover img {
+        transform: scale(1.05);
+    }
+
+    // Huy hiệu sao (góc dưới trái)
+    .star-badge {
+        position: absolute;
+        bottom: 8px;
+        left: 8px;
+        background: rgba(0, 0, 0, 0.75);
+        color: $star-color;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        backdrop-filter: blur(4px);
+    }
+}
+
+// Bên phải: Nội dung (giống card-right của coupon)
+.card-right {
+    flex: 1;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+
+    .card-top {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 4px;
+
+        .date-tag {
+            font-size: 0.7rem;
+            color: #999;
+            white-space: nowrap;
+        }
+    }
+
+    .product-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #333;
+        margin: 0 0 6px;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+
+        a {
+            color: inherit;
+            text-decoration: none;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+
+    .stars-row {
+        display: flex;
+        gap: 2px;
+        margin-bottom: 6px;
+
+        .fas {
+            font-size: 11px;
+            color: #ddd;
+
+            &.active {
+                color: $star-color;
+            }
+        }
+    }
+
+    .review-text {
+        font-size: 0.8rem;
+        color: #777;
+        margin: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.4;
+        font-style: italic;
+    }
+
+    // Nút thao tác (giống action-area của coupon)
+    .action-area {
+        display: flex;
+        gap: 8px;
+        margin-top: auto;
+
+        button {
+            border: none;
+            padding: 5px 14px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+
+            i {
+                font-size: 10px;
+            }
+        }
+
+        .btn-edit {
+            background: $primary;
+            color: white;
+
+            &:hover {
+                background: #333;
+            }
+        }
+
+        .btn-remove {
+            background: #fafafa;
+            color: #999;
+            border: 1px solid #eee;
+
+            &:hover {
+                color: #dc2626;
+                border-color: #fca5a5;
+                background: #fef2f2;
+            }
+        }
+    }
+}
+
+// Vòng tròn trang trí (giống coupon)
+.review-card .circle {
+    position: absolute;
+    left: 124px;
+    width: 12px;
+    height: 12px;
+    background-color: $page-bg;
+    border-radius: 50%;
+    z-index: 2;
+
+    &.top {
+        top: -6px;
+    }
+
+    &.bottom {
+        bottom: -6px;
+    }
+}
+
+// ═══════════════════════════════════════
+// PHÂN TRANG
+// ═══════════════════════════════════════
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    padding: 32px 0 16px;
+
+    button {
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 500;
+        background: white;
+        border: 1px solid #e5e5e5;
+        border-radius: 6px;
+        color: #666;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover:not(:disabled) {
+            border-color: $primary;
+            color: $primary;
+        }
+
+        &:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        &.active {
+            background: $primary;
+            color: white;
+            border-color: $primary;
+        }
+    }
+}
+
+// ═══════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.modal-box {
+    background: white;
+    width: 100%;
+    max-width: 480px;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    animation: fadeInUp 0.25s ease-out;
+    overflow: hidden;
+}
+
+.modal-sm {
+    max-width: 380px;
+}
+
+.modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+    border-bottom: 1px solid #eee;
+
+    h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: $primary;
+        margin: 0;
+    }
+
+    .btn-close-modal {
+        background: none;
+        border: none;
+        font-size: 16px;
+        color: #aaa;
+        cursor: pointer;
+        padding: 4px;
+
+        &:hover {
+            color: $primary;
+        }
+    }
+}
+
+.modal-content {
+    padding: 20px 24px;
+}
+
+.edit-product-info {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 20px;
+    align-items: center;
+
+    img {
+        width: 50px;
+        height: 64px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid #eee;
+    }
+
+    h4 {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+        margin: 0 0 2px;
+    }
+
+    small {
+        font-size: 12px;
+        color: #999;
+    }
+}
+
+.form-field {
+    margin-bottom: 16px;
+
+    label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 8px;
+    }
+
+    textarea {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid #e5e5e5;
+        border-radius: 6px;
+        font-size: 14px;
+        font-family: $font-main;
+        resize: vertical;
+        color: #333;
+        outline: none;
+        transition: border-color 0.2s;
+
+        &:focus {
+            border-color: $primary;
+        }
+
+        &::placeholder {
+            color: #bbb;
+        }
+    }
+}
+
+.stars-select {
+    display: flex;
+    gap: 4px;
+
+    .fas {
+        font-size: 20px;
+        cursor: pointer;
+        color: #ddd;
+        transition: color 0.15s, transform 0.15s;
+
+        &.active {
+            color: $star-color;
+        }
+
+        &:hover {
+            transform: scale(1.15);
+        }
+    }
+}
+
+.modal-foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 24px;
+    border-top: 1px solid #eee;
+
+    .btn-cancel {
+        padding: 9px 18px;
+        font-size: 13px;
+        font-weight: 600;
+        background: none;
+        border: none;
+        color: #999;
+        cursor: pointer;
+
+        &:hover {
+            color: $primary;
+        }
+    }
+
+    .btn-save {
+        padding: 9px 22px;
+        font-size: 13px;
+        font-weight: 700;
+        background: $primary;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s;
+
+        &:hover {
+            background: #333;
+        }
+    }
+}
+
+// Modal xóa
+.delete-body {
+    text-align: center;
+    padding: 28px 24px;
+
+    .delete-icon {
+        width: 44px;
+        height: 44px;
+        background: #fef2f2;
+        color: #dc2626;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        font-size: 16px;
+    }
+
+    h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: $primary;
+        margin-bottom: 6px;
+    }
+
+    p {
+        font-size: 13px;
+        color: #666;
+        line-height: 1.5;
+        margin-bottom: 20px;
+    }
+
+    .delete-btns {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        button {
+            width: 100%;
+            padding: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+
+            &:hover {
+                background: #b91c1c;
+            }
+        }
+
+        .btn-cancel {
+            background: white;
+            color: #666;
+            border: 1px solid #e5e5e5;
+
+            &:hover {
+                border-color: $primary;
+                color: $primary;
+            }
+        }
+    }
+}
+
+// ═══════════════════════════════════════
+// RESPONSIVE
+// ═══════════════════════════════════════
+@media (max-width: 480px) {
+    .review-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .review-card {
+        height: auto;
+        flex-direction: column;
+
+        .card-left {
+            width: 100%;
+            height: 160px;
+        }
+
+        .card-right {
+            padding: 14px;
+        }
+    }
+
+    .review-card .circle {
+        display: none;
+    }
+
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+}

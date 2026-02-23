@@ -22,8 +22,14 @@
                         <span class="order-id">Đơn hàng #{{ order.id }}</span>
                         <span class="order-date">{{ order.order_date | date:'dd/MM/yyyy HH:mm' }}</span>
                     </div>
-                    <div class="order-status" [ngClass]="getStatusClass(order.status)">
-                        {{ getStatusText(order.status) }}
+                    <div class="order-actions-header">
+                        <div class="order-status" [ngClass]="getStatusClass(order.status)">
+                            {{ getStatusText(order.status) }}
+                        </div>
+                        <!-- Nút Đánh giá cho đơn delivered -->
+                        <button *ngIf="isDelivered(order)" class="btn-review" (click)="openReviewModal(order)">
+                            <i class="fas fa-star"></i> Đánh giá
+                        </button>
                     </div>
                 </div>
 
@@ -31,7 +37,6 @@
                 <div class="order-items">
                     <div class="order-item" *ngFor="let detail of order.order_details">
                         <div class="item-image">
-                            <!-- Placeholder nếu không có ảnh, hoặc xử lý URL trong TS -->
                             <img [src]="detail.thumbnail ? ('http://localhost:8088/api/v1/products/images/' + detail.thumbnail) : 'assets/images/product-placeholder.png'"
                                 alt="{{ detail.product_name }}"
                                 onerror="this.src='assets/images/product-placeholder.png'">
@@ -59,6 +64,95 @@
                         <span class="total-amount">{{ order.total_money | currency:'VND':'symbol':'1.0-0':'vi' }}</span>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- REVIEW MODAL -->
+<!-- ═══════════════════════════════════════ -->
+<div class="review-modal-overlay" *ngIf="showReviewModal" (click)="closeReviewModal()">
+    <div class="review-modal" (click)="$event.stopPropagation()">
+        <!-- Modal Header -->
+        <div class="modal-header">
+            <h2>
+                <i class="fas fa-star"></i>
+                Đánh giá sản phẩm
+            </h2>
+            <span class="order-ref">Đơn hàng #{{ reviewingOrder?.id }}</span>
+            <button class="btn-close-modal" (click)="closeReviewModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="modal-body">
+            <div *ngIf="loadingReviewStatus" class="loading-review">
+                <i class="fas fa-spinner fa-spin"></i> Đang kiểm tra trạng thái đánh giá...
+            </div>
+
+            <div *ngIf="!loadingReviewStatus" class="review-items">
+                <div *ngFor="let item of reviewItems; let i = index" class="review-item-card">
+                    <!-- Product Info -->
+                    <div class="review-product-info">
+                        <img [src]="item.thumbnail" [alt]="item.productName"
+                            onerror="this.src='assets/images/product-placeholder.png'">
+                        <div class="product-name">{{ item.productName }}</div>
+                    </div>
+
+                    <!-- Already reviewed -->
+                    <div *ngIf="item.alreadyReviewed && !item.submitted" class="already-reviewed">
+                        <i class="fas fa-check-circle"></i> Đã đánh giá sản phẩm này
+                    </div>
+
+                    <!-- Just submitted -->
+                    <div *ngIf="item.submitted" class="just-submitted">
+                        <i class="fas fa-check-circle"></i> Đánh giá thành công!
+                    </div>
+
+                    <!-- Review Form -->
+                    <div *ngIf="!item.alreadyReviewed && !item.submitted" class="review-form-compact">
+                        <!-- Star Rating -->
+                        <div class="star-rating-row">
+                            <span class="star-label">Chất lượng:</span>
+                            <div class="stars-select">
+                                <i *ngFor="let star of [1,2,3,4,5]" class="fas fa-star star-btn"
+                                    [class.active]="star <= (item.hoverRating || item.rating)"
+                                    (click)="setItemRating(item, star)" (mouseenter)="setItemHover(item, star)"
+                                    (mouseleave)="resetItemHover(item)">
+                                </i>
+                            </div>
+                            <span class="rating-label" *ngIf="item.rating > 0">{{ getRatingText(item.rating) }}</span>
+                        </div>
+
+                        <!-- Content -->
+                        <textarea [(ngModel)]="item.content"
+                            placeholder="Chia sẻ trải nghiệm của bạn (ít nhất 10 ký tự)..." rows="3" [maxlength]="500"
+                            class="review-textarea">
+                        </textarea>
+                        <div class="textarea-footer">
+                            <span class="char-count"
+                                [class.warning]="item.content.length < 10 && item.content.length > 0">
+                                {{ item.content.length }}/500
+                            </span>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button class="btn-submit-review" [disabled]="!canSubmitItem(item)"
+                            (click)="submitReview(item)">
+                            <i class="fas fa-spinner fa-spin" *ngIf="item.submitting"></i>
+                            <i class="fas fa-paper-plane" *ngIf="!item.submitting"></i>
+                            {{ item.submitting ? 'Đang gửi...' : 'Gửi đánh giá' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All reviewed message -->
+            <div *ngIf="!loadingReviewStatus && allReviewed" class="all-reviewed-msg">
+                <i class="fas fa-check-double"></i>
+                <span>Tất cả sản phẩm trong đơn hàng đã được đánh giá!</span>
             </div>
         </div>
     </div>

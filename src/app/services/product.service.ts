@@ -79,4 +79,39 @@ export class ProductService {
   getFavoriteProducts(): Observable<ApiResponse> {
     return this.http.post<ApiResponse>(`${this.apiBaseUrl}/products/favorite-products`, {});
   }
+
+  // Lọc sản phẩm nâng cao (brand, color, size, origin, giá)
+  getProductsWithFilters(params: {
+    keyword?: string;
+    categoryId?: number;
+    page?: number;
+    limit?: number;
+    active?: boolean;
+    brandId?: number;
+    colorIds?: number[];
+    sizeIds?: number[];
+    originIds?: number[];
+    minPrice?: number;
+    maxPrice?: number;
+  }): Observable<ApiResponse> {
+    let httpParams = new HttpParams();
+    if (params.keyword) httpParams = httpParams.set('keyword', params.keyword);
+    if (params.categoryId) httpParams = httpParams.set('category_id', params.categoryId.toString());
+    if (params.page != null) httpParams = httpParams.set('page', params.page.toString());
+    if (params.limit) httpParams = httpParams.set('limit', params.limit.toString());
+    if (params.active != null) httpParams = httpParams.set('active', params.active.toString());
+    if (params.brandId) httpParams = httpParams.set('brand_id', params.brandId.toString());
+    if (params.colorIds && params.colorIds.length > 0) {
+      params.colorIds.forEach(id => httpParams = httpParams.append('color_ids', id.toString()));
+    }
+    if (params.sizeIds && params.sizeIds.length > 0) {
+      params.sizeIds.forEach(id => httpParams = httpParams.append('size_ids', id.toString()));
+    }
+    if (params.originIds && params.originIds.length > 0) {
+      params.originIds.forEach(id => httpParams = httpParams.append('origin_ids', id.toString()));
+    }
+    if (params.minPrice != null) httpParams = httpParams.set('min_price', params.minPrice.toString());
+    if (params.maxPrice != null) httpParams = httpParams.set('max_price', params.maxPrice.toString());
+    return this.http.get<ApiResponse>(`${this.apiBaseUrl}/products/filter`, { params: httpParams });
+  }
 }
