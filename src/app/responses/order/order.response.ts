@@ -15,6 +15,9 @@ export interface OrderResponse {
   shipping_address: string;
   shipping_date: Date; // Dạng chuỗi ISO 8601
   payment_method: string;
+  sub_total: number;
+  coupon_code: string;
+  discount_amount: number;
   order_details: OrderDetailResponse[]; // Sử dụng interface Response mới
 }
 

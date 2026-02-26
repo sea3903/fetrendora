@@ -43,9 +43,28 @@
         <!-- Tên sản phẩm -->
         <h1 class="product-title">{{ product.name }}</h1>
 
-        <!-- Giá -->
-        <div class="product-price">
-          {{ (selectedVariant?.price || product.price) | currency:'VND':'symbol':'1.0-0':'vi' }}
+        <!-- Giá và Đánh giá -->
+        <div
+          style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e5e5e5; padding-bottom: 8px; margin-bottom: 0;">
+          <div class="product-price" style="border-bottom: none; padding-bottom: 0; margin-bottom: 0;">
+            {{ (selectedVariant?.price || product.price) | currency:'VND':'symbol':'1.0-0':'vi' }}
+          </div>
+          @if(totalRatings > 0) {
+          <div style="display: flex; align-items: center; gap: 6px; cursor: pointer;" (click)="switchTab('reviews')">
+            <span style="font-size: 16px; font-weight: 700; color: #1a1a1a;">{{ averageRating | number:'1.1-1' }}</span>
+            <div style="display: flex; gap: 2px;">
+              @for(star of [1,2,3,4,5]; track star) {
+              <i class="fas" style="font-size: 13px;" [ngClass]="{
+                'fa-star': averageRating >= star || averageRating < star - 0.5,
+                'fa-star-half-alt': averageRating >= star - 0.5 && averageRating < star,
+                'filled': averageRating >= star - 0.5
+              }" [style.color]="averageRating >= star - 0.5 ? '#f59e0b' : '#e0e0e0'"></i>
+              }
+            </div>
+            <span style="font-size: 13px; color: #6b7280; text-decoration: underline;">({{ totalRatings }} đánh
+              giá)</span>
+          </div>
+          }
         </div>
 
         <!-- Màu sắc -->
@@ -263,12 +282,16 @@
           @if(totalRatings > 0) {
           <div class="rating-summary-compact">
             <div class="score-box">
-              <span class="avg">{{ averageRating }}</span>
+              <span class="avg">{{ averageRating | number:'1.1-1' }}</span>
               <span class="max">/5</span>
             </div>
             <div class="stars-row">
               @for(star of [1,2,3,4,5]; track star) {
-              <i class="fas fa-star" [class.filled]="star <= Math.round(averageRating)"></i>
+              <i class="fas" [ngClass]="{
+                'fa-star': averageRating >= star || averageRating < star - 0.5,
+                'fa-star-half-alt': averageRating >= star - 0.5 && averageRating < star,
+                'filled': averageRating >= star - 0.5
+              }"></i>
               }
             </div>
             <div class="total-count">Dựa trên {{ totalRatings }} đánh giá</div>
@@ -309,7 +332,7 @@
           </div>
           } @else {
           <div class="reviews-list-premium">
-            @for(comment of comments; track comment.id) {
+            @for(comment of paginatedReviews; track comment.id) {
             <div class="review-card">
               <div class="review-header">
                 <img [src]="getAvatarUrl(comment.user)" class="user-avatar-small"
@@ -333,6 +356,50 @@
             </div>
             }
           </div>
+
+          <!-- Phân trang đánh giá -->
+          @if(totalReviewPages > 1) {
+          <div class="pagination" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #f0f0f0;">
+            <button (click)="goToReviewPage(1)" [disabled]="currentReviewPage === 1">
+              <i class="fas fa-angle-double-left"></i>
+            </button>
+            <button (click)="goToReviewPage(currentReviewPage - 1)" [disabled]="currentReviewPage === 1">
+              <i class="fas fa-angle-left"></i>
+            </button>
+
+            @for(page of [].constructor(totalReviewPages); track $index) {
+            <button (click)="goToReviewPage($index + 1)" [class.active]="$index + 1 === currentReviewPage"
+              class="page-num"
+              style="min-width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #e5e5e5; font-size: 13px; font-weight: 500; cursor: pointer; color: #6b7280; transition: all 0.2s;">
+              {{ $index + 1 }}
+            </button>
+            }
+
+            <button (click)="goToReviewPage(currentReviewPage + 1)" [disabled]="currentReviewPage === totalReviewPages">
+              <i class="fas fa-angle-right"></i>
+            </button>
+            <button (click)="goToReviewPage(totalReviewPages)" [disabled]="currentReviewPage === totalReviewPages">
+              <i class="fas fa-angle-double-right"></i>
+            </button>
+          </div>
+          <style>
+            .pagination button.active {
+              background: #000 !important;
+              color: #fff !important;
+              border-color: #000 !important;
+            }
+
+            .pagination button:not(.active):hover:not([disabled]) {
+              background: #f3f4f6 !important;
+              color: #111827 !important;
+            }
+
+            .pagination button[disabled] {
+              opacity: 0.5;
+              cursor: not-allowed;
+            }
+          </style>
+          }
           }
         </div>
         }

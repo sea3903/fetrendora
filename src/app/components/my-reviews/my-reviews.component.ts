@@ -97,7 +97,7 @@ export class MyReviewsComponent implements OnInit {
     // ══════════════════════════════════════════════
 
     openEditModal(review: Comment): void {
-        this.editingReview = review;
+        this.editingReview = { ...review };
         this.editRating = review.rating || 0;
         this.editHoverRating = 0;
         this.editContent = review.content;

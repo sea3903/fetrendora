@@ -36,6 +36,9 @@ export class DetailOrderAdminComponent extends BaseComponent implements OnInit {
     shipping_address: '',
     shipping_date: new Date(),
     payment_method: '',
+    sub_total: 0,
+    coupon_code: '',
+    discount_amount: 0,
     order_details: [],
   };
 

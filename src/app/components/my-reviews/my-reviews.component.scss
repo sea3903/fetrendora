@@ -226,6 +226,12 @@ $font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             font-size: 0.7rem;
             color: #999;
             white-space: nowrap;
+
+            &.date-updated {
+                font-size: 0.65rem;
+                color: #bbb;
+                margin-left: 5px;
+            }
         }
     }
 

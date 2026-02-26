@@ -8,4 +8,7 @@ export interface OrderDetailResponse {
     number_of_products: number;
     total_money: number;
     color?: string;
+    size?: string;
+    origin?: string;
+    selling_attributes?: string;
 }

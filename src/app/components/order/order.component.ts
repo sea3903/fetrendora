@@ -87,15 +87,29 @@ export class OrderComponent extends BaseComponent implements OnInit, OnDestroy {
           const product = { ...productFound };
           product.thumbnail = `${environment.apiBaseUrl}/products/images/${product.thumbnail}`;
 
+          // Lọc thuộc tính biến thể dựa theo selling_attributes (cấu hình của Admin)
+          let finalColorName = cartItem.colorName;
+          let finalSizeName = cartItem.sizeName;
+          let finalOriginName = cartItem.originName;
+
+          if (product.selling_attributes) {
+            const attrs = product.selling_attributes.toLowerCase();
+            if (!attrs.includes('color')) finalColorName = undefined;
+            if (!attrs.includes('size')) finalSizeName = undefined;
+            if (!attrs.includes('origin')) finalOriginName = undefined;
+          } else {
+            // Nếu không có cấu hình gì, tốt nhất không nên hiện bừa bãi hoặc hiện tất, ở đây em hiện all nếu null.
+          }
+
           return {
             product: product,
             quantity: cartItem.quantity,
             selected: cartItem.selected,
             productDetailId: cartItem.productDetailId,
             variant: {
-              colorName: cartItem.colorName,
-              sizeName: cartItem.sizeName,
-              originName: cartItem.originName
+              colorName: finalColorName,
+              sizeName: finalSizeName,
+              originName: finalOriginName
             }
           };
         }).filter(item => item !== null) as CartItemWithProduct[];

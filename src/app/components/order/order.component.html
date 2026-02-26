@@ -36,7 +36,8 @@
 
             <!-- Product Info -->
             <div class="item-info">
-              <a [routerLink]="['/products', item.product.id]" class="item-name">{{ item.product.name }}</a>
+              <a [routerLink]="['/products', item.product.id]" class="item-name" [title]="item.product.name">{{
+                item.product.name }}</a>
               <!-- Thuộc tính đã chọn -->
               <div class="item-attrs">
                 @if(item.variant?.sizeName) {

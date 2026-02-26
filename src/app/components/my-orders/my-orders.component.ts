@@ -65,10 +65,12 @@ export class MyOrdersComponent implements OnInit {
             next: (response: ApiResponse) => {
                 const ordersData = response.data as OrderResponse[];
                 this.orders = ordersData.map(order => {
-                    if (order.order_details) {
-                        order.order_details = order.order_details.map(detail => {
-                            return detail;
-                        });
+                    // Parse order_date từ mảng [năm, tháng, ngày, giờ, phút, giây] sang Date
+                    if (Array.isArray(order.order_date)) {
+                        const d = order.order_date as unknown as number[];
+                        order.order_date = new Date(d[0], d[1] - 1, d[2], d[3] || 0, d[4] || 0, d[5] || 0);
+                    } else if (order.order_date) {
+                        order.order_date = new Date(order.order_date);
                     }
                     return order;
                 });
@@ -113,6 +115,19 @@ export class MyOrdersComponent implements OnInit {
             case 'cancelled': return 'Đã hủy';
             default: return status;
         }
+    }
+
+    getPaymentMethodText(method: string): string {
+        switch (method?.toLowerCase()) {
+            case 'cod': return 'Thanh toán khi nhận hàng (COD)';
+            case 'vnpay': return 'Thanh toán VNPay';
+            default: return method;
+        }
+    }
+
+    hasSellingAttribute(attributes: string | undefined, attr: string): boolean {
+        if (!attributes) return true; // Hiển thị mặc định nếu không có cấu hình admin
+        return attributes.toLowerCase().includes(attr.toLowerCase());
     }
 
     // ══════════════════════════════════════════════

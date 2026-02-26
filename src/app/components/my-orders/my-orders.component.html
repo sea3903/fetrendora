@@ -16,7 +16,7 @@
 
         <div class="orders-list" *ngIf="orders.length > 0">
             <div class="order-card" *ngFor="let order of orders">
-                <!-- Order Header -->
+                <!-- Phần đầu: Mã đơn + Ngày đặt + Trạng thái -->
                 <div class="order-header">
                     <div class="order-info">
                         <span class="order-id">Đơn hàng #{{ order.id }}</span>
@@ -26,42 +26,65 @@
                         <div class="order-status" [ngClass]="getStatusClass(order.status)">
                             {{ getStatusText(order.status) }}
                         </div>
-                        <!-- Nút Đánh giá cho đơn delivered -->
+                        <!-- Nút Đánh giá cho đơn đã giao -->
                         <button *ngIf="isDelivered(order)" class="btn-review" (click)="openReviewModal(order)">
                             <i class="fas fa-star"></i> Đánh giá
                         </button>
                     </div>
                 </div>
 
-                <!-- Order Details (Products) -->
-                <div class="order-items">
-                    <div class="order-item" *ngFor="let detail of order.order_details">
+                <!-- Sản phẩm rút gọn: chỉ hiện sản phẩm đầu tiên -->
+                <div class="order-items" *ngIf="order.order_details && order.order_details.length > 0">
+                    <div class="order-item">
                         <div class="item-image">
-                            <img [src]="detail.thumbnail ? ('http://localhost:8088/api/v1/products/images/' + detail.thumbnail) : 'assets/images/product-placeholder.png'"
-                                alt="{{ detail.product_name }}"
+                            <img [src]="order.order_details[0].thumbnail ? ('http://localhost:8088/api/v1/products/images/' + order.order_details[0].thumbnail) : 'assets/images/product-placeholder.png'"
+                                [alt]="order.order_details[0].product_name"
                                 onerror="this.src='assets/images/product-placeholder.png'">
                         </div>
                         <div class="item-details">
-                            <h4 class="item-name">{{ detail.product_name }}</h4>
+                            <h4 class="item-name">{{ order.order_details[0].product_name }}</h4>
                             <div class="item-meta">
-                                <span *ngIf="detail.color">Màu: {{ detail.color }}</span>
-                                <span *ngIf="detail.number_of_products">SL: {{ detail.number_of_products }}</span>
+                                <span
+                                    *ngIf="order.order_details[0].size && hasSellingAttribute(order.order_details[0].selling_attributes, 'size')"
+                                    class="attr-tag">{{ order.order_details[0].size }}</span>
+                                <span
+                                    *ngIf="order.order_details[0].color && hasSellingAttribute(order.order_details[0].selling_attributes, 'color')"
+                                    class="attr-tag">{{ order.order_details[0].color }}</span>
+                                <span
+                                    *ngIf="order.order_details[0].origin && hasSellingAttribute(order.order_details[0].selling_attributes, 'origin')"
+                                    class="attr-tag">{{ order.order_details[0].origin }}</span>
+                                <span class="quantity-tag">SL: {{ order.order_details[0].number_of_products }}</span>
                             </div>
                         </div>
                         <div class="item-price">
-                            {{ detail.price | currency:'VND':'symbol':'1.0-0':'vi' }}
+                            {{ order.order_details[0].price | currency:'VND':'symbol':'1.0-0':'vi' }}
                         </div>
+                    </div>
+
+                    <!-- Dòng "...và N sản phẩm khác" -->
+                    <div class="more-items" *ngIf="order.order_details.length > 1">
+                        <div class="more-thumbnails">
+                            <img *ngFor="let detail of $any(order.order_details).slice(1, 4)"
+                                [src]="detail.thumbnail ? ('http://localhost:8088/api/v1/products/images/' + detail.thumbnail) : 'assets/images/product-placeholder.png'"
+                                onerror="this.src='assets/images/product-placeholder.png'" class="mini-thumb">
+                        </div>
+                        <span class="more-text">...và {{ order.order_details.length - 1 }} sản phẩm khác</span>
                     </div>
                 </div>
 
-                <!-- Order Footer -->
-                <div class="order-footer">
-                    <div class="shipping-info">
-                        <small><i class="fas fa-map-marker-alt"></i> {{ order.address }}</small>
+                <!-- Phần cuối: Thanh toán + Tổng tiền + Xem chi tiết -->
+                <div class="order-bottom">
+                    <div class="payment-info">
+                        <i class="fas fa-credit-card"></i>
+                        <span>{{ getPaymentMethodText(order.payment_method) }}</span>
                     </div>
-                    <div class="order-total">
-                        <span>Tổng tiền:</span>
-                        <span class="total-amount">{{ order.total_money | currency:'VND':'symbol':'1.0-0':'vi' }}</span>
+                    <div class="order-total-block">
+                        <div class="total-text">
+                            <span>Tổng tiền:</span>
+                            <span class="total-amount">{{ order.total_money | currency:'VND':'symbol':'1.0-0':'vi'
+                                }}</span>
+                        </div>
+                        <a [routerLink]="['/orders', order.id]" class="btn-detail-order">Xem chi tiết</a>
                     </div>
                 </div>
             </div>
@@ -70,11 +93,11 @@
 </div>
 
 <!-- ═══════════════════════════════════════ -->
-<!-- REVIEW MODAL -->
+<!-- MODAL ĐÁNH GIÁ -->
 <!-- ═══════════════════════════════════════ -->
 <div class="review-modal-overlay" *ngIf="showReviewModal" (click)="closeReviewModal()">
     <div class="review-modal" (click)="$event.stopPropagation()">
-        <!-- Modal Header -->
+        <!-- Tiêu đề modal -->
         <div class="modal-header">
             <h2>
                 <i class="fas fa-star"></i>
@@ -86,7 +109,7 @@
             </button>
         </div>
 
-        <!-- Modal Body -->
+        <!-- Nội dung modal -->
         <div class="modal-body">
             <div *ngIf="loadingReviewStatus" class="loading-review">
                 <i class="fas fa-spinner fa-spin"></i> Đang kiểm tra trạng thái đánh giá...
@@ -94,26 +117,26 @@
 
             <div *ngIf="!loadingReviewStatus" class="review-items">
                 <div *ngFor="let item of reviewItems; let i = index" class="review-item-card">
-                    <!-- Product Info -->
+                    <!-- Thông tin sản phẩm -->
                     <div class="review-product-info">
                         <img [src]="item.thumbnail" [alt]="item.productName"
                             onerror="this.src='assets/images/product-placeholder.png'">
                         <div class="product-name">{{ item.productName }}</div>
                     </div>
 
-                    <!-- Already reviewed -->
+                    <!-- Đã đánh giá rồi -->
                     <div *ngIf="item.alreadyReviewed && !item.submitted" class="already-reviewed">
                         <i class="fas fa-check-circle"></i> Đã đánh giá sản phẩm này
                     </div>
 
-                    <!-- Just submitted -->
+                    <!-- Vừa gửi thành công -->
                     <div *ngIf="item.submitted" class="just-submitted">
                         <i class="fas fa-check-circle"></i> Đánh giá thành công!
                     </div>
 
-                    <!-- Review Form -->
+                    <!-- Form đánh giá -->
                     <div *ngIf="!item.alreadyReviewed && !item.submitted" class="review-form-compact">
-                        <!-- Star Rating -->
+                        <!-- Chọn sao -->
                         <div class="star-rating-row">
                             <span class="star-label">Chất lượng:</span>
                             <div class="stars-select">
@@ -126,7 +149,7 @@
                             <span class="rating-label" *ngIf="item.rating > 0">{{ getRatingText(item.rating) }}</span>
                         </div>
 
-                        <!-- Content -->
+                        <!-- Nội dung -->
                         <textarea [(ngModel)]="item.content"
                             placeholder="Chia sẻ trải nghiệm của bạn (ít nhất 10 ký tự)..." rows="3" [maxlength]="500"
                             class="review-textarea">
@@ -138,7 +161,7 @@
                             </span>
                         </div>
 
-                        <!-- Submit Button -->
+                        <!-- Nút gửi -->
                         <button class="btn-submit-review" [disabled]="!canSubmitItem(item)"
                             (click)="submitReview(item)">
                             <i class="fas fa-spinner fa-spin" *ngIf="item.submitting"></i>
@@ -149,7 +172,7 @@
                 </div>
             </div>
 
-            <!-- All reviewed message -->
+            <!-- Đã đánh giá hết -->
             <div *ngIf="!loadingReviewStatus && allReviewed" class="all-reviewed-msg">
                 <i class="fas fa-check-double"></i>
                 <span>Tất cả sản phẩm trong đơn hàng đã được đánh giá!</span>

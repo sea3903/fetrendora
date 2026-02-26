@@ -59,17 +59,37 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
   // Tabs
   activeTab: 'details' | 'warranty' | 'reviews' = 'details';
 
-  // Comments/Reviews (read-only)
+  // Bình luận/Đánh giá (chỉ đọc)
   comments: Comment[] = [];
   loadingComments: boolean = false;
   averageRating: number = 0; // Trung bình sao
   totalRatings: number = 0; // Tổng số đánh giá
 
-  // Environment để dùng trong template
+  // Phân trang cho đánh giá
+  currentReviewPage: number = 1;
+  reviewsPerPage: number = 5;
+
+  get paginatedReviews(): Comment[] {
+    const startIndex = (this.currentReviewPage - 1) * this.reviewsPerPage;
+    return this.comments.slice(startIndex, startIndex + this.reviewsPerPage);
+  }
+
+  get totalReviewPages(): number {
+    return Math.ceil(this.comments.length / this.reviewsPerPage);
+  }
+
+  goToReviewPage(page: number): void {
+    if (page >= 1 && page <= this.totalReviewPages) {
+      this.currentReviewPage = page;
+      this.cdr.detectChanges();
+    }
+  }
+
+  // Môi trường để dùng trong template
   environment = environment;
   Math = Math; // Để dùng Math.round() trong template
 
-  // Lightbox
+  // Hộp đèn ảnh
   lightboxOpen: boolean = false;
   lightboxIndex: number = 0;
 
@@ -116,7 +136,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
         }
         this.product = response;
 
-        // Parse selling attributes
+        // Phân tích thuộc tính bán hàng
         this.requiredAttributes.clear();
         this.hasSellingAttributesConfig = false;
         if (this.product?.selling_attributes && this.product.selling_attributes.trim() !== '') {
@@ -126,7 +146,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
         }
 
         this.showImage(0);
-        // Nếu product details đã load trước đó
+        // Nếu chi tiết sản phẩm đã tải trước đó
         if (this.productDetails.length > 0) {
           this.checkInitialSelection();
         }
@@ -203,7 +223,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
     }
   }
 
-  // === Image Gallery ===
+  // === Thư viện ảnh ===
   showImage(index: number): void {
     if (this.product && this.product.product_images &&
       this.product.product_images.length > 0) {
@@ -220,7 +240,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
     this.currentImageIndex = index;
   }
 
-  // === Lightbox ===
+  // === Hộp đèn ảnh ===
   openLightbox(index: number): void {
     this.lightboxIndex = index;
     this.lightboxOpen = true;
@@ -246,7 +266,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
     }
   }
 
-  // === Variant Selection ===
+  // === Lựa chọn biến thể ===
   getUniqueColors(): ProductDetail[] {
     const colorMap = new Map<number, ProductDetail>();
     this.productDetails.forEach(variant => {
@@ -437,7 +457,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
     }
   }
 
-  // === Quantity ===
+  // === Số lượng ===
   increaseQuantity(): void {
     this.quantity++;
   }
@@ -448,7 +468,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
     }
   }
 
-  // === Cart ===
+  // === Giỏ hàng ===
   addToCart(): void {
     if (!this.isLoggedIn) {
       this.toastService.showToast({
@@ -492,7 +512,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
       return;
     }
 
-    // Prepare variant info
+    // Chuẩn bị thông tin biến thể
     const variantInfo = this.selectedVariant ? {
       productDetailId: this.selectedVariant.id,
       colorName: this.selectedVariant.color_name,
@@ -529,7 +549,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
 
 
 
-  // === Helpers ===
+  // === Hàm hỗ trợ ===
   getAvatarUrl(user: any): string {
     if (!user?.profile_image) return 'assets/images/user-placeholder.png';
     if (user.profile_image.startsWith('http')) return user.profile_image;
@@ -546,7 +566,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
     });
   }
 
-  // Format description: chuyển \n thành <br> và xử lý HTML cơ bản
+  // Định dạng mô tả: chuyển \n thành <br> và xử lý HTML cơ bản
   formatDescription(text: string | undefined): string {
     if (!text) return '';
     // Chuyển \n thành <br>

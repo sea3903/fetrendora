@@ -140,7 +140,7 @@
                             <img [src]="getAvatarUrl(comment.user)" class="user-avatar" alt="avatar">
                             <div class="user-info">
                                 <div class="user-name">{{ comment.user?.fullname || 'Ẩn danh' }}</div>
-                                <div class="user-email" *ngIf="comment.user?.email">{{ comment.user.email }}</div>
+                                <div class="user-email" *ngIf="comment.user?.email">{{ comment.user?.email }}</div>
                             </div>
                         </div>
                     </td>
@@ -232,7 +232,7 @@
                             <img [src]="getAvatarUrl(detailComment.user)" alt="avatar">
                             <div class="user-text">
                                 <span class="name">{{ detailComment.user?.fullname || 'Ẩn danh' }}</span>
-                                <span class="email" *ngIf="detailComment.user?.email">{{ detailComment.user.email
+                                <span class="email" *ngIf="detailComment.user?.email">{{ detailComment.user?.email
                                     }}</span>
                             </div>
                         </div>

@@ -1,6 +1,6 @@
 @use "sass:color";
 
-// Variables
+// Biến màu chung
 $primary: #1a1a1a;
 $accent: #4CAF50;
 $warning: #ffc107;
@@ -11,6 +11,10 @@ $text-muted: #666;
 $border: #e0e0e0;
 $bg-light: #f8f9fa;
 $white: #fff;
+
+// ═══════════════════════════════════════════
+// TRANG LỊCH SỬ ĐƠN HÀNG
+// ═══════════════════════════════════════════
 
 .orders-page {
     padding: 40px 0;
@@ -31,7 +35,7 @@ $white: #fff;
     color: $primary;
 }
 
-// States
+// Trạng thái trống / đang tải
 .loading-state,
 .empty-state {
     text-align: center;
@@ -64,7 +68,7 @@ $white: #fff;
     }
 }
 
-// Order List
+// Danh sách đơn hàng
 .orders-list {
     display: flex;
     flex-direction: column;
@@ -79,7 +83,7 @@ $white: #fff;
     border: 1px solid $border;
 }
 
-// Header
+// Phần đầu đơn hàng
 .order-header {
     display: flex;
     justify-content: space-between;
@@ -144,7 +148,7 @@ $white: #fff;
     }
 }
 
-// Review Button
+// Nút đánh giá
 .btn-review {
     display: inline-flex;
     align-items: center;
@@ -168,13 +172,9 @@ $white: #fff;
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
     }
-
-    &:active {
-        transform: translateY(0);
-    }
 }
 
-// Items
+// Sản phẩm rút gọn
 .order-items {
     padding: 0 20px;
 }
@@ -183,12 +183,7 @@ $white: #fff;
     display: flex;
     align-items: center;
     padding: 16px 0;
-    border-bottom: 1px solid #eee;
     gap: 16px;
-
-    &:last-child {
-        border-bottom: none;
-    }
 
     .item-image {
         width: 60px;
@@ -218,54 +213,123 @@ $white: #fff;
             font-size: 0.85rem;
             color: $text-muted;
             display: flex;
-            gap: 12px;
+            gap: 8px;
         }
     }
 
     .item-price {
         font-weight: 600;
         color: $primary;
+        white-space: nowrap;
     }
 }
 
-// Footer
-.order-footer {
-    padding: 16px 20px;
-    background: #fff;
-    border-top: 1px solid $border;
+.attr-tag {
+    background: #f0f0f0;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.quantity-tag {
+    font-size: 0.8rem;
+    color: #666;
+    font-weight: 600;
+}
+
+// Dòng "...và N sản phẩm khác"
+.more-items {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 10px;
+    padding: 8px 0 14px;
+    border-top: 1px dashed #eee;
 
-    .shipping-info {
-        color: $text-muted;
-        max-width: 60%;
+    .more-thumbnails {
+        display: flex;
+        gap: 6px;
 
-        i {
-            color: #999;
-            margin-right: 4px;
+        .mini-thumb {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            object-fit: cover;
+            border: 1px solid #eee;
         }
     }
 
-    .order-total {
-        text-align: right;
-        font-size: 1.1rem;
+    .more-text {
+        font-size: 0.85rem;
+        color: $text-muted;
+        font-style: italic;
+    }
+}
 
-        span:first-child {
-            margin-right: 8px;
-            color: $text-muted;
+// Phần cuối: thanh toán + tổng tiền
+.order-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    background: #fcfcfc;
+    border-top: 1px solid $border;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    .payment-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        color: $text-muted;
+
+        i {
+            color: $accent;
+        }
+    }
+
+    .order-total-block {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+
+        .total-text {
+            font-size: 1rem;
+
+            span:first-child {
+                margin-right: 6px;
+                color: $text-muted;
+            }
+
+            .total-amount {
+                color: $danger;
+                font-weight: 700;
+                font-size: 1.2rem;
+            }
         }
 
-        .total-amount {
-            color: $danger;
-            font-weight: 700;
-            font-size: 1.2rem;
+        .btn-detail-order {
+            padding: 8px 24px;
+            background: $white;
+            border: 1px solid $primary;
+            color: $primary;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+
+            &:hover {
+                background: $primary;
+                color: $white;
+            }
         }
     }
 }
 
 // ═══════════════════════════════════════════
-// REVIEW MODAL
+// MODAL ĐÁNH GIÁ
 // ═══════════════════════════════════════════
 
 .review-modal-overlay {
@@ -354,20 +418,14 @@ $white: #fff;
     }
 }
 
-// Review Item Card
 .review-item-card {
     border: 1px solid $border;
     border-radius: 12px;
     padding: 16px;
     margin-bottom: 16px;
-    transition: all 0.2s;
 
     &:last-child {
         margin-bottom: 0;
-    }
-
-    &:hover {
-        border-color: #ccc;
     }
 }
 
@@ -401,31 +459,18 @@ $white: #fff;
     border-radius: 8px;
     font-size: 0.9rem;
     font-weight: 500;
-
-    i {
-        font-size: 1rem;
-    }
 }
 
 .already-reviewed {
     background: #f0f9ff;
     color: #0284c7;
-
-    i {
-        color: #0284c7;
-    }
 }
 
 .just-submitted {
     background: #f0fdf4;
     color: #16a34a;
-
-    i {
-        color: #16a34a;
-    }
 }
 
-// Review Form Compact
 .review-form-compact {
     .star-rating-row {
         display: flex;
@@ -436,7 +481,6 @@ $white: #fff;
         .star-label {
             font-size: 0.9rem;
             color: $text-muted;
-            white-space: nowrap;
         }
 
         .stars-select {
@@ -475,7 +519,6 @@ $white: #fff;
         resize: vertical;
         min-height: 70px;
         font-family: inherit;
-        transition: border-color 0.2s;
         box-sizing: border-box;
 
         &:focus {
@@ -492,8 +535,7 @@ $white: #fff;
     .textarea-footer {
         display: flex;
         justify-content: flex-end;
-        margin-top: 4px;
-        margin-bottom: 10px;
+        margin: 4px 0 10px;
 
         .char-count {
             font-size: 0.8rem;
@@ -547,15 +589,10 @@ $white: #fff;
     }
 }
 
-// Animations
+// Hiệu ứng
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 @keyframes slideUp {
@@ -563,7 +600,6 @@ $white: #fff;
         opacity: 0;
         transform: translateY(20px) scale(0.97);
     }
-
     to {
         opacity: 1;
         transform: translateY(0) scale(1);

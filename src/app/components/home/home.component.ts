@@ -213,9 +213,11 @@ export class HomeComponent extends BaseComponent implements OnInit, OnDestroy {
     this.currentPage = page;
     this.loadAllProducts();
     // Scroll to products section
-    const section = document.querySelector('.all-products-section');
-    if (section) {
-      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (isPlatformBrowser(this.platformId)) {
+      const section = document.querySelector('.all-products-section');
+      if (section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
   }
 
@@ -233,7 +235,9 @@ export class HomeComponent extends BaseComponent implements OnInit, OnDestroy {
   // ════════════════════════════════════════════════════════════════════════════
 
   startBannerSlide(): void {
-    this.bannerInterval = setInterval(() => this.nextBanner(), 5000);
+    if (isPlatformBrowser(this.platformId)) {
+      this.bannerInterval = setInterval(() => this.nextBanner(), 5000);
+    }
   }
 
   nextBanner(): void {
@@ -356,6 +360,8 @@ export class HomeComponent extends BaseComponent implements OnInit, OnDestroy {
     };
 
     updateTimer(); // Run immediately
-    this.timerInterval = setInterval(updateTimer, 1000);
+    if (isPlatformBrowser(this.platformId)) {
+      this.timerInterval = setInterval(updateTimer, 1000);
+    }
   }
 }

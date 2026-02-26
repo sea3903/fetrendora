@@ -38,7 +38,11 @@
                 <!-- Bên phải: Nội dung -->
                 <div class="card-right">
                     <div class="card-top">
-                        <span class="date-tag">{{ formatDate(review.created_at) }}</span>
+                        <span class="date-tag">Ngày tạo: {{ formatDate(review.created_at) }}</span>
+                        <span class="date-tag date-updated"
+                            *ngIf="review.updated_at && review.updated_at !== review.created_at">
+                            (Đã sửa: {{ formatDate(review.updated_at) }})
+                        </span>
                     </div>
 
                     <h3 class="product-title">
