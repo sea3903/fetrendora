@@ -204,7 +204,13 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
         // Lấy userId để backend check giới hạn sử dụng per user
         const userId = this.tokenService.getUserId();
 
-        this.couponService.calculateCouponValue(code, this.totalAmount, userId)
+        const cartItemsData = this.checkoutItems.map(item => ({
+            product_id: item.product.id,
+            quantity: item.quantity,
+            product_detail_id: item.productDetailId
+        }));
+
+        this.couponService.calculateCouponValue(code, this.totalAmount, userId, cartItemsData)
             .subscribe({
                 next: (apiResponse: ApiResponse) => {
                     this.finalAmount = apiResponse.data;
