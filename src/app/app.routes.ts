@@ -57,5 +57,7 @@ export const routes: Routes = [
     canActivate: [AdminGuardFn]
   },
   // VnPay Return
-  { path: 'payments/payment-callback', component: PaymentCallbackComponent }
+  { path: 'payments/payment-callback', component: PaymentCallbackComponent },
+  // SePay QR Payment
+  { path: 'payments/sepay-payment', loadComponent: () => import('./components/sepay-payment/sepay-payment.component').then(m => m.SepayPaymentComponent) }
 ];

@@ -11,7 +11,7 @@ import { CreatePaymentDTO } from '../dtos/payment/create.payment.dto';
 export class PaymentService {
   private apiBaseUrl = environment.apiBaseUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /** 
    * POST /payments/create_payment_url
@@ -21,6 +21,21 @@ export class PaymentService {
     return this.http.post<ApiResponse>(
       `${this.apiBaseUrl}/payments/create_payment_url`,
       paymentData
+    );
+  }
+
+  // ===== SEPAY - Thanh toán QR chuyển khoản =====
+
+  createSepayQr(data: { amount: number, orderCode: string }): Observable<ApiResponse> {
+    return this.http.post<ApiResponse>(
+      `${this.apiBaseUrl}/payments/sepay/create-qr`,
+      data
+    );
+  }
+
+  checkSepayStatus(orderCode: string, amount: number): Observable<ApiResponse> {
+    return this.http.get<ApiResponse>(
+      `${this.apiBaseUrl}/payments/sepay/check-status?orderCode=${orderCode}&amount=${amount}`
     );
   }
 }

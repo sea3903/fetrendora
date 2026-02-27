@@ -286,6 +286,8 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
 
         if (this.paymentMethod === 'vnpay') {
             this.processVNPayOrder(orderData);
+        } else if (this.paymentMethod === 'sepay') {
+            this.processSepayOrder(orderData);
         } else {
             this.processCODOrder(orderData);
         }
@@ -356,6 +358,54 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
                 this.toastService.showToast({
                     error: error,
                     defaultMsg: 'Lỗi kết nối cổng thanh toán. Vui lòng thử lại.',
+                    title: 'Lỗi'
+                });
+            }
+        });
+    }
+
+    // Xử lý đơn hàng SePay (QR Chuyển khoản)
+    private processSepayOrder(orderData: OrderDTO): void {
+        // Bước 1: Tạo đơn hàng trước
+        this.orderService.placeOrder(orderData).subscribe({
+            next: (orderRes: ApiResponse) => {
+                const orderId = orderRes.data?.id || orderRes.data;
+                // Bước 2: Tạo QR Code
+                this.paymentService.createSepayQr({
+                    amount: this.finalAmount,
+                    orderCode: orderId.toString()
+                }).subscribe({
+                    next: (qrRes: ApiResponse) => {
+                        const qrData = qrRes.data;
+                        this.cartService.clearSelectedItems();
+                        // Chuyển hướng đến trang thanh toán QR kèm thông tin
+                        this.router.navigate(['/payments/sepay-payment'], {
+                            queryParams: {
+                                orderCode: qrData.orderCode,
+                                amount: qrData.amount,
+                                qrUrl: qrData.qrUrl,
+                                content: qrData.content,
+                                bankCode: qrData.bankCode,
+                                bankAccount: qrData.bankAccount,
+                                accountName: qrData.accountName
+                            }
+                        });
+                    },
+                    error: (error: HttpErrorResponse) => {
+                        this.isSubmitting = false;
+                        this.toastService.showToast({
+                            error: error,
+                            defaultMsg: 'Lỗi tạo mã QR thanh toán. Vui lòng thử lại.',
+                            title: 'Lỗi'
+                        });
+                    }
+                });
+            },
+            error: (error: HttpErrorResponse) => {
+                this.isSubmitting = false;
+                this.toastService.showToast({
+                    error: error,
+                    defaultMsg: 'Lỗi tạo đơn hàng. Vui lòng thử lại.',
                     title: 'Lỗi'
                 });
             }

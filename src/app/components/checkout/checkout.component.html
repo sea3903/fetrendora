@@ -9,7 +9,7 @@
             <div class="checkout-form">
                 <form #checkoutForm="ngForm">
                     <div class="form-section">
-                        <h2>Thông tin giao hàng</h2>
+                        <h2><i class="fas fa-map-marker-alt"></i> Thông tin giao hàng</h2>
 
                         <div class="form-row">
                             <div class="form-group">
@@ -40,33 +40,47 @@
                         </div>
                     </div>
 
-                    <!-- Shipping & Payment -->
-                    <div class="form-section compact">
-                        <div class="option-row">
-                            <div class="option-group">
-                                <h3>Vận chuyển</h3>
-                                <label class="radio-opt" [class.active]="shippingMethod === 'express'">
-                                    <input type="radio" name="shippingMethod" [(ngModel)]="shippingMethod"
-                                        value="express">
-                                    <span>Nhanh (1-2 ngày)</span>
-                                </label>
-                                <label class="radio-opt" [class.active]="shippingMethod === 'normal'">
-                                    <input type="radio" name="shippingMethod" [(ngModel)]="shippingMethod"
-                                        value="normal">
-                                    <span>Tiêu chuẩn (3-5 ngày)</span>
-                                </label>
+                    <!-- Shipping & Payment dạng Dropdown gọn -->
+                    <div class="form-section">
+                        <h2><i class="fas fa-cog"></i> Phương thức</h2>
+
+                        <div class="select-row">
+                            <div class="select-group">
+                                <label>Vận chuyển</label>
+                                <div class="custom-select">
+                                    <select name="shippingMethod" [(ngModel)]="shippingMethod">
+                                        <option value="express">🚀 Nhanh (1-2 ngày)</option>
+                                        <option value="normal">📦 Tiêu chuẩn (3-5 ngày)</option>
+                                    </select>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
                             </div>
-                            <div class="option-group">
-                                <h3>Thanh toán</h3>
-                                <label class="radio-opt" [class.active]="paymentMethod === 'cod'">
-                                    <input type="radio" name="paymentMethod" [(ngModel)]="paymentMethod" value="cod">
-                                    <span><i class="fas fa-money-bill-wave"></i> COD</span>
-                                </label>
-                                <label class="radio-opt" [class.active]="paymentMethod === 'vnpay'">
-                                    <input type="radio" name="paymentMethod" [(ngModel)]="paymentMethod" value="vnpay">
-                                    <span><i class="fas fa-credit-card"></i> VNPAY</span>
-                                </label>
+                            <div class="select-group">
+                                <label>Thanh toán</label>
+                                <div class="custom-select">
+                                    <select name="paymentMethod" [(ngModel)]="paymentMethod">
+                                        <option value="cod">💵 COD - Thanh toán khi nhận hàng</option>
+                                        <option value="vnpay">💳 VNPAY - Thẻ / Ví điện tử</option>
+                                        <option value="sepay">📱 QR Chuyển khoản ngân hàng</option>
+                                    </select>
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
                             </div>
+                        </div>
+
+                        <!-- Hiển thị ghi chú phương thức đã chọn -->
+                        <div class="method-note">
+                            @if(paymentMethod === 'cod') {
+                            <p><i class="fas fa-info-circle"></i> Thanh toán bằng tiền mặt khi nhận hàng.</p>
+                            }
+                            @if(paymentMethod === 'vnpay') {
+                            <p><i class="fas fa-info-circle"></i> Bạn sẽ được chuyển đến cổng thanh toán VNPay để hoàn
+                                tất.</p>
+                            }
+                            @if(paymentMethod === 'sepay') {
+                            <p><i class="fas fa-info-circle"></i> Mã QR chuyển khoản sẽ được hiển thị sau khi đặt hàng.
+                            </p>
+                            }
                         </div>
                     </div>
                 </form>

@@ -1,0 +1,106 @@
+<app-header></app-header>
+
+<div class="sepay-page">
+    <div class="container">
+
+        @if(loading) {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Đang tạo mã QR thanh toán...</p>
+        </div>
+        }
+
+        @if(!loading && !paymentSuccess && !paymentExpired) {
+        <div class="payment-card">
+            <div class="payment-header">
+                <h1>Thanh toán chuyển khoản</h1>
+                <div class="timer" [class.urgent]="timeLeft < 120">
+                    <i class="fas fa-clock"></i>
+                    <span>Hết hạn sau: <strong>{{ formattedTime }}</strong></span>
+                </div>
+            </div>
+
+            <div class="payment-body">
+                <!-- QR Code -->
+                <div class="qr-section">
+                    <div class="qr-wrapper">
+                        <img [src]="qrUrl" alt="QR Code thanh toán" class="qr-image">
+                    </div>
+                    <p class="qr-hint">Mở app Ngân hàng và quét mã QR để thanh toán</p>
+                </div>
+
+                <!-- Thông tin chuyển khoản -->
+                <div class="transfer-info">
+                    <h3>Hoặc chuyển khoản thủ công</h3>
+
+                    <div class="info-row">
+                        <span class="label">Ngân hàng</span>
+                        <span class="value">{{ bankCode }} - MB Bank</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Số tài khoản</span>
+                        <span class="value highlight">{{ bankAccount }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Chủ tài khoản</span>
+                        <span class="value">{{ accountName }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Số tiền</span>
+                        <span class="value highlight">{{ amount | currency:'VND':'symbol':'1.0-0':'vi' }}</span>
+                    </div>
+                    <div class="info-row content-row">
+                        <span class="label">Nội dung CK</span>
+                        <div class="content-copy">
+                            <span class="value highlight">{{ content }}</span>
+                            <button class="btn-copy" (click)="copyContent()" title="Sao chép">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="warning-box">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Vui lòng nhập <strong>đúng nội dung chuyển khoản</strong> để hệ thống tự động xác
+                            nhận.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trạng thái chờ -->
+            <div class="waiting-status">
+                <div class="pulse-dot"></div>
+                <span>Đang chờ thanh toán...</span>
+            </div>
+        </div>
+        }
+
+        @if(!loading && paymentSuccess) {
+        <div class="result-card success">
+            <div class="icon-wrapper">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>Thanh toán thành công!</h2>
+            <p>Cảm ơn bạn đã thanh toán. Đơn hàng đang được xử lý.</p>
+            <div class="redirect-info">
+                <div class="spinner-small"></div>
+                <span>Đang chuyển hướng đến đơn hàng của bạn...</span>
+            </div>
+        </div>
+        }
+
+        @if(!loading && paymentExpired) {
+        <div class="result-card expired">
+            <div class="icon-wrapper">
+                <i class="fas fa-clock"></i>
+            </div>
+            <h2>Hết thời gian thanh toán</h2>
+            <p>Phiên thanh toán đã hết hạn. Vui lòng thử lại.</p>
+            <button class="btn-retry" routerLink="/checkout">Thử lại</button>
+        </div>
+        }
+
+    </div>
+</div>
+
+<app-footer></app-footer>
