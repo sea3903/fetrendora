@@ -19,7 +19,7 @@
             <!-- Phần Avatar -->
             <div class="avatar-section">
                 <div class="avatar-wrapper">
-                    <img [src]="avatarUrl" alt="Avatar" (error)="onImageError($event)">
+                    <img [src]="avatarUrl" alt="Avatar" referrerpolicy="no-referrer" (error)="onImageError($event)">
                     <label class="avatar-edit">
                         <i class="fas fa-camera"></i>
                         <input type="file" (change)="onFileSelected($event)" accept="image/*" hidden>

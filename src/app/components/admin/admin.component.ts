@@ -70,12 +70,12 @@ export class AdminComponent extends BaseComponent implements OnInit, OnDestroy {
     if (this.userResponse?.profile_image) {
       return `${environment.apiBaseUrl}/users/profile-images/${this.userResponse.profile_image}`;
     }
-    return 'assets/images/user-placeholder.png';
+    return 'https://ui-avatars.com/api/?name=User&background=000000&color=fff&size=128';
   }
 
   // Handle image error
   onImageError(event: any) {
-    event.target.src = 'assets/images/user-placeholder.png';
+    event.target.src = 'https://ui-avatars.com/api/?name=User&background=000000&color=fff&size=128';
   }
 
   logout() {

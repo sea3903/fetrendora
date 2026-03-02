@@ -332,7 +332,7 @@ export class CommentAdminComponent extends BaseComponent implements OnInit {
     // ══════════════════════════════════════════════
 
     getAvatarUrl(user: any): string {
-        if (!user?.profile_image) return 'assets/images/user-placeholder.png';
+        if (!user?.profile_image) return 'https://ui-avatars.com/api/?name=User&background=000000&color=fff&size=128';
         if (user.profile_image.startsWith('http')) return user.profile_image;
         return `${this.environment.apiBaseUrl}/users/profile-images/${user.profile_image}`;
     }

@@ -35,7 +35,7 @@ export class AdminProfileComponent implements OnInit {
     dateOfBirth: string = '';
 
     // Avatar
-    avatarUrl: string = 'assets/images/user-placeholder.png';
+    avatarUrl: string = 'https://ui-avatars.com/api/?name=User&background=000000&color=fff&size=128';
     selectedFile: File | null = null;
 
     // State
@@ -182,7 +182,7 @@ export class AdminProfileComponent implements OnInit {
     }
 
     onImageError(event: any) {
-        event.target.src = 'assets/images/user-placeholder.png';
+        event.target.src = 'https://ui-avatars.com/api/?name=User&background=000000&color=fff&size=128';
     }
 
     // Save

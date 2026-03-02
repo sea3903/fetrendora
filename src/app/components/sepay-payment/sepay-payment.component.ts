@@ -106,6 +106,7 @@ export class SepayPaymentComponent implements OnInit, OnDestroy {
             switchMap(() => this.paymentService.checkSepayStatus(this.orderCode, this.amount))
         ).subscribe({
             next: (response: ApiResponse) => {
+                console.log('[SePay Polling] Response:', response);
                 if (response.data?.success === true) {
                     this.paymentSuccess = true;
                     this.pollingSubscription?.unsubscribe();
@@ -127,10 +128,16 @@ export class SepayPaymentComponent implements OnInit, OnDestroy {
                             }, 3000);
                         }
                     });
+                } else if (response.data?.error) {
+                    console.error('[SePay Polling] Lỗi từ backend:', response.data.error);
                 }
             },
             error: (err) => {
-                console.error('Lỗi polling SePay:', err);
+                console.error('[SePay Polling] Lỗi HTTP:', err.status, err.message);
+                // Nếu lỗi 429 (rate limit) hoặc 500, giảm tần suất hoặc log
+                if (err.status === 429) {
+                    console.warn('[SePay Polling] Rate limited! Sẽ thử lại sau...');
+                }
             }
         });
     }

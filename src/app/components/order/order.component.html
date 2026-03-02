@@ -54,7 +54,8 @@
             </div>
 
             <!-- Giá + Số lượng + Tổng (cùng hàng) -->
-            <div class="item-price">{{ item.product.price | currency:'VND':'symbol':'1.0-0':'vi' }}</div>
+            <div class="item-price">{{ (item.variant?.price || item.product.price) |
+              currency:'VND':'symbol':'1.0-0':'vi' }}</div>
 
             <div class="item-quantity">
               <button (click)="decreaseQuantity(i)" [disabled]="item.quantity <= 1">−</button>
@@ -62,7 +63,8 @@
               <button (click)="increaseQuantity(i)">+</button>
             </div>
 
-            <div class="item-total">{{ (item.product.price * item.quantity) | currency:'VND':'symbol':'1.0-0':'vi' }}
+            <div class="item-total">{{ ((item.variant?.price || item.product.price) * item.quantity) |
+              currency:'VND':'symbol':'1.0-0':'vi' }}
             </div>
 
             <!-- Delete -->

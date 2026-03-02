@@ -17,6 +17,7 @@ interface CheckoutItem {
     product: Product;
     quantity: number;
     productDetailId?: number; // ID biến thể để trừ tồn kho
+    variantPrice?: number; // Lưu giá của biến thể
 }
 
 @Component({
@@ -103,10 +104,22 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
                     const product = { ...productFound };
                     product.thumbnail = `${environment.apiBaseUrl}/products/images/${product.thumbnail}`;
 
+                    // Ưu tiên 1: Lấy giá biến thể từ CartItem (đã lưu lúc add to cart)
+                    // Ưu tiên 2: Tìm từ product_details (API trả về)
+                    // Fallback: Dùng giá sản phẩm gốc (product.price)
+                    let variantPrice: number | undefined = cartItem.variantPrice;
+                    if (!variantPrice && cartItem.productDetailId && product.product_details) {
+                        const matchedDetail = product.product_details.find((pd: any) => pd.id === cartItem.productDetailId);
+                        if (matchedDetail && matchedDetail.price) {
+                            variantPrice = matchedDetail.price;
+                        }
+                    }
+
                     return {
                         product: product,
                         quantity: cartItem.quantity,
-                        productDetailId: cartItem.productDetailId
+                        productDetailId: cartItem.productDetailId,
+                        variantPrice: variantPrice
                     };
                 }).filter(item => item !== null) as CheckoutItem[];
 
@@ -191,7 +204,10 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
 
     calculateTotal(): void {
         this.totalAmount = this.checkoutItems.reduce(
-            (total, item) => total + item.product.price * item.quantity,
+            (total, item) => {
+                const itemPrice = item.variantPrice || item.product.price;
+                return total + itemPrice * item.quantity;
+            },
             0
         );
         this.finalAmount = this.totalAmount - this.discountAmount;

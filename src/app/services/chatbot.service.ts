@@ -20,7 +20,7 @@ export interface ProductSuggestion {
 
 export interface ChatRequest {
     message: string;
-    userId?: number;
+    sessionId: string;
 }
 
 export interface ChatResponse {
@@ -35,6 +35,9 @@ export class ChatbotService {
     private apiBaseUrl = environment.apiBaseUrl;
     private http = inject(HttpClient);
 
+    // Session ID cố định cho toàn bộ phiên chat → gửi lên backend để Redis lưu đúng lịch sử
+    private sessionId: string = this.generateSessionId();
+
     // Message history
     private messagesSubject = new BehaviorSubject<ChatMessage[]>([]);
     public messages$ = this.messagesSubject.asObservable();
@@ -48,34 +51,34 @@ export class ChatbotService {
     public isLoading$ = this.isLoadingSubject.asObservable();
 
     constructor() {
-        // Add welcome message
+        // Tin nhắn chào mừng
         this.addMessage({
             role: 'assistant',
-            content: 'Xin chào! Em là trợ lý tư vấn của Shop App. Anh/chị đang tìm kiếm sản phẩm gì ạ? 🛍️',
+            content: 'Xin chào! Em là trợ lý tư vấn của TRENDORA. Anh/chị đang tìm kiếm sản phẩm gì ạ? 🛍️',
             timestamp: new Date()
         });
     }
 
     /**
-     * Send message to chatbot API
+     * Gửi tin nhắn tới chatbot API (kèm sessionId)
      */
     sendMessage(message: string): Observable<ChatResponse> {
         this.isLoadingSubject.next(true);
 
-        // Add user message to history
         this.addMessage({
             role: 'user',
             content: message,
             timestamp: new Date()
         });
 
-        const request: ChatRequest = { message };
+        const request: ChatRequest = {
+            message,
+            sessionId: this.sessionId
+        };
         return this.http.post<ChatResponse>(`${this.apiBaseUrl}/chat`, request);
     }
 
-    /**
-     * Handle API response
-     */
+    /** Xử lý response thành công */
     handleResponse(response: ChatResponse): void {
         this.isLoadingSubject.next(false);
         this.addMessage({
@@ -86,9 +89,7 @@ export class ChatbotService {
         });
     }
 
-    /**
-     * Handle API error
-     */
+    /** Xử lý lỗi */
     handleError(error: any): void {
         this.isLoadingSubject.next(false);
         this.addMessage({
@@ -99,43 +100,35 @@ export class ChatbotService {
         console.error('Chatbot Error:', error);
     }
 
-    /**
-     * Add message to history
-     */
     private addMessage(message: ChatMessage): void {
         const current = this.messagesSubject.value;
         this.messagesSubject.next([...current, message]);
     }
 
-    /**
-     * Toggle chat window
-     */
     toggleChat(): void {
         this.isOpenSubject.next(!this.isOpenSubject.value);
     }
 
-    /**
-     * Open chat window
-     */
     openChat(): void {
         this.isOpenSubject.next(true);
     }
 
-    /**
-     * Close chat window
-     */
     closeChat(): void {
         this.isOpenSubject.next(false);
     }
 
-    /**
-     * Clear chat history
-     */
+    /** Xóa lịch sử chat và tạo session mới */
     clearHistory(): void {
+        this.sessionId = this.generateSessionId();
         this.messagesSubject.next([{
             role: 'assistant',
-            content: 'Xin chào! Em là trợ lý tư vấn của Shop App. Anh/chị đang tìm kiếm sản phẩm gì ạ? 🛍️',
+            content: 'Xin chào! Em là trợ lý tư vấn của TRENDORA. Anh/chị đang tìm kiếm sản phẩm gì ạ? 🛍️',
             timestamp: new Date()
         }]);
+    }
+
+    /** Tạo session ID duy nhất */
+    private generateSessionId(): string {
+        return 'chat-' + Date.now() + '-' + Math.random().toString(36).substring(2, 9);
     }
 }

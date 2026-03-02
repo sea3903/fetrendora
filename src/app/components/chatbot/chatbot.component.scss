@@ -280,12 +280,65 @@ $bot-bubble: #f0f0f0;
         padding: 12px 16px;
         border-radius: 16px;
         font-size: 14px;
-        line-height: 1.5;
+        line-height: 1.6;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 
-        p {
+        .msg-text {
             margin: 0;
-            white-space: pre-wrap;
+            word-wrap: break-word;
+
+            strong {
+                font-weight: 600;
+            }
+
+            em {
+                font-style: italic;
+            }
+
+            // Link sản phẩm clickable
+            .product-link {
+                color: $primary;
+                text-decoration: none;
+                font-weight: 500;
+                cursor: pointer;
+                border-bottom: 1px dashed $primary;
+                transition: all 0.2s;
+
+                &:hover {
+                    color: $primary-dark;
+                    border-bottom-style: solid;
+                }
+            }
+
+            a:not(.product-link) {
+                color: $primary;
+                text-decoration: underline;
+            }
+
+            // Danh sách trong chat
+            .chat-list {
+                margin: 6px 0;
+                padding-left: 16px;
+                list-style: none;
+
+                li {
+                    position: relative;
+                    padding: 2px 0;
+                    padding-left: 8px;
+
+                    &::before {
+                        content: '•';
+                        position: absolute;
+                        left: -8px;
+                        color: $primary;
+                        font-weight: bold;
+                    }
+
+                    &.numbered::before {
+                        content: none;
+                    }
+                }
+            }
         }
 
         &.typing {

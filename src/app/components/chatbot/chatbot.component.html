@@ -41,8 +41,8 @@
 
             <!-- Content -->
             <div class="msg-content">
-                <div class="msg-bubble">
-                    <p [innerHTML]="msg.content"></p>
+                <div class="msg-bubble" (click)="onMessageClick($event)">
+                    <div class="msg-text" [innerHTML]="renderMarkdown(msg.content)"></div>
                 </div>
 
                 <!-- Product Suggestions -->

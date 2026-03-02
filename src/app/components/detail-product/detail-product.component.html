@@ -335,8 +335,8 @@
             @for(comment of paginatedReviews; track comment.id) {
             <div class="review-card">
               <div class="review-header">
-                <img [src]="getAvatarUrl(comment.user)" class="user-avatar-small"
-                  onerror="this.src='assets/images/user-placeholder.png'">
+                <img [src]="getAvatarUrl(comment.user)" class="user-avatar-small" referrerpolicy="no-referrer"
+                  onerror="this.src='https://ui-avatars.com/api/?name=User&background=000000&color=fff&size=128'">
                 <div class="user-meta">
                   <span class="user-name">{{ comment.user.fullname || 'Khách hàng ẩn danh' }}</span>
                   <div class="rating-row">

@@ -11,7 +11,8 @@
       <!-- User Dropdown -->
       <div class="user-dropdown" *ngIf="userResponse">
         <button class="user-btn" (click)="toggleDropdown(); $event.stopPropagation()">
-          <img [src]="getAvatarUrl()" class="user-avatar" (error)="onImageError($event)" alt="Avatar">
+          <img [src]="getAvatarUrl()" class="user-avatar" referrerpolicy="no-referrer" (error)="onImageError($event)"
+            alt="Avatar">
           <span class="user-name">{{ userResponse.fullname || 'Admin' }}</span>
           <i class="fas fa-chevron-down"></i>
         </button>

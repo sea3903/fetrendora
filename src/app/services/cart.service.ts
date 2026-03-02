@@ -11,6 +11,7 @@ export interface CartItem {
   colorName?: string;
   sizeName?: string;
   originName?: string;
+  variantPrice?: number; // Giá của biến thể (ProductDetail), ưu tiên dùng khi tính tiền
 }
 
 @Injectable({
@@ -103,6 +104,7 @@ export class CartService {
       colorName?: string;
       sizeName?: string;
       originName?: string;
+      variantPrice?: number; // Giá của biến thể
     }
   ): void {
     // Dùng productDetailId làm key nếu có, ngược lại dùng productId
@@ -111,6 +113,10 @@ export class CartService {
     if (this.cart.has(cartKey)) {
       const item = this.cart.get(cartKey)!;
       item.quantity += quantity;
+      // Cập nhật giá variant nếu có (trường hợp lần trước chưa lưu giá)
+      if (variantInfo?.variantPrice) {
+        item.variantPrice = variantInfo.variantPrice;
+      }
       this.cart.set(cartKey, item);
     } else {
       this.cart.set(cartKey, {
@@ -120,7 +126,8 @@ export class CartService {
         productDetailId: variantInfo?.productDetailId,
         colorName: variantInfo?.colorName,
         sizeName: variantInfo?.sizeName,
-        originName: variantInfo?.originName
+        originName: variantInfo?.originName,
+        variantPrice: variantInfo?.variantPrice
       });
     }
     this.saveCartToLocalStorage();

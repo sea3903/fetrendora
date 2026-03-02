@@ -16,6 +16,7 @@ interface VariantInfo {
   colorName?: string;
   sizeName?: string;
   originName?: string;
+  price?: number; // Thêm giá của biến thể
 }
 
 interface CartItemWithProduct {
@@ -87,6 +88,17 @@ export class OrderComponent extends BaseComponent implements OnInit, OnDestroy {
           const product = { ...productFound };
           product.thumbnail = `${environment.apiBaseUrl}/products/images/${product.thumbnail}`;
 
+          // Ưu tiên 1: Lấy giá biến thể từ CartItem (đã lưu lúc add to cart)
+          // Ưu tiên 2: Tìm từ product_details (API trả về)
+          // Fallback: Dùng giá sản phẩm gốc (product.price)
+          let variantPrice: number | undefined = cartItem.variantPrice;
+          if (!variantPrice && cartItem.productDetailId && product.product_details) {
+            const matchedDetail = product.product_details.find((pd: any) => pd.id === cartItem.productDetailId);
+            if (matchedDetail && matchedDetail.price) {
+              variantPrice = matchedDetail.price;
+            }
+          }
+
           // Lọc thuộc tính biến thể dựa theo selling_attributes (cấu hình của Admin)
           let finalColorName = cartItem.colorName;
           let finalSizeName = cartItem.sizeName;
@@ -109,7 +121,8 @@ export class OrderComponent extends BaseComponent implements OnInit, OnDestroy {
             variant: {
               colorName: finalColorName,
               sizeName: finalSizeName,
-              originName: finalOriginName
+              originName: finalOriginName,
+              price: variantPrice // Lưu giá của biến thể (nếu có)
             }
           };
         }).filter(item => item !== null) as CartItemWithProduct[];
@@ -199,7 +212,11 @@ export class OrderComponent extends BaseComponent implements OnInit, OnDestroy {
   calculateTotal(): void {
     this.totalAmount = this.cartItems
       .filter(item => item.selected)
-      .reduce((total, item) => total + item.product.price * item.quantity, 0);
+      .reduce((total, item) => {
+        // Ưu tiên dùng giá của biến thể (nếu có), ngược lại dùng giá sản phẩm
+        const itemPrice = item.variant?.price || item.product.price;
+        return total + itemPrice * item.quantity;
+      }, 0);
     this.selectedCount = this.cartItems.filter(item => item.selected).length;
   }
 

@@ -98,7 +98,7 @@
                             <span class="name">{{ item.product.name }}</span>
                             <span class="qty">x{{ item.quantity }}</span>
                         </div>
-                        <span class="price">{{ (item.product.price * item.quantity) |
+                        <span class="price">{{ ((item.variantPrice || item.product.price) * item.quantity) |
                             currency:'VND':'symbol':'1.0-0':'vi' }}</span>
                     </div>
                     }

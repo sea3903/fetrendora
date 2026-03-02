@@ -512,12 +512,13 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
       return;
     }
 
-    // Chuẩn bị thông tin biến thể
+    // Chuẩn bị thông tin biến thể (bao gồm giá)
     const variantInfo = this.selectedVariant ? {
       productDetailId: this.selectedVariant.id,
       colorName: this.selectedVariant.color_name,
       sizeName: this.selectedVariant.size_name,
-      originName: this.selectedVariant.origin_name
+      originName: this.selectedVariant.origin_name,
+      variantPrice: this.selectedVariant.price // Lưu giá biến thể vào giỏ hàng
     } : undefined;
 
     this.cartService.addToCart(this.productId, this.quantity, variantInfo);
@@ -551,7 +552,7 @@ export class DetailProductComponent extends BaseComponent implements OnInit {
 
   // === Hàm hỗ trợ ===
   getAvatarUrl(user: any): string {
-    if (!user?.profile_image) return 'assets/images/user-placeholder.png';
+    if (!user?.profile_image) return 'https://ui-avatars.com/api/?name=User&background=000000&color=fff&size=128';
     if (user.profile_image.startsWith('http')) return user.profile_image;
     return `${environment.apiBaseUrl}/users/profile-images/${user.profile_image}`;
   }

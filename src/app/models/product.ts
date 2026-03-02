@@ -16,4 +16,5 @@ export interface Product {
   is_active?: boolean;
   url: string;
   product_images: ProductImage[];
+  product_details?: any[]; // Cần có type cho product_details
 }

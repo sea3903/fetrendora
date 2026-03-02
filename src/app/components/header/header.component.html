@@ -37,20 +37,33 @@
           <i class="fas fa-ticket-alt"></i>
         </a>
 
-        <!-- Tìm kiếm -->
+        <!-- Tìm kiếm
         <button class="action-btn" title="Tìm kiếm">
           <i class="fas fa-search"></i>
+        </button> -->
+        <!-- Giỏ hàng -->
+        <a routerLink="/cart" class="action-btn" title="Giỏ hàng">
+          <i class="fas fa-shopping-bag"></i>
+          <span class="badge" *ngIf="getCartItemCount() > 0">{{ getCartItemCount() }}</span>
+        </a>
+
+        <!-- Yêu thích -->
+        <!-- Yêu thích -->
+        <button class="action-btn" (click)="toggleFavorites()" title="Yêu thích">
+          <i class="fas fa-heart"></i>
         </button>
 
         <!-- User Dropdown - Dùng pattern giống Admin -->
         <div class="user-dropdown" *ngIf="userResponse">
           <button class="action-btn avatar-btn" (click)="toggleUserMenu(); $event.stopPropagation()" title="Tài khoản">
-            <img [src]="getAvatarUrl(userResponse)" alt="Avatar" class="avatar-img" (error)="onImageError($event)">
+            <img [src]="getAvatarUrl(userResponse)" alt="Avatar" class="avatar-img" referrerpolicy="no-referrer"
+              (error)="onImageError($event)">
           </button>
 
           <div class="dropdown-menu user-menu" [class.show]="showUserMenu" (click)="$event.stopPropagation()">
             <div class="user-info">
-              <img [src]="getAvatarUrl(userResponse)" alt="Avatar" class="user-avatar" (error)="onImageError($event)">
+              <img [src]="getAvatarUrl(userResponse)" alt="Avatar" class="user-avatar" referrerpolicy="no-referrer"
+                (error)="onImageError($event)">
               <div class="user-details">
                 <span class="user-name">{{ userResponse.fullname || 'Người dùng' }}</span>
                 <span class="user-email">{{ userResponse.email || '' }}</span>
@@ -104,18 +117,6 @@
             </a>
           </div>
         </div>
-
-        <!-- Giỏ hàng -->
-        <a routerLink="/cart" class="action-btn" title="Giỏ hàng">
-          <i class="fas fa-shopping-bag"></i>
-          <span class="badge" *ngIf="getCartItemCount() > 0">{{ getCartItemCount() }}</span>
-        </a>
-
-        <!-- Yêu thích -->
-        <!-- Yêu thích -->
-        <button class="action-btn" (click)="toggleFavorites()" title="Yêu thích">
-          <i class="fas fa-heart"></i>
-        </button>
       </div>
     </div>
   </nav>
