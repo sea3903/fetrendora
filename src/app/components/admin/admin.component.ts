@@ -38,7 +38,7 @@ export class AdminComponent extends BaseComponent implements OnInit, OnDestroy {
 
     // Default router
     if (this.router.url === '/admin') {
-      this.router.navigate(['/admin/orders']);
+      this.router.navigate(['/admin/dashboard']);
     }
   }
 

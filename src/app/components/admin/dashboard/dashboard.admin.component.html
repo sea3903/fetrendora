@@ -1,0 +1,230 @@
+<div class="dashboard-container">
+
+    <!-- Loading State -->
+    <div class="loading-overlay" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Đang tải dữ liệu...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-message" *ngIf="errorMessage && !isLoading">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>{{ errorMessage }}</p>
+        <button (click)="loadDashboardData()">Thử lại</button>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div *ngIf="dashboardData && !isLoading">
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- 1. KPI CARDS -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <div class="kpi-grid">
+
+            <div class="kpi-card kpi-revenue">
+                <div class="kpi-icon">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Doanh thu tháng</span>
+                    <span class="kpi-value">{{ dashboardData.month_revenue | currencyVnd }}</span>
+                    <span class="kpi-sub">Hôm nay: {{ dashboardData.today_revenue | currencyVnd }}</span>
+                </div>
+            </div>
+
+            <div class="kpi-card kpi-orders">
+                <div class="kpi-icon">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Tổng đơn hàng</span>
+                    <span class="kpi-value">{{ dashboardData.total_orders }}</span>
+                    <span class="kpi-sub">Chờ xử lý: {{ dashboardData.pending_orders }}</span>
+                </div>
+            </div>
+
+            <div class="kpi-card kpi-stock">
+                <div class="kpi-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Cảnh báo tồn kho</span>
+                    <span class="kpi-value">{{ dashboardData.low_stock_count }}</span>
+                    <span class="kpi-sub">Sản phẩm sắp hết</span>
+                </div>
+            </div>
+
+            <div class="kpi-card kpi-comments">
+                <div class="kpi-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Đánh giá hôm nay</span>
+                    <span class="kpi-value">{{ dashboardData.new_comments_today }}</span>
+                    <span class="kpi-sub">Lượt đánh giá mới</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- 2. BIỂU ĐỒ -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="charts-grid">
+
+        <!-- Biểu đồ doanh thu -->
+        <div class="chart-card chart-revenue">
+            <div class="chart-header">
+                <h3><i class="fas fa-chart-line"></i> Doanh thu 30 ngày gần nhất</h3>
+            </div>
+            <div class="chart-body">
+                <canvas #revenueCanvas></canvas>
+            </div>
+        </div>
+
+        <!-- Biểu đồ trạng thái đơn hàng -->
+        <div class="chart-card chart-status">
+            <div class="chart-header">
+                <h3><i class="fas fa-chart-pie"></i> Trạng thái đơn hàng</h3>
+            </div>
+            <div class="chart-body">
+                <canvas #orderStatusCanvas></canvas>
+            </div>
+        </div>
+
+        <!-- Biểu đồ top sản phẩm -->
+        <div class="chart-card chart-top-products">
+            <div class="chart-header">
+                <h3><i class="fas fa-trophy"></i> Top 5 sản phẩm bán chạy</h3>
+            </div>
+            <div class="chart-body">
+                <canvas #topProductsCanvas></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- 3. DANH SÁCH THAO TÁC NHANH -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="action-grid">
+
+        <!-- Đơn hàng mới nhất -->
+        <div class="action-card">
+            <div class="action-header">
+                <h3><i class="fas fa-clock"></i> Đơn hàng mới nhất</h3>
+                <a routerLink="/admin/orders" class="view-all">Xem tất cả <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="action-body">
+                <table class="data-table" *ngIf="dashboardData.recent_orders?.length > 0">
+                    <thead>
+                        <tr>
+                            <th>Mã ĐH</th>
+                            <th>Khách hàng</th>
+                            <th>Tổng tiền</th>
+                            <th>Thanh toán</th>
+                            <th>Trạng thái</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let order of dashboardData.recent_orders">
+                            <td class="order-id">#{{ order.id }}</td>
+                            <td>{{ order.fullname }}</td>
+                            <td class="money">{{ order.total_money | currencyVnd }}</td>
+                            <td>
+                                <span class="payment-badge">{{ order.payment_method | paymentMethod }}</span>
+                            </td>
+                            <td>
+                                <span class="status-badge" [ngClass]="order.status | orderStatus:'class'">
+                                    {{ order.status | orderStatus }}
+                                </span>
+                            </td>
+                            <td>
+                                <a [routerLink]="['/admin/orders', order.id]" class="btn-detail" title="Xem chi tiết">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="empty-state" *ngIf="!dashboardData.recent_orders?.length">
+                    <i class="fas fa-inbox"></i>
+                    <p>Chưa có đơn hàng nào</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sản phẩm sắp hết hàng -->
+        <div class="action-card">
+            <div class="action-header">
+                <h3><i class="fas fa-box-open"></i> Sản phẩm sắp hết hàng</h3>
+                <a routerLink="/admin/inventory" class="view-all">Quản lý kho <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="action-body">
+                <table class="data-table" *ngIf="dashboardData.low_stock_products?.length > 0">
+                    <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th>SKU</th>
+                            <th>Màu</th>
+                            <th>Size</th>
+                            <th>Tồn kho</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of dashboardData.low_stock_products"
+                            [ngClass]="{'critical-stock': item.stock_quantity <= 2}">
+                            <td>{{ item.product_name }}</td>
+                            <td class="sku">{{ item.sku }}</td>
+                            <td>{{ item.color_name || '—' }}</td>
+                            <td>{{ item.size_name || '—' }}</td>
+                            <td class="stock-qty">
+                                <span class="stock-badge"
+                                    [ngClass]="item.stock_quantity === 0 ? 'stock-out' : 'stock-low'">
+                                    {{ item.stock_quantity }}
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="empty-state" *ngIf="!dashboardData.low_stock_products?.length">
+                    <i class="fas fa-check-circle"></i>
+                    <p>Tất cả sản phẩm đều đủ hàng</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Đánh giá mới nhất -->
+        <div class="action-card">
+            <div class="action-header">
+                <h3><i class="fas fa-star"></i> Đánh giá gần đây</h3>
+                <a routerLink="/admin/comments" class="view-all">Xem tất cả <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="action-body">
+                <div class="review-list" *ngIf="dashboardData.recent_comments?.length > 0">
+                    <div class="review-item" *ngFor="let comment of dashboardData.recent_comments">
+                        <div class="review-header">
+                            <span class="reviewer-name">{{ comment.user_name }}</span>
+                            <div class="review-stars">
+                                <ng-container *ngFor="let i of stars">
+                                    <i class="fas fa-star" *ngIf="i <= (comment.rating || 0)"></i>
+                                    <i class="far fa-star" *ngIf="i > (comment.rating || 0)"></i>
+                                </ng-container>
+                            </div>
+                        </div>
+                        <p class="review-product">{{ comment.product_name }}</p>
+                        <p class="review-content">{{ comment.content }}</p>
+                        <span class="review-date">{{ comment.created_at }}</span>
+                    </div>
+                </div>
+                <div class="empty-state" *ngIf="!dashboardData.recent_comments?.length">
+                    <i class="fas fa-comments"></i>
+                    <p>Chưa có đánh giá nào</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

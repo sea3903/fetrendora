@@ -22,12 +22,18 @@ import { InventoryAdminComponent } from "./inventory/inventory.admin.component";
 // Event Management
 import { EventAdminComponent } from "./event/event.admin.component";
 import { CommentAdminComponent } from "./comment/comment.admin.component";
+// Dashboard
+import { DashboardAdminComponent } from "./dashboard/dashboard.admin.component";
 
 export const adminRoutes: Routes = [
     {
         path: 'admin',
         component: AdminComponent,
         children: [
+            {
+                path: 'dashboard',
+                component: DashboardAdminComponent
+            },
             {
                 path: 'orders',
                 component: OrderAdminComponent
