@@ -105,7 +105,11 @@ export class UpdateProductAdminComponent extends BaseComponent implements OnInit
   // --- Các hàm tải dữ liệu ---
   loadCategories() {
     this.categoryService.getCategories().subscribe({
-      next: (apiResponse: ApiResponse) => this.categories = apiResponse.data,
+      next: (apiResponse: ApiResponse) => {
+        const allCategories = apiResponse.data || [];
+        const parentIds = new Set(allCategories.map((c: any) => c.parentId).filter((id: any) => id != null));
+        this.categories = allCategories.filter((c: any) => !parentIds.has(c.id));
+      },
       error: (error: HttpErrorResponse) => console.error('Lỗi tải danh mục', error)
     });
   }

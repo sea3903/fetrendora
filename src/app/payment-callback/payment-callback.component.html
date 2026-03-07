@@ -24,9 +24,9 @@
     @if (!loading && !paymentSuccess) {
     <div class="status-card error">
         <i class="fas fa-times-circle icon"></i>
-        <h2>Thanh toán thất bại</h2>
-        <p>Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.</p>
-        <button class="btn btn-primary" routerLink="/checkout">Thử lại</button>
+        <h2>Thanh toán chưa hoàn tất</h2>
+        <p>Thanh toán chưa thành công. Bạn có thể đặt lại đơn hàng từ giỏ hàng.</p>
+        <button class="btn btn-primary" routerLink="/my-orders">Về đơn hàng của tôi</button>
     </div>
     }
 </div>

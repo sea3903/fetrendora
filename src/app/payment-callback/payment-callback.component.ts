@@ -41,7 +41,7 @@ export class PaymentCallbackComponent extends BaseComponent implements OnInit { 
 
   handlePaymentSuccess(orderId: number): void {
     // Sử dụng this.orderService từ BaseComponent
-    this.orderService.updateOrderStatus(orderId, 'shipped').subscribe({
+    this.orderService.updateOrderStatus(orderId, 'processing').subscribe({
       next: (response: ApiResponse) => {
         this.loading = false;
         this.paymentSuccess = true;
@@ -74,12 +74,12 @@ export class PaymentCallbackComponent extends BaseComponent implements OnInit { 
     this.paymentSuccess = false;
     this.toastService.showToast({
       error: null,
-      defaultMsg: 'Thanh toán thất bại. Vui lòng thử lại.',
-      title: 'Lỗi'
+      defaultMsg: 'Thanh toán chưa hoàn tất. Bạn có thể đặt lại đơn hàng từ giỏ hàng.',
+      title: 'Thông báo'
     });
-    // Chuyển hướng về trang thanh toán hoặc trang chủ
+    // Chuyển hướng về trang đơn hàng (không quay lại /checkout để tránh tạo đơn trùng)
     setTimeout(() => {
-      this.router.navigate(['/checkout']);
+      this.router.navigate(['/my-orders']);
     }, 3000);
   }
 }

@@ -177,7 +177,8 @@ export class HomeComponent extends BaseComponent implements OnInit, OnDestroy {
 
   // Load New Products (Latest 4)
   private loadNewProducts(): void {
-    this.productService.getProducts('', 0, 0, 4).subscribe({
+    // Thêm tham số true cho 'active' để chỉ lấy sản phẩm mới đang kinh doanh, sort="desc" để lấy đồ mới nhất
+    this.productService.getProducts('', 0, 0, 4, true, 'desc').subscribe({
       next: (response: ApiResponse) => {
         const data = response.data;
         this.newProducts = data.products.map((product: Product) => ({
@@ -191,7 +192,8 @@ export class HomeComponent extends BaseComponent implements OnInit, OnDestroy {
 
   // Load All Products (Paginated)
   private loadAllProducts(): void {
-    this.productService.getProducts('', 0, this.currentPage, this.itemsPerPage).subscribe({
+    // Thêm tham số true cho 'active' để chỉ lấy sản phẩm đang kinh doanh, sort="asc" để từ cũ đến mới theo yêu cầu
+    this.productService.getProducts('', 0, this.currentPage, this.itemsPerPage, true, 'asc').subscribe({
       next: (response: ApiResponse) => {
         const data = response.data;
         this.products = data.products.map((product: Product) => ({

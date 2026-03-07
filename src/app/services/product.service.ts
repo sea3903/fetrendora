@@ -20,7 +20,8 @@ export class ProductService {
     categoryId: number,
     page: number,
     limit: number,
-    active?: boolean
+    active?: boolean,
+    sort?: string // Tham số sort mới
   ): Observable<ApiResponse> {
     const params: any = {
       keyword: keyword,
@@ -30,6 +31,9 @@ export class ProductService {
     };
     if (active != null) {
       params.active = active.toString();
+    }
+    if (sort) {
+      params.sort = sort;
     }
     return this.http.get<ApiResponse>(`${this.apiBaseUrl}/products`, { params });
   }

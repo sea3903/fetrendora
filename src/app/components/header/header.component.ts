@@ -191,7 +191,22 @@ export class HeaderComponent extends BaseComponent implements OnInit, OnDestroy 
 
   // Lấy số lượng giỏ hàng
   getCartItemCount(): number {
-    return this.cartService.getCart().size;
+    if (!this.userResponse) return 0;
+    return this.cartService.getItemCount();
+  }
+
+  // Vào giỏ hàng
+  goToCart(): void {
+    if (!this.userResponse) {
+      this.toastService.showToast({
+        error: null,
+        defaultMsg: 'Vui lòng đăng nhập để xem giỏ hàng',
+        title: 'Yêu cầu đăng nhập'
+      });
+      this.openLoginModal();
+    } else {
+      this.router.navigate(['/cart']);
+    }
   }
 
   // Favorite Sidebar

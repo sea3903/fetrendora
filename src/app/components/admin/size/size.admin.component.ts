@@ -40,6 +40,7 @@ export class SizeAdminComponent implements OnInit {
 
     // Validation
     nameError: string = '';
+    descError: string = '';
 
     private sizeService = inject(SizeService);
     private toastService = inject(ToastService);
@@ -115,6 +116,7 @@ export class SizeAdminComponent implements OnInit {
         this.selectedSize = null;
         this.sizeForm = { name: '', description: '' };
         this.nameError = '';
+        this.descError = '';
         this.showModal = true;
     }
 
@@ -127,6 +129,7 @@ export class SizeAdminComponent implements OnInit {
             description: size.description || ''
         };
         this.nameError = '';
+        this.descError = '';
         this.showModal = true;
     }
 
@@ -135,6 +138,8 @@ export class SizeAdminComponent implements OnInit {
         this.showModal = false;
         this.selectedSize = null;
         this.sizeForm = { name: '', description: '' };
+        this.nameError = '';
+        this.descError = '';
     }
 
     // Validate
@@ -163,9 +168,19 @@ export class SizeAdminComponent implements OnInit {
         return true;
     }
 
+    validateDesc(): boolean {
+        const desc = (this.sizeForm.description || '').trim();
+        if (desc.length > 100) {
+            this.descError = 'Mô tả tối đa 100 ký tự';
+            return false;
+        }
+        this.descError = '';
+        return true;
+    }
+
     // Lưu
     saveSize() {
-        if (!this.validateName()) return;
+        if (!this.validateName() || !this.validateDesc()) return;
         this.saving = true;
 
         if (this.modalMode === 'create') {

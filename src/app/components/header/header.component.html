@@ -42,7 +42,7 @@
           <i class="fas fa-search"></i>
         </button> -->
         <!-- Giỏ hàng -->
-        <a routerLink="/cart" class="action-btn" title="Giỏ hàng">
+        <a class="action-btn" title="Giỏ hàng" (click)="goToCart()">
           <i class="fas fa-shopping-bag"></i>
           <span class="badge" *ngIf="getCartItemCount() > 0">{{ getCartItemCount() }}</span>
         </a>

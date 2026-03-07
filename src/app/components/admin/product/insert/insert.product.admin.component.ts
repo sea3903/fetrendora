@@ -95,7 +95,10 @@ export class InsertProductAdminComponent extends BaseComponent implements OnInit
   loadCategories() {
     this.categoryService.getCategories().subscribe({
       next: (apiResponse: ApiResponse) => {
-        this.categories = apiResponse.data;
+        const allCategories = apiResponse.data || [];
+        const parentIds = new Set(allCategories.map((c: any) => c.parentId).filter((id: any) => id != null));
+        // Lọc giữ lại danh mục lá (không đóng vai trò là cha của danh mục khác)
+        this.categories = allCategories.filter((c: any) => !parentIds.has(c.id));
       },
       error: (error: HttpErrorResponse) => {
         this.toastService.showToast({ error, defaultMsg: 'Lỗi tải danh mục', title: 'Lỗi' });

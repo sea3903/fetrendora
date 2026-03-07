@@ -103,9 +103,12 @@
 
                 <!-- Mô tả -->
                 <div class="form-group">
-                    <label>Mô tả</label>
+                    <label>Mô tả <span class="text-muted" style="font-weight: normal; font-size: 0.85rem;">(Tối đa 100
+                            ký tự)</span></label>
                     <textarea [(ngModel)]="sizeForm.description" name="description" rows="3"
-                        placeholder="Nhập mô tả size"></textarea>
+                        (ngModelChange)="validateDesc()" (blur)="validateDesc()" maxlength="100"
+                        [class.error]="descError" placeholder="Nhập mô tả size"></textarea>
+                    <span class="error-text" *ngIf="descError">{{ descError }}</span>
                 </div>
 
                 <!-- Actions -->

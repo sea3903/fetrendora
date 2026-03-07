@@ -95,6 +95,19 @@ export class SepayPaymentComponent implements OnInit, OnDestroy {
                 this.paymentExpired = true;
                 this.timerSubscription?.unsubscribe();
                 this.pollingSubscription?.unsubscribe();
+
+                // Tự động hủy đơn hàng khi hết hạn thanh toán → hoàn trả tồn kho
+                const orderId = Number(this.orderCode);
+                if (orderId > 0) {
+                    this.orderService.cancelOrder(orderId).subscribe({
+                        next: () => {
+                            console.log('[SePay] Đã tự động hủy đơn hàng hết hạn:', orderId);
+                        },
+                        error: (err) => {
+                            console.error('[SePay] Lỗi hủy đơn hàng hết hạn:', err);
+                        }
+                    });
+                }
             }
         });
     }

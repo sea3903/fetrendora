@@ -925,6 +925,13 @@ textarea.form-control {
 
 // History Table
 .history-table {
+
+    td:first-child,
+    th:first-child {
+        white-space: nowrap;
+        width: 130px;
+    }
+
     .type-badge {
         padding: 4px 8px;
         border-radius: 4px;
@@ -954,9 +961,9 @@ textarea.form-control {
     }
 
     .note-cell {
-        max-width: 200px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        max-width: 250px;
+        white-space: normal;
+        word-break: break-word;
+        line-height: 1.4;
     }
 }

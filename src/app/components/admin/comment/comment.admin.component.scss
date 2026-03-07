@@ -388,15 +388,15 @@ $shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .col-user {
-        width: 18%;
+        width: 22%;
     }
 
     .col-product {
-        width: 18%;
+        width: 22%;
     }
 
     .col-content {
-        width: 24%;
+        width: 20%;
     }
 
     .col-rating {
@@ -404,11 +404,11 @@ $shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
     .col-date {
-        width: 12%;
+        width: 10%;
     }
 
     .col-actions {
-        width: 12%;
+        width: 10%;
     }
 
     .main-text {
@@ -422,25 +422,35 @@ $shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     gap: 10px;
+    max-width: 100%;
 }
 
 .user-avatar {
     width: 32px;
     height: 32px;
+    min-width: 32px;
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid $border;
 }
 
 .user-info {
+    overflow: hidden;
+
     .user-name {
         font-weight: 500;
         font-size: 0.88rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .user-email {
         font-size: 0.75rem;
         color: $text-muted;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 }
 

@@ -352,9 +352,8 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
                     vnp_txn_ref: vnp_TxnRef
                 }).subscribe({
                     next: () => {
-                        // CHỈ xóa cart SAU KHI đặt hàng THÀNH CÔNG
-                        this.cartService.clearSelectedItems();
-                        // Redirect đến VNPay
+                        // KHÔNG xóa cart ở đây — chỉ xóa khi VNPay callback xác nhận thành công
+                        // (xử lý trong payment-callback.component.ts)
                         window.location.href = paymentUrl;
                     },
                     error: (error: HttpErrorResponse) => {
@@ -393,7 +392,8 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
                 }).subscribe({
                     next: (qrRes: ApiResponse) => {
                         const qrData = qrRes.data;
-                        this.cartService.clearSelectedItems();
+                        // KHÔNG xóa cart ở đây — chỉ xóa khi SePay polling xác nhận thành công
+                        // (xử lý trong sepay-payment.component.ts)
                         // Chuyển hướng đến trang thanh toán QR kèm thông tin
                         this.router.navigate(['/payments/sepay-payment'], {
                             queryParams: {

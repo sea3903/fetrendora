@@ -60,4 +60,10 @@ export class OrderService {
     const params = new HttpParams().set('status', status); // Thêm tham số status vào query params
     return this.http.put<ApiResponse>(url, null, { params }); // Gửi yêu cầu PUT với tham số status
   }
+
+  // Hủy đơn hàng (dùng khi hết hạn thanh toán SePay)
+  cancelOrder(orderId: number): Observable<ApiResponse> {
+    const url = `${environment.apiBaseUrl}/orders/cancel/${orderId}`;
+    return this.http.put<ApiResponse>(url, null);
+  }
 }

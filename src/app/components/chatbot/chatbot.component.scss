@@ -34,6 +34,13 @@ $bot-bubble: #f0f0f0;
         font-size: 24px;
     }
 
+    .chatbot-logo {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
     .tooltip {
         position: absolute;
         right: 70px;
@@ -199,6 +206,7 @@ $bot-bubble: #f0f0f0;
 .chat-messages {
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 16px;
     background: #fafafa;
     display: flex;
@@ -274,6 +282,8 @@ $bot-bubble: #f0f0f0;
         display: flex;
         flex-direction: column;
         gap: 6px;
+        min-width: 0;
+        overflow: hidden;
     }
 
     .msg-bubble {
@@ -282,10 +292,15 @@ $bot-bubble: #f0f0f0;
         font-size: 14px;
         line-height: 1.6;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        overflow-wrap: anywhere;
+        word-break: break-word;
 
         .msg-text {
             margin: 0;
             word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            white-space: pre-line;
 
             strong {
                 font-weight: 600;
@@ -303,6 +318,7 @@ $bot-bubble: #f0f0f0;
                 cursor: pointer;
                 border-bottom: 1px dashed $primary;
                 transition: all 0.2s;
+                word-break: break-all;
 
                 &:hover {
                     color: $primary-dark;
