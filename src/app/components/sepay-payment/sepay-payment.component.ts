@@ -96,18 +96,8 @@ export class SepayPaymentComponent implements OnInit, OnDestroy {
                 this.timerSubscription?.unsubscribe();
                 this.pollingSubscription?.unsubscribe();
 
-                // Tự động hủy đơn hàng khi hết hạn thanh toán → hoàn trả tồn kho
-                const orderId = Number(this.orderCode);
-                if (orderId > 0) {
-                    this.orderService.cancelOrder(orderId).subscribe({
-                        next: () => {
-                            console.log('[SePay] Đã tự động hủy đơn hàng hết hạn:', orderId);
-                        },
-                        error: (err) => {
-                            console.error('[SePay] Lỗi hủy đơn hàng hết hạn:', err);
-                        }
-                    });
-                }
+                // Không cần tự động hủy đơn hàng nữa vì đơn hàng chưa được tạo!
+                sessionStorage.removeItem('pendingOrder');
             }
         });
     }
@@ -125,22 +115,38 @@ export class SepayPaymentComponent implements OnInit, OnDestroy {
                     this.pollingSubscription?.unsubscribe();
                     this.timerSubscription?.unsubscribe();
 
-                    // Cập nhật trạng thái đơn hàng
-                    const orderId = Number(this.orderCode);
-                    this.orderService.updateOrderStatus(orderId, 'processing').subscribe({
-                        next: () => {
-                            this.cartService.clearSelectedItems();
-                            setTimeout(() => {
-                                this.router.navigate(['/my-orders']);
-                            }, 3000);
-                        },
-                        error: () => {
-                            // Vẫn chuyển hướng dù lỗi update status
-                            setTimeout(() => {
-                                this.router.navigate(['/my-orders']);
-                            }, 3000);
-                        }
-                    });
+                    // Lấy đơn hàng từ session storage và TẠO ĐƠN
+                    const pendingOrderStr = sessionStorage.getItem('pendingOrder');
+                    if (pendingOrderStr) {
+                        const orderData = JSON.parse(pendingOrderStr);
+
+                        this.orderService.placeOrder(orderData).subscribe({
+                            next: (orderRes: ApiResponse) => {
+                                const createdOrderId = orderRes.data?.id;
+                                sessionStorage.removeItem('pendingOrder');
+
+                                // Cập nhật trạng thái thành processing luôn vì đã trả tiền
+                                this.orderService.updateOrderStatus(createdOrderId, 'processing').subscribe({
+                                    next: () => {
+                                        this.cartService.clearSelectedItems();
+                                        setTimeout(() => this.router.navigate(['/my-orders']), 3000);
+                                    },
+                                    error: () => {
+                                        this.cartService.clearSelectedItems();
+                                        setTimeout(() => this.router.navigate(['/my-orders']), 3000); // Vẫn thành công
+                                    }
+                                });
+                            },
+                            error: (err) => {
+                                console.error('[SePay] Thanh toán thành công nhưng không tự động sinh đơn được', err);
+                                // Vẫn chuyển hướng
+                                setTimeout(() => this.router.navigate(['/my-orders']), 3000);
+                            }
+                        });
+                    } else {
+                        // Logic dự phòng
+                        setTimeout(() => this.router.navigate(['/my-orders']), 3000);
+                    }
                 } else if (response.data?.error) {
                     console.error('[SePay Polling] Lỗi từ backend:', response.data.error);
                 }
@@ -166,6 +172,7 @@ export class SepayPaymentComponent implements OnInit, OnDestroy {
 
     // Quay lại
     goBack(): void {
-        this.router.navigate(['/checkout']);
+        sessionStorage.removeItem('pendingOrder'); // Xóa giỏ hàng nháp
+        this.router.navigate(['/cart']);
     }
 }

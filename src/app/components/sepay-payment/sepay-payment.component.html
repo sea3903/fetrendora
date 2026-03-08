@@ -3,15 +3,12 @@
 <div class="sepay-page">
     <div class="container">
 
-        @if(loading) {
-        <div class="loading-state">
+        <div *ngIf="loading" class="loading-state">
             <div class="spinner"></div>
             <p>Đang tạo mã QR thanh toán...</p>
         </div>
-        }
 
-        @if(!loading && !paymentSuccess && !paymentExpired) {
-        <div class="payment-card">
+        <div *ngIf="!loading && !paymentSuccess && !paymentExpired" class="payment-card">
             <div class="payment-header">
                 <h1>Thanh toán chuyển khoản</h1>
                 <div class="timer" [class.urgent]="timeLeft < 120">
@@ -73,10 +70,8 @@
                 <span>Đang chờ thanh toán...</span>
             </div>
         </div>
-        }
 
-        @if(!loading && paymentSuccess) {
-        <div class="result-card success">
+        <div *ngIf="!loading && paymentSuccess" class="result-card success">
             <div class="icon-wrapper">
                 <i class="fas fa-check-circle"></i>
             </div>
@@ -87,18 +82,15 @@
                 <span>Đang chuyển hướng đến đơn hàng của bạn...</span>
             </div>
         </div>
-        }
 
-        @if(!loading && paymentExpired) {
-        <div class="result-card expired">
+        <div *ngIf="!loading && paymentExpired" class="result-card expired">
             <div class="icon-wrapper">
                 <i class="fas fa-clock"></i>
             </div>
             <h2>Hết thời gian thanh toán</h2>
             <p>Phiên thanh toán đã hết hạn. Vui lòng thử lại.</p>
-            <button class="btn-retry" routerLink="/checkout">Thử lại</button>
+            <button class="btn-retry" routerLink="/cart">Về giỏ hàng</button>
         </div>
-        }
 
     </div>
 </div>

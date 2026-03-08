@@ -347,29 +347,15 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
                 const paymentUrl = res.data;
                 const vnp_TxnRef = new URL(paymentUrl).searchParams.get('vnp_TxnRef') || '';
 
-                this.orderService.placeOrder({
-                    ...orderData,
-                    vnp_txn_ref: vnp_TxnRef
-                }).subscribe({
-                    next: () => {
-                        // KHÔNG xóa cart ở đây — chỉ xóa khi VNPay callback xác nhận thành công
-                        // (xử lý trong payment-callback.component.ts)
-                        window.location.href = paymentUrl;
-                    },
-                    error: (error: HttpErrorResponse) => {
-                        this.isSubmitting = false;
-                        // KHÔNG xóa cart khi tạo đơn thất bại
-                        this.toastService.showToast({
-                            error: error,
-                            defaultMsg: 'Lỗi tạo đơn hàng. Vui lòng thử lại.',
-                            title: 'Lỗi'
-                        });
-                    }
-                });
+                // Lưu tạm đơn hàng vào Session Storage
+                orderData.vnp_txn_ref = vnp_TxnRef;
+                sessionStorage.setItem('pendingOrder', JSON.stringify(orderData));
+
+                // Chuyển hướng VNPay
+                window.location.href = paymentUrl;
             },
             error: (error: HttpErrorResponse) => {
                 this.isSubmitting = false;
-                // KHÔNG xóa cart khi kết nối payment thất bại
                 this.toastService.showToast({
                     error: error,
                     defaultMsg: 'Lỗi kết nối cổng thanh toán. Vui lòng thử lại.',
@@ -381,39 +367,29 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
 
     // Xử lý đơn hàng SePay (QR Chuyển khoản)
     private processSepayOrder(orderData: OrderDTO): void {
-        // Bước 1: Tạo đơn hàng trước
-        this.orderService.placeOrder(orderData).subscribe({
-            next: (orderRes: ApiResponse) => {
-                const orderId = orderRes.data?.id || orderRes.data;
-                // Bước 2: Tạo QR Code
-                this.paymentService.createSepayQr({
-                    amount: this.finalAmount,
-                    orderCode: orderId.toString()
-                }).subscribe({
-                    next: (qrRes: ApiResponse) => {
-                        const qrData = qrRes.data;
-                        // KHÔNG xóa cart ở đây — chỉ xóa khi SePay polling xác nhận thành công
-                        // (xử lý trong sepay-payment.component.ts)
-                        // Chuyển hướng đến trang thanh toán QR kèm thông tin
-                        this.router.navigate(['/payments/sepay-payment'], {
-                            queryParams: {
-                                orderCode: qrData.orderCode,
-                                amount: qrData.amount,
-                                qrUrl: qrData.qrUrl,
-                                content: qrData.content,
-                                bankCode: qrData.bankCode,
-                                bankAccount: qrData.bankAccount,
-                                accountName: qrData.accountName
-                            }
-                        });
-                    },
-                    error: (error: HttpErrorResponse) => {
-                        this.isSubmitting = false;
-                        this.toastService.showToast({
-                            error: error,
-                            defaultMsg: 'Lỗi tạo mã QR thanh toán. Vui lòng thử lại.',
-                            title: 'Lỗi'
-                        });
+        // Tạo mã order tạm để gửi cho SePay ghi nhận
+        const tempOrderCode = Math.floor(Math.random() * 100000000).toString(); // Mã ngẫu nhiên
+
+        this.paymentService.createSepayQr({
+            amount: this.finalAmount,
+            orderCode: tempOrderCode
+        }).subscribe({
+            next: (qrRes: ApiResponse) => {
+                const qrData = qrRes.data;
+
+                // Lưu tạm đơn hàng vào Session Storage
+                sessionStorage.setItem('pendingOrder', JSON.stringify(orderData));
+
+                // Chuyển hướng đến trang thanh toán QR kèm thông tin
+                this.router.navigate(['/payments/sepay-payment'], {
+                    queryParams: {
+                        orderCode: qrData.orderCode,
+                        amount: qrData.amount,
+                        qrUrl: qrData.qrUrl,
+                        content: qrData.content,
+                        bankCode: qrData.bankCode,
+                        bankAccount: qrData.bankAccount,
+                        accountName: qrData.accountName
                     }
                 });
             },
@@ -421,7 +397,7 @@ export class CheckoutComponent extends BaseComponent implements OnInit {
                 this.isSubmitting = false;
                 this.toastService.showToast({
                     error: error,
-                    defaultMsg: 'Lỗi tạo đơn hàng. Vui lòng thử lại.',
+                    defaultMsg: 'Lỗi tạo mã QR thanh toán. Vui lòng thử lại.',
                     title: 'Lỗi'
                 });
             }
